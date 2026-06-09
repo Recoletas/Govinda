@@ -46,8 +46,14 @@ def main():
         status = "OK" if v.startswith("OK") else "FAIL"
         print(f"[{status}] {k} -> {v}")
 
+    import datetime
+    output = {
+        "run_at": datetime.datetime.now().isoformat(timespec="seconds"),
+        "script": "scripts/verify_testset_access.py",
+        "results": results,
+    }
     Path("benchmarks/testset_access.json").write_text(
-        __import__("json").dumps(results, indent=2)
+        __import__("json").dumps(output, indent=2) + "\n"
     )
     if any("FAIL" in v for v in results.values()):
         print("\n至少一个测试集不可下载 — 立刻询问赛方")

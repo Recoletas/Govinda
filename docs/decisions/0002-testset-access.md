@@ -34,6 +34,16 @@ P0 任务 0.2 要求在跑任何 baseline / 优化前先确认 LongBench 和 RUL
   2. RULER 评测是赛方统一跑还是我们自己跑?如果是后者,需要确认 SQuAD / HotpotQA / Paul Graham 源数据是否允许现场拉取。
   3. 评测容器镜像里预装了什么 Python 包(`datasets` / `transformers` / `vllm`)?
 
+### 失败 → 询问映射
+
+| 失败 | 解决路径 | 问赛方哪个问题 |
+|------|----------|----------------|
+| LongBench 401 (gated) | 赛方提供镜像/快照/token | 问题 #1 |
+| RULER 404 (无预置 JSON) | **不需要"提供文件"** —— RULER 数据由评测时合成 | 问题 #2（确认赛方统一跑） |
+| `datasets` 缺失 | 容器镜像预装 / 允许 pip install | 问题 #3 |
+
+注意：RULER 404 不是"数据缺失"问题，是"评测机制不同"问题；不要让赛方去找一个不存在的 `synthetic.json`。
+
 ## Fallback 策略: 自造 100 样本
 
 如果 24h 内未得到赛方回复或赛方不提供测试集:
@@ -50,10 +60,12 @@ P0 任务 0.2 要求在跑任何 baseline / 优化前先确认 LongBench 和 RUL
 - **P2 任务 2.1 (bench harness TDD)** 不会被卡 — harness 只依赖 OpenAI 兼容接口,数据来源可注入。
 - **P2 任务 2.2 (3 档 baseline 跑分)** **会被卡** 直到测试集到位 — 用自造 100 样本先出 1 档 rough baseline。
 - **P3+ 任务 (优化)** 不依赖此任务,继续推进。
-- **Spec 引用**: 此 ADR 替代了 spec 中"测试集来源"假设,后续 PR 需在 spec 增补一段。
+- **Spec 引用**: 此 ADR 替代了 spec §2 "待验证未知项" 第 3 项"LongBench / RULER 测试集"以及 §10 风险表对应行的假设,后续 PR 需在 spec 增补一段。
 
 ## 待办
 
 - [ ] 队长发邮件/IM 给赛方,引用本 ADR + `benchmarks/testset_access.json`
 - [ ] 收到回复后更新本 ADR 的"决策"段
 - [ ] 若 24h 无回复,启动 fallback: 写 `scripts/make_synth_bench.py`
+- [ ] 在 spec §2 增补"测试集由赛方提供"段（同步 §10 风险表对应行）
+- [ ] (spec 修订) 在 spec §2 待验证未知项 第 3 项"LongBench / RULER 测试集"中增补"长度分布: 短文 2k-10k / 长文 10k-50k / NIAH 4k-128k 多 bin",影响 Task 2.1 harness 设计
