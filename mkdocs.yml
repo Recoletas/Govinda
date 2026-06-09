@@ -82,6 +82,9 @@ nav:
       - "0006a Docker 构建": decisions/0006a-docker-build.md
       - 0007 编译决策矩阵: decisions/0007-coupling-matrix.md
       - 0008 块大小假设: decisions/0008-blocksize-hypothesis.md
+      - 0009 KV 量化策略: decisions/0009-kv-quant-strategy.md
+      - 0010 Attention backend 选型: decisions/0010-attention-backend.md
+      - 0011 P0 末调研输出: decisions/0011-p0-research-output.md
       - 0013 torch.compile ROI: decisions/0013-torch-compile-roi.md
   - 进度:
       - Weekly Standup: weekly/progress.md
