@@ -1,0 +1,83 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual envs
+.venv/
+venv/
+env/
+conda-meta/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Project artifacts
+*.bin
+*.safetensors
+*.pt
+*.pth
+*.onnx
+*.h5
+*.hdf5
+*.parquet
+*.arrow
+*.npz
+*.npy
+*.pkl
+*.ckpt
+*.gguf
+*.tar
+*.tar.gz
+*.zip
+*.7z
+
+# DCU / GPU
+*.ais
+*.dcu
+*_ipynb_checkpoint/
+
+# Logs / runtime
+*.log
+logs/
+*.pid
+*.sock
+core.*
+
+# Secrets / local
+.env
+.env.local
+*.pem
+*.key
+secrets/
+
+# mkdocs
+/site/
+
+# Benchmarks raw data (keep summaries, ignore huge)
+benchmarks/raw/
+benchmarks/*/raw-*.json
+benchmarks/*/logs/
+
+# Local Claude config (per-user, not project)
+.claude/settings.local.json
+
+# The competition spec PDF (large binary, re-fetch from competition site)
+qwen_use.pdf
