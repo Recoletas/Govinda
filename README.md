@@ -19,7 +19,20 @@
 
 ## 项目状态
 
-当前阶段：**基础周 A**（CP1 待达成）。详见 [设计文档 §路线图](docs/specs/2026-06-09-qwen-inference-optimization-design.md)。
+> 注：本表区分 **plan-level 任务交付** (artifacts 落地) 与 **CP gate 状态** (模板是否就绪 + 实际是否签过)。CP0/1/2 不是"通过",是"模板就绪,签名 slot 留好"。
+
+| 阶段 | 任务交付 (plan-level) | CP Gate 状态 |
+|------|----------------------|--------------|
+| P0 基础统一 | 5/7 交付 (0.4/0.5 DCU 阻塞) | **CP0 未签** ([模板](docs/weekly/p0-offline-log.md)) |
+| P1 基础培训 | 4/4 交付 | **CP1 未签** ([模板](docs/weekly/p1-signoff.md), 双签 slot 留好) |
+| P2 Baseline 锁定 | 2/4 交付 (2.2/2.3 DCU 阻塞) | **CP2 未签** ([模板](docs/weekly/p2-signoff.md), 4 签 slot 留好) |
+| P3 优化试错 | 3/9 交付 (3A/3B.2/3B.3/3C.2/3D.1 DCU 阻塞) | **CP3 未签** ([模板](docs/weekly/p3-signoff.md)) |
+| P4 集成精度 | 2/5 交付 (4.1/4.2/4.3 DCU 阻塞) | **CP4 未签** ([模板](docs/weekly/p4-signoff.md)) |
+| P5 提交冲刺 | 2/2 交付 (5.1 dry-run 脚本 + 5.2 log 模板) | **CP5 未签** ([模板](docs/weekly/p5-submission-log.md), 实际提交事件在 P5 末) |
+
+详细交付清单 + 阻塞点：见 [设计文档 §路线图](docs/specs/2026-06-09-qwen-inference-optimization-design.md) 和 [实施计划](docs/superpowers/plans/2026-06-09-qwen-dcu-inference-optimization.md)。
+
+**关键阻塞**：LongBench / RULER 测试集需赛方确认（[ADR 0002](docs/decisions/0002-testset-access.md)），3 档 baseline 跑分因此暂缓。
 
 ## 团队
 

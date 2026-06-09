@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # benchmarks/run_bench.py
-# AI-generated, verified by <team-lead> on 2026-06-09
+# AI-generated, awaiting verification by <team-lead> on <YYYY-MM-DD>
 """Run vllm bench serve for a specific input-length tier."""
 import argparse
 import json

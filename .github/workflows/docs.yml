@@ -1,0 +1,32 @@
+# GitHub Pages deployment for mkdocs-material docs site.
+# Triggers on changes to docs/** or mkdocs.yml on main.
+# Requires: Pages enabled in repo settings → Source: "Deploy from a branch" → Branch: gh-pages.
+name: Deploy docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install mkdocs + material
+        run: pip install mkdocs-material pymdown-extensions
+      - name: Build (strict disabled — many docs link across docs/↔root)
+        run: mkdocs build
+      - name: Deploy to gh-pages branch
+        run: mkdocs gh-deploy --force --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

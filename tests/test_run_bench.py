@@ -1,10 +1,11 @@
-# AI-generated, verified by <team-lead> on 2026-06-09
+# AI-generated, awaiting verification by <team-lead> on <YYYY-MM-DD>
 """Tests for the benchmark harness (Task 2.1).
 
 The smoke test (test_run_bench_creates_json) requires a DCU + the 27B model
-+ vllm installed. It is marked @pytest.mark.skip_dcu and is verified manually
-on the DCU host. The unit tests below cover the testable pure-Python logic
-and pass in any environment.
++ vllm installed. It is marked @pytest.mark.skip_dcu and is **not** run
+in CI. It is expected to be run manually on the DCU host by 队员 C when
+Task 2.2 (3 档 baseline 跑分) is unblocked. The unit tests below cover
+the testable pure-Python logic and pass in any environment.
 """
 from pathlib import Path
 import json

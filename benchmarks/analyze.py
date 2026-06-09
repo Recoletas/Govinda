@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # benchmarks/analyze.py
-# AI-generated, verified by <name> on <YYYY-MM-DD>
+# AI-generated, awaiting verification by <team-lead> on <YYYY-MM-DD>
 """Aggregate JSON files in a directory into a single markdown table."""
 import argparse
 import json

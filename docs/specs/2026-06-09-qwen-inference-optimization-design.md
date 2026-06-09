@@ -293,39 +293,3 @@ docs/
 4. **P0 验证结果回写本 spec**（如选型有变）→ §5 决策表更新
 5. **P0 末** → subagent 并行调研（vLLM backend 接入点 / DCU 性能特征 / KV 量化方案对比），输出落 `docs/appendices/`
 
----
-
-## 修订记录
-
-- **v1** (`8b763b4`)：初稿
-- **v2** (`b49d60e`)：3 subagent 审查后修订
-  - **新增 §2 待验证未知项 4 项硬卡门**（C B1-B4 + B FP8-SKU 风险）—— Phase 0 入口
-  - **反转 §5 Triton fallback 方向**（B blocker：Triton 是支持路径，CUDA-only 才不可用）
-  - **砍优化方向 6 → 3 必做 + 3 stretch**（C I1：4 新人 + 5-10h/周太激进）
-  - **§5 `torch.compile` mode 改 `default`**（A + B：max-autotune 在 ROCm 不完整）
-  - **§5 加 FA2 only 限定、vllm/vllm-rocm Docker**（B）
-  - **§6 加 profiler 行**（B：`torch.profiler` / `rocprofv3` / `rocsys`）
-  - **§7 加决策机制**（C B2：之前缺）
-  - **§9 P0 加离线期间具体任务**（C B1：之前太空）
-  - **§9 CP1/CP2 硬化**（C I3：可跳过是隐患）
-  - **§11 加赛题 §12-15 owner 表**（C I2：之前缺）
-  - **§10 加新风险**（ROCm wheel 不匹配 / CDNA SKU / baseline 不可见 / 测试集不可下载）
-  - **§7 加 bus factor 录屏机制**（C I4）
-- **v3**（本版）：v2 + 真·源码验证（部分 subagent 因权限延迟未完成的部分由队长补做）
-  - **§5.2 新增**：vLLM 0.18.1 真实 backend 机制（`AttentionBackendEnum` 22 值 / `RocmPlatform._get_backend_priorities()` / 平台 plugin entry point）
-  - **§5.3 新增**：FlashAttention ROCm fork 真实支持范围（MI200x-355x，含 CDNA2/CDNA3）
-  - **§5.4 新增**：AMD FP8 支持矩阵（CDNA3 FNUZ / CDNA2 不支持） + FNUZ vs OCP 不兼容提醒
-  - **§5.5 强化**：Triton + DCU 已知坑 + 具体验证动作（5 行 matmul + FP8 store 最小 case）
-  - **§5.1 决策表细化**：custom backend 路径列明 3 种真实机制（register_backend / 改优先级 / CUSTOM 槽位）
-  - **§2 第 4 项更新**：custom backend 路径"机制已验证，安装待 DCU"
-- **v4**（本版）：3 路真·subagent 复核 + PDF 关键页重读
-  - **§4 重写**：与赛题 P2/P3/P5/P6 原文对齐（**删除 spec 自加的"❌ 自定义 CUDA/HIP kernel"**；新增"标准自回归解码"、Decode 调度允许；明确"图重构"边界）
-  - **§5.1 修正**：22 → **24** enum 值；列举补 `FLASH_ATTN_DIFFKV` / `CPU_ATTN` / `TREE_ATTN`；新增"图优化边界"行明确 cudagraph / torch.compile **不**算"图重构"
-  - **§5.2 修正**：`_get_backend_priorities()` 行号 245-283 → **309-352**，并明示**模块级函数**（非 RocmPlatform 方法）；`get_attn_backend_cls()` 行号 370-429 → ~432
-  - **§5.3 补充**：CK backend 仅 fp16/bf16，FP8 走 aiter/Triton
-  - **§5.4 精确化**：FNUZ 缩写展开为 **F**inite + **N**o inf + **U**nsigned zero（AMD 文档原文）
-  - **§5.5 修正**：明确 `tl.atomic_*` / `tl.dot` scale bug **未验证**（未附 issue 链接）
-  - **§9 重写 Phase 表**：9.5 周锁死 + 每 CP 加判官 + 加 buffer；P0 任务量化 h/人
-  - **§10 风险表 4 行新增**：SLA 上限明确、决赛多卡、评测黑盒、队员 C bus factor、AI 审阅 SLA、编译撞 P5
-  - **§11 评分场景表新增**：baseline 公开 / 部分 / 完全不公开 3 档
-  - **§1 对手画像假设**：明示"不与头部争 90+"

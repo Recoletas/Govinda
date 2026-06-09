@@ -1,4 +1,4 @@
-# AI-generated, verified by <name> on <YYYY-MM-DD>
+# AI-generated, awaiting verification by <team-lead> on <YYYY-MM-DD>
 """Detect DCU SKU + FP8 support. Run on DCU host."""
 import subprocess
 import sys

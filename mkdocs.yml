@@ -65,8 +65,37 @@ plugins:
 
 nav:
   - 首页: index.md
-  - 设计文档:
-      - specs/2026-06-09-qwen-inference-optimization-design.md
+  - 设计:
+      - 设计文档: specs/2026-06-09-qwen-inference-optimization-design.md
+  - 计划:
+      - 实施计划: superpowers/plans/2026-06-09-qwen-dcu-inference-optimization.md
+  - 决策:
+      - 0001 DCU SKU: decisions/0001-dcu-sku.md
+      - 0002 测试集访问: decisions/0002-testset-access.md
+      - 0003 Baseline 数字来源: decisions/0003-baseline-source.md
+      - 0006 vLLM 0.18.1 读图: decisions/0006-vllm-readmap.md
+      - "0006a Docker 构建": decisions/0006a-docker-build.md
+      - 0007 编译决策矩阵: decisions/0007-coupling-matrix.md
+      - 0008 块大小假设: decisions/0008-blocksize-hypothesis.md
+      - 0013 torch.compile ROI: decisions/0013-torch-compile-roi.md
+  - 录屏:
+      - "P1 分享 1 · Pre/Decode/KV": recordings/p1-share-1-prefill-decode.md
+      - "P1 分享 2 · PagedAttention": recordings/p1-share-2-paged-attention.md
+      - "P1 分享 3 · DCU/HIP": recordings/p1-share-3-dcu-hip.md
+      - "P1 Quiz 题目": recordings/p1-quiz.md
+      - "P0 Triton 教程": recordings/p0-triton-tutorial.md
+      - "P0 vLLM Bench": recordings/p0-vllm-bench.md
+  - 周报:
+      - P0 离线练手: weekly/p0-offline-log.md
+      - P1 Sign-off: weekly/p1-signoff.md
+      - P2 Sign-off: weekly/p2-signoff.md
+      - P3 Sign-off: weekly/p3-signoff.md
+      - P4 Sign-off: weekly/p4-signoff.md
+      - P5 Dry Run Log: weekly/p5-dryrun-log.md
+      - P5 Submission Log: weekly/p5-submission-log.md
+  - 资源:
+      - AI 协作: AGENTS.md
+      - AI Prompts 库: ai-prompts/README.md
 
 extra:
   generator: false

@@ -51,11 +51,12 @@
 ### 标注
 AI 写 ≥ 50 行的代码必须在文件头加注释：
 ```python
-# AI-generated, verified by <name> on <YYYY-MM-DD>
+# AI-generated, awaiting verification by <name> on <YYYY-MM-DD>
 ```
+精确含义：代码由 AI 起草并**尚未**经团队成员验证。AI 输出验证协议（下方）通过后，改为 `verified by <name> on <YYYY-MM-DD>`。不要省略 "awaiting"，避免给后来者制造"已验证"的错觉。
 
 ### 共享 prompt 库
-[`docs/ai-prompts/`](docs/ai-prompts/) 存好用过的 prompt，避免重复造轮子。
+[`docs/ai-prompts/`](docs/ai-prompts/README.md) 存好用过的 prompt，避免重复造轮子。
 
 ## 必读 vLLM 0.18.1 文件清单
 
@@ -82,3 +83,7 @@ AI 写 ≥ 50 行的代码必须在文件头加注释：
 ## Changelog
 
 <!-- 每次会话后追加一行：日期 / 主要发现 / 决策 -->
+
+- **2026-06-09 (本次会话)**：交付 16 个 CPU 可做 plan-level 任务的 artifacts (代码 + 文档模板 + ADR + 脚本),但 **CP0/1/2/3/4/5 gate 全部未签** — 模板就绪,签名 slot 留好,需队长+队员按 weekly/<p>-signoff.md 流程过。新增 8 份文档(3 份 reports / 5 份 weekly+sign-off / dry-run 脚本 / 提交 log 模板)。修复 ADR 0002 / 0006a / 0006 命名冲突,确认 vLLM 0.18.1 attention backend 真实机制,验证 DCU FP8 矩阵。**关键阻塞**: 测试集访问 (ADR 0002) 待赛方确认。文档站: 新增 GitHub Pages Actions (`.github/workflows/docs.yml`),扩展 mkdocs nav 到 7 个 section,新建 `docs/ai-prompts/`。
+- **2026-06-09 (v4 spec)**: 3 轮 subagent 复核 + PDF 关键页重读,移除自相矛盾的"❌ 自定义 kernel",锁定 9 周预算 + 24 个 AttentionBackendEnum 真实位置。**注**: spec 是设计文档,不是状态报告。
+- **2026-06-09 (v1 plan)**: 22 任务 / 136 子步 / 6 phase / 9.5 周,带 TDD skip 标记的 DCU 阻塞任务清单。**注**: plan 是路线图,不是已完成清单。

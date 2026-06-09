@@ -93,7 +93,7 @@ Govinda/
 
 ```python
 # scripts/verify_dcu.py
-# AI-generated, verified by <name> on <YYYY-MM-DD>
+# AI-generated, awaiting verification by <team-lead> on <YYYY-MM-DD>
 """Detect DCU SKU + FP8 support. Run on DCU host."""
 import subprocess
 import sys
@@ -809,7 +809,7 @@ def test_run_bench_creates_json(tmp_path):
 ```python
 #!/usr/bin/env python3
 # benchmarks/run_bench.py
-# AI-generated, verified by <name> on <YYYY-MM-DD>
+# AI-generated, awaiting verification by <team-lead> on <YYYY-MM-DD>
 """Run vllm bench serve for a specific input-length tier."""
 import argparse
 import json
@@ -916,7 +916,7 @@ Expected: PASS（如果 DCU 上有 27B 模型）；如模型未到位，**先 mo
 ```python
 #!/usr/bin/env python3
 # benchmarks/analyze.py
-# AI-generated, verified by <name> on <YYYY-MM-DD>
+# AI-generated, awaiting verification by <team-lead> on <YYYY-MM-DD>
 """Aggregate JSON files in a directory into a single markdown table."""
 import argparse
 import json
@@ -1114,7 +1114,7 @@ git commit -m "P2: CP2 sign-off (4 签)"
 
 ```python
 # src/block_size/sweep.py
-# AI-generated, verified by <name> on <YYYY-MM-DD>
+# AI-generated, awaiting verification by <team-lead> on <YYYY-MM-DD>
 """Sweep --block-size values and find the best per tier."""
 import argparse
 import json
@@ -1312,7 +1312,7 @@ class KVQuantizer(ABC):
 
 ```python
 # src/kv_quant/fp8_quant.py
-# AI-generated, verified by <name> on <YYYY-MM-DD>
+# AI-generated, awaiting verification by <team-lead> on <YYYY-MM-DD>
 """FP8 dynamic quantization for KV cache (per-head / per-token scale)."""
 import torch
 from .base import KVQuantizer
@@ -1443,7 +1443,7 @@ git commit -m "P3B: INT8 fallback quantizer"
 
 ```python
 # src/compile/config.py
-# AI-generated, verified by <name> on <YYYY-MM-DD>
+# AI-generated, awaiting verification by <team-lead> on <YYYY-MM-DD>
 """torch.compile / cudagraph configuration for vLLM 0.18.1."""
 from dataclasses import dataclass
 
@@ -1754,9 +1754,3 @@ git commit -m "P5: submission complete"
 **4. 已知简化（不构成 placeholder）**:
 - Task 3B.2 "实际接入 vLLM KV cache 流程" 标注 "具体代码需读 vLLM 0.18.1 源码后写" —— 这是合法的 "research-driven implementation" 占位（spec §5.2 给了机制但实装需 P3 期间读源码），不违反 "no placeholder" 规则。
 - Stream C 的 `--extra-args "<编译相关参数>"` 标了 "实际参数名以源码为准" —— 同样，spec §5.1 给了方向但具体 flag 名以 0.18.1 实际源码为准。
-
----
-
-## 修订记录
-
-- v1 (2026-06-09): 初稿，从 spec v4 (commit `0725d0e`) 派生的实施计划

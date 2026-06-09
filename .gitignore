@@ -81,3 +81,15 @@ benchmarks/*/logs/
 
 # The competition spec PDF (large binary, re-fetch from competition site)
 qwen_use.pdf
+
+# Testset data (per ADR 0002: do NOT commit unauthorized testset downloads or
+# self-synthesized fallback data. The fallback is gitignored so it stays local
+# until either赛方 provides the official set or the team explicitly approves
+# committing the synth set as a regression baseline.)
+benchmarks/synth_100/
+benchmarks/dryrun/logs/
+*.tmp.*
+
+# Claude auto-tmp files (subagent scratch)
+/.claude/agents/
+/.claude/sessions/
