@@ -12,11 +12,11 @@ use_directory_urls: true
 theme:
   name: material
   features:
-    - navigation.tabs
     - navigation.sections
     - navigation.index
     - navigation.top
     - navigation.footer
+    - navigation.expand
     - search.suggest
     - search.highlight
     - content.code.copy
@@ -61,6 +61,7 @@ markdown_extensions:
 
 plugins:
   - search
+  - govinda_left_toc
 
 extra_css:
   - assets/extra.css

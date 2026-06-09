@@ -9,6 +9,8 @@ on:
     paths:
       - 'docs/**'
       - 'mkdocs.yml'
+      - 'govinda_left_toc.py'
+      - 'pyproject.toml'
   workflow_dispatch:
 
 permissions:
@@ -22,8 +24,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Install mkdocs + material
-        run: pip install mkdocs-material pymdown-extensions
+      - name: Install mkdocs + material + local plugins
+        run: |
+          pip install mkdocs-material pymdown-extensions
+          pip install -e .
       - name: Build (strict disabled — many docs link across docs/↔root)
         run: mkdocs build
       - name: Deploy to gh-pages branch

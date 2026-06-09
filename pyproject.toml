@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "govinda-mkdocs-plugin"
+version = "0.1.0"
+description = "Local mkdocs plugins for the Govinda docs site"
+requires-python = ">=3.10"
+
+[tool.setuptools]
+py-modules = ["govinda_left_toc"]
+
+[project.entry-points."mkdocs.plugins"]
+govinda_left_toc = "govinda_left_toc:GovindaLeftTocPlugin"
