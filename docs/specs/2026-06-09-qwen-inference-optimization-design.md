@@ -175,9 +175,9 @@
 
 ### 协作机制
 - **每周 1 次同步会**（30 min）：上周交付、本周计划、阻塞
-- **每周 owner 各录 1 段 ≤ 30min 讲解自己负责模块**（落 `docs/recordings/`，bus factor 备份）
 - **PR 全部进 GitHub**：每个 owner 1 个 worktree
-- **共享笔记**：每周 1 篇 1-page 周报，owner 轮流写
+- **轻量进度交流**：每周 standup 写入 `docs/weekly/progress.md`（4 人各 1 行）
+- ~~**每周 owner 各录 1 段 ≤ 30min 讲解**~~ (2026-06-09 删, 录屏是 overhead, 改用 [learning.md](../learning.md) 索引)
 
 ## 8. 文档架构
 
@@ -186,10 +186,10 @@
 ```
 docs/
 ├── index.md                 # 文档站首页
+├── learning.md              # 找学习资料的方法 (vLLM / AMD / DCU 关键文件 + grep 技巧)
 ├── specs/                   # 设计 / 决策 / 计划
 ├── decisions/               # ADR —— P0+ 按需建
-├── weekly/                  # 周报 —— P1+ 按需建
-├── recordings/              # owner 录屏 —— P1+ 按需建
+├── weekly/progress.md       # 轻量 standup 模板 —— P1+ 用
 ├── ai-prompts/              # 共享 prompt 库 —— P3+ 按需建
 └── appendices/              # subagent 调研报告 —— 一次性建
 ```

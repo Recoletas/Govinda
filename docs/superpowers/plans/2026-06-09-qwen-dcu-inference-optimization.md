@@ -21,13 +21,14 @@ Govinda/
 ├── mkdocs.yml                         # 已存在
 ├── docs/
 │   ├── index.md                       # 已存在
+│   ├── learning.md                    # 找学习资料的方法 + 术语速查
 │   ├── specs/                         # 已存在（v4 spec 在此）
 │   ├── superpowers/
 │   │   └── plans/
 │   │       └── 2026-06-09-qwen-dcu-inference-optimization.md  # 本文件
 │   ├── decisions/                     # P0+ 按需建（ADR 记录）
-│   ├── weekly/                        # P1+ 按需建（周报）
-│   ├── recordings/                    # P1+ 按需建（owner 录屏）
+│   ├── weekly/
+│   │   └── progress.md                # 轻量 standup 模板（每周 1 行/人）
 │   └── ai-prompts/                    # P3+ 按需建（共享 prompt 库）
 ├── src/
 │   ├── __init__.py
