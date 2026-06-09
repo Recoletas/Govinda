@@ -1,0 +1,21 @@
+# docker/compose.yml
+services:
+  vllm:
+    build: .
+    image: govinda:vllm-0.18.1
+    devices:
+      - /dev/kfd
+      - /dev/dri
+    group_add:
+      - video
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp:unconfined
+    volumes:
+      - ..:/workspace
+    working_dir: /workspace
+    environment:
+      - VLLM_USE_V1=1
+      - HIP_VISIBLE_DEVICES=0
+      - NCCL_MIN_NCHANNELS=112

@@ -1,0 +1,5 @@
+# requirements.txt — 自定义层依赖
+# 注意：PyTorch 2.10.0 + ROCm 由基础镜像自带，不要在这里覆盖
+triton>=3.0,<4.0
+flash-attn==2.7.4.post1
+aiter>=0.1
