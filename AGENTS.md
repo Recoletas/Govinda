@@ -76,14 +76,8 @@ AI 写 ≥ 50 行的代码必须在文件头加注释：
 
 ## 反馈循环
 
-- 任何新发现（vLLM 行为、DCU 限制、最佳实践） → 写进 [`docs/decisions/`](docs/decisions/) 或 [本文件末尾](#changelog)
+- 任何新发现（vLLM 行为、DCU 限制、最佳实践）→ 写进 [`docs/decisions/`](docs/decisions/)
 - spec 与实际不符 → 在 PR 里指出并提出修改
 - AI 给的建议违反赛题边界 → 在 PR / Issue 里 flag，立即停止
-
-## Changelog
-
-<!-- 每次会话后追加一行：日期 / 主要发现 / 决策 -->
-
-- **2026-06-09 (本次会话)**：交付 16 个 CPU 可做 plan-level 任务的 artifacts (代码 + 文档 + ADR + 脚本)。**重定向**: 删了 P1-P5 sign-off 模板 + 录屏脚本 + dry-run/submission log 模板 (overhead), 改为 [`docs/learning.md`](docs/learning.md) (找学习资料方法) + [`docs/weekly/progress.md`](docs/weekly/progress.md) (轻量 standup)。**CP0/1/2/3/4/5 都不再有"签"概念** — gate 通过靠实际产出(bench 跑分 / 精度达标 / 集成日 ROI ≥ 10%),不是 4 签 checkbox。修复 ADR 0002 / 0006a / 0006 命名冲突,确认 vLLM 0.18.1 attention backend 真实机制,验证 DCU FP8 矩阵。**关键阻塞**: 测试集访问 (ADR 0002) 待赛方确认。文档站: GitHub Pages Actions + mkdocs nav 重新组织为 学习/设计/计划/决策/进度/资源 6 个 section。
-- **2026-06-09 (v4 spec)**: 3 轮 subagent 复核 + PDF 关键页重读,移除自相矛盾的"❌ 自定义 kernel",锁定 9 周预算 + 24 个 AttentionBackendEnum 真实位置。**注**: spec 是设计文档,不是状态报告。
-- **2026-06-09 (v1 plan)**: 22 任务 / 136 子步 / 6 phase / 9.5 周,带 TDD skip 标记的 DCU 阻塞任务清单。**注**: plan 是路线图,不是已完成清单。
+- 进展同步 → [`docs/weekly/progress.md`](docs/weekly/progress.md) (4 人各 1 行/周)
+- 调研笔记 / grep 技巧 → [`docs/learning.md`](docs/learning.md)

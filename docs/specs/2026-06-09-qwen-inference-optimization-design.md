@@ -1,8 +1,7 @@
 # 2026-06-09 Qwen 推理服务优化比赛 · 设计文档
 
-> **状态**：v4（v3 + 3 路 subagent 复核 + PDF 关键页重读）· **作者**：队长 recoletas · **最后更新**：2026-06-09
-> **配套**：[`AGENTS.md`](../../AGENTS.md) · [`README.md`](../../README.md) · [v1 commit](https://github.com/Recoletas/Govinda/commit/8b763b4) · [v2 commit](https://github.com/Recoletas/Govinda/commit/b49d60e) · [v3 commit](https://github.com/Recoletas/Govinda/commit/270fbf0)
-> **审查来源**：3 subagent 并行报告（vLLM internals / DCU + Triton + FlashAttention / spec 完整性）+ v3 队长直接源码验证（vLLM 0.18.1 `registry.py` / `platforms/rocm.py` / AMD FP8 docs / ROCm/flash-attention 仓库）+ v4 3 路真·subagent 复核（技术准确性 / spec 完整性 / 风险+Phase）
+> **作者**：队长 recoletas · **最后更新**：2026-06-09
+> **配套**：[`AGENTS.md`](../../AGENTS.md) · [`README.md`](../../README.md)
 
 ---
 
@@ -10,7 +9,7 @@
 
 参加 2026 全国大学生计算机系统能力大赛 · 智能计算创新设计赛（先导杯），赛题为"基于国产加速卡（DCU）的 Qwen3.5-27B 推理服务优化"。初赛单卡、并发=1、长上下文场景（4k-32k 三档）。**团队 4 人均为新人，9.5 周时间预算（从 2 周后有时间为起算点），目标稳定拿 60-75 / 100 分而非冲击高分**。
 
-**对手画像假设**（v3 复核补充，先导杯强校如清华/中科院/上交战队多为成熟团队，**不**与头部争 90+）：避免中途焦虑动方案，60-75 是合理对位。
+**对手画像假设**：先导杯强校如清华/中科院/上交战队多为成熟团队，**不**与头部争 90+ — 60-75 是合理对位，避免中途焦虑动方案。
 
 ## 2. 待验证未知项（**Phase 0 硬卡门**，确认前不开 Phase 1）
 
@@ -72,7 +71,7 @@
 
 | 决策点 | 选择 | 理由 / 风险 |
 |--------|------|-------------|
-| **Decode attention 提速** | **优先复用 vLLM 已有的 `TRITON_ATTN` backend**（vllm.v1.attention.backends.triton_attn.TritonAttentionBackend），不自己写新 backend | vLLM 0.18.1 `AttentionBackendEnum` 已有 24 个值（v3 复核后），含 `TRITON_ATTN` / `ROCM_ATTN` / `ROCM_AITER_FA` / `ROCM_AITER_UNIFIED_ATTN` / `FLASH_ATTN` / `FLASH_ATTN_DIFFKV` / `CPU_ATTN` / `TREE_ATTN` 等。新人写新 backend 风险大；先调通已存在的 TRITON_ATTN |
+| **Decode attention 提速** | **优先复用 vLLM 已有的 `TRITON_ATTN` backend**（vllm.v1.attention.backends.triton_attn.TritonAttentionBackend），不自己写新 backend | vLLM 0.18.1 `AttentionBackendEnum` 已有 24 个值,含 `TRITON_ATTN` / `ROCM_ATTN` / `ROCM_AITER_FA` / `ROCM_AITER_UNIFIED_ATTN` / `FLASH_ATTN` / `FLASH_ATTN_DIFFKV` / `CPU_ATTN` / `TREE_ATTN` 等。新人写新 backend 风险大；先调通已存在的 TRITON_ATTN |
 | **Custom backend 路径** | 真要扩展：调 `AttentionBackendEnum.register_backend()`，**或**改模块级 `_get_backend_priorities()`（非 RocmPlatform 方法）优先级，**或**用 `AttentionBackendEnum.CUSTOM` 槽位（已存在，CUSTOM = None） | 机制是"enum + register_backend()"，**不是**"丢个 .py 进 vllm/attention/backends/"。改平台优先级需改 vLLM 源码或 monkey-patch |
 | **FA2 vs FA3** | **FA2 only**（用 ROCm/flash-attention fork） | FA3 是 Hopper WMMA 专用，DCU 不可用。ROCm/flash-attention 覆盖 MI200x/MI250x/MI300x/MI355x；CK backend 默认仅 fp16/bf16，FP8 走 aiter/Triton |
 | **KV cache 优化** | **动态 FP8 量化**（per-head/per-token scale，**非持久化**） | 取决于 DCU SKU：CDNA3 (gfx942) 原生支持 FNUZ 变体（`__hip_fp8_e4m3_fnuz`）；CDNA2 (gfx90a) **不支持**。**§2 必查**；不行则改 INT8 或保留 bf16 |
@@ -86,14 +85,14 @@
 
 ### 5.2 vLLM 0.18.1 attention backend 真实机制（已源码验证）
 
-- **枚举**：`AttentionBackendEnum` 在 `vllm/v1/attention/backends/registry.py`，**共 24 个值**（v3 复核计数）
+- **枚举**：`AttentionBackendEnum` 在 `vllm/v1/attention/backends/registry.py`，**共 24 个值**
 - **关键值**：`TRITON_ATTN` / `ROCM_ATTN` / `ROCM_AITER_FA` / `ROCM_AITER_UNIFIED_ATTN` / `FLASH_ATTN` / `FLASH_ATTN_DIFFKV` / `FLASHINFER` / `FLEX_ATTENTION` / `TORCH_SDPA` / `CPU_ATTN` / `TREE_ATTN` / `CUSTOM` (None)
-- **平台选择（v3 复核修正）**：
-  - **模块级函数** `_get_backend_priorities()` 在 `vllm/platforms/rocm.py:309-352`（**不是** `RocmPlatform` 类方法，之前 v3 写 245-283 错）
-  - `RocmPlatform.get_attn_backend_cls()` 类方法在 `vllm/platforms/rocm.py:~432`（之前 v3 写 370-429 偏差）
+- **平台选择**：
+  - **模块级函数** `_get_backend_priorities()` 在 `vllm/platforms/rocm.py:309-352`
+  - `RocmPlatform.get_attn_backend_cls()` 类方法在 `vllm/platforms/rocm.py:~432`
 - **平台 plugin**：`PLATFORM_PLUGINS_GROUP = "vllm.platform_plugins"` (`vllm/plugins/__init__.py`)，通过 `importlib.metadata.entry_points()` 加载；平台用 `builtin_platform_plugins = {'tpu','cuda','rocm','xpu','cpu'}` + 外部 plugin
 - **Pyproject entry-points**：只有 `vllm.general_plugins`（LoRA resolver），**没有** `vllm.platform_plugins` 或 `vllm.attention_backends` 显式声明（意味着第三方可以声明，会被 `load_plugins_by_group` 自动发现）
-- **ROCM 默认 backend**：`_get_backend_priorities()` 默认返回 `[TRITON_ATTN]`；开启 `VLLM_ROCM_USE_AITER=1` 才注入 `ROCM_AITER_UNIFIED_ATTN` / `ROCM_AITER_FA`（v3 复核补充）
+- **ROCM 默认 backend**：`_get_backend_priorities()` 默认返回 `[TRITON_ATTN]`；开启 `VLLM_ROCM_USE_AITER=1` 才注入 `ROCM_AITER_UNIFIED_ATTN` / `ROCM_AITER_FA`
 
 ### 5.3 FlashAttention ROCm 真相（已验证）
 
@@ -123,7 +122,7 @@
 
 - Triton 3.x 在 ROCm/HIP 上有 first-class backend（target `gfx90a` / `gfx942` / `gfx950`）
 - 装 Triton 走 PyTorch 的 ROCm wheel 路径，**不要** `pip install triton[all]`
-- **未验证的已知坑**（v3 复核标记：spec 之前未附 issue 链接或复现步骤）：DCU 上 `tl.atomic_*` for FP8 和部分 `tl.dot` scale 组合的 bug
+- **未验证的已知坑**（无 issue 链接 / 复现步骤，需 P0 跑最小 case 验证）：DCU 上 `tl.atomic_*` for FP8 和部分 `tl.dot` scale 组合的 bug
   - **P0 验证动作**：P0 期间在 DCU 跑 1 个 5 行 `triton.jit` matmul + FP8 store 最小 case，失败即降级 bf16 路线
 
 ### 优化方向砍到 **3 必做 + 3 stretch**
@@ -163,11 +162,11 @@
 | 🅰 队长 + Profiling & 集成 owner | recoletas | 5-10 h | 周主持、决策、3 档压测脚本、最终整合、文档收尾 |
 | 🅱 Kernel owner | 队员 A | 8-12 h | Triton kernel 模板（stretch）；P3 进展不行则降级 |
 | 🅲 vLLM & KV cache owner | 队员 B | 8-12 h | vLLM 源码笔记、KV 量化、块管理调参 |
-| 🅳 浮动支持 / QA / 录屏 | 队员 C | 3-5 h | 跑回归、复核数字、文档校对、bus factor 录屏 |
+| 🅳 浮动支持 / QA | 队员 C | 3-5 h | 跑回归、复核数字、文档校对 |
 
 **4 人 + AI 辅助 ≈ 5-6 人等效生产力**。
 
-### 决策机制（**之前缺，补上**）
+### 决策机制
 - **技术分歧**：3 owner 投票，多数决；平票 → 队长最终拍板
 - **决策超时**：单议题阻塞超过 24h → 升级到下次全组 sync
 - **赛题边界**（修改 scheduler / 投机解码 / 持久化量化等）→ 一票否决，**任何 owner 可触发升级**
@@ -177,7 +176,7 @@
 - **每周 1 次同步会**（30 min）：上周交付、本周计划、阻塞
 - **PR 全部进 GitHub**：每个 owner 1 个 worktree
 - **轻量进度交流**：每周 standup 写入 `docs/weekly/progress.md`（4 人各 1 行）
-- ~~**每周 owner 各录 1 段 ≤ 30min 讲解**~~ (2026-06-09 删, 录屏是 overhead, 改用 [learning.md](../learning.md) 索引)
+- **共享调研笔记 / grep 技巧**：写到 `docs/learning.md`（活文档，持续追加）
 
 ## 8. 文档架构
 
@@ -205,27 +204,28 @@ docs/
 4. **AI 输出必审**：subagent 写的代码 / 文档必须经过"读 + 跑 + 对比 baseline"三关
 5. **集成是瓶颈**：P3 起每周 1 次集成日，所有 owner 合到一起跑 3 档
 
-### Phase 划分（**v3 复核修正：锁 9 周预算**）
-| Phase | 目标 | 出口（CP） | 时长 | CP 判官 |
-|-------|------|-----------|------|---------|
-| **P0** | §2 4 项未知全部确认 + 建仓库 + 各自看 1 篇 vLLM 论文 + 各 owner 离线练手任务 | **CP0**（硬卡） | 1.5 周（离线） | 队长 + 队员 B 双签 |
-| **P1**（基础统一） | 4 人能讲清 LLM 推理基础 + DCU/HIP 区别 + vLLM 0.18.1 架构 + Triton 5 行 FP8 matmul smoke test | **CP1**（硬卡） | 1.5 周 | 队长 + 队员 B 双签 |
-| **P2**（baseline 锁定 + 调研） | 三档 baseline 数字锁定，误差 < 5% | **CP2**（硬卡） | 1.5 周 | 全员 4 签 |
-| **P3**（优化试错） | 必做 3 项至少有 1 项在 1 档上提分 ≥ 10% | **CP3** | 3.5 周（**锁死**） | 队长单签 + 全员 ack |
-| **P4**（集成 + 精度） | 3 档 + 4 类任务精度扣分 ≤ 3% + 1 次干净全量编译演练 | **CP4** | 0.5 周 | 全员 4 签 |
-| **P5**（提交冲刺） | 提交材料齐全，演练成功 | **CP5** | 0.5 周 | 队长 + 队员 C 双签 |
-| **buffer** | Phase 滑期用 | — | 0.5 周 | — |
-| **总计** | — | — | **9.5 周** | — |
+### Phase 划分（9 周预算）
+
+| Phase | 目标 | 出口（CP） | 时长 |
+|-------|------|-----------|------|
+| **P0** | §2 4 项未知全部确认 + 建仓库 + 各自看 1 篇 vLLM 论文 + 各 owner 离线练手任务 | **CP0**（硬卡） | 1.5 周（离线） |
+| **P1**（基础统一） | 4 人能讲清 LLM 推理基础 + DCU/HIP 区别 + vLLM 0.18.1 架构 + Triton 5 行 FP8 matmul smoke test | **CP1**（硬卡） | 1.5 周 |
+| **P2**（baseline 锁定 + 调研） | 三档 baseline 数字锁定，误差 < 5% | **CP2**（硬卡） | 1.5 周 |
+| **P3**（优化试错） | 必做 3 项至少有 1 项在 1 档上提分 ≥ 10% | **CP3** | 3.5 周（**锁死**） |
+| **P4**（集成 + 精度） | 3 档 + 4 类任务精度扣分 ≤ 3% + 1 次干净全量编译演练 | **CP4** | 0.5 周 |
+| **P5**（提交冲刺） | 提交材料齐全，演练成功 | **CP5** | 0.5 周 |
+| **buffer** | Phase 滑期用 | — | 0.5 周 |
+| **总计** | — | — | **9.5 周** |
 
 **对照用户预算 8-10 周**：spec 落 9.5 周（取下沿），留 0.5-1.5 周 buffer 给突发（队员退 / DCU 不到位 / 编译撞墙）。
 
 ### P0 离线期间具体任务
 - **队长（5-10h/周 × 1.5 周 = 8-15h）**：通读 `qwen_use.pdf` 1 遍 + 写完 AGENTS.md + 用 `mmx-cli` 查 1 篇 vLLM 论文 + 跑 §2 4 项验证的协调
 - **队员 A / Kernel（8-12h/周 × 1.5 周 = 12-18h）**：Triton 官方 tutorial 跑通 vector_add / softmax / fused attention 3 个例子；提交 1 个练习 PR
-- **队员 B / vLLM（8-12h/周 × 1.5 周 = 12-18h）**：精读 vLLM 0.18.1 `v1/kv_cache_interface.py` + `attention/backends/`，写 1 页阅读笔记落 `docs/decisions/0005-vllm-readmap.md`
+- **队员 B / vLLM（8-12h/周 × 1.5 周 = 12-18h）**：精读 vLLM 0.18.1 `v1/kv_cache_interface.py` + `attention/backends/`，写 1 页阅读笔记落 `docs/decisions/0006-vllm-readmap.md`
 - **队员 C / 浮动（3-5h/周 × 1.5 周 = 5-8h）**：本地 `vllm serve` + `vllm bench serve` 命令跑通（GPU 或 CPU mock），熟悉 vllm bench 输出格式
 
-**注**：P0 任务按 5-12h/周 配比；与 §7 周投入承诺**整体一致**，但**不平衡**（队员 C 1.5 周仅 5-8h 是 bus factor 1，P3 起把"录屏 + 周报 owner"主责任迁到队员 B）。
+**注**：P0 任务按 5-12h/周 配比；与 §7 周投入承诺**整体一致**，但**不平衡**（队员 C 1.5 周仅 5-8h 是 bus factor 1，P3 起把"调研笔记 + standup owner"主责任迁到队员 B）。
 
 ### Phase 跳过规则（硬化）
 - CP0 不通过 → 不开 P1
@@ -252,7 +252,7 @@ docs/
 | **编译失败撞 P5 截止** | vLLM 全量编译 4-12h 实测 | 演练放在 P4 末而非 P5；保留上次成功构建的 Docker 镜像 |
 | **决赛多卡扩展**（PDF P11 提决赛多卡分布式） | 初赛结束 | P3 末评估 1 个 stretch 项：tensor parallel 路径调研（不实现） |
 | **评测黑盒：请求顺序/时间戳不可见** | PDF P11 第 3 款 | prefix-caching 调参策略要保守；不要假设请求可重放 |
-| **队员 C 退出（bus factor 1）** | 队员 C 连续 2 周 0 交付 | P0 末把"录屏 + 周报 owner"主责任迁到队员 B；队员 C 仅保留 QA |
+| **队员 C 退出（bus factor 1）** | 队员 C 连续 2 周 0 交付 | P0 末把"调研笔记 + standup owner"主责任迁到队员 B；队员 C 仅保留 QA |
 | **AI 代码未及时审阅合 main** | `git log` 找到无 reviewer 的 AI commit | AGENTS.md 已有 3 关（读 / 跑 / 对比 baseline）；spec 加 24h 内未审 = revert |
 
 ## 11. 完工标准（Phase 5 结束）
@@ -265,7 +265,7 @@ docs/
 - ✅ `src/` 下 KV 量化模块 / torch.compile 配置 / block-size 调参脚本可一键加载
 - ✅ 1 次干净的全量编译 + 跑通演练（**P4 末完成，P5 只重跑**）
 
-### 赛题第 12-15 条提交材料清单（**v3 复核：P4 末完成材料，P5 演练**）
+### 赛题第 12-15 条提交材料清单
 
 | 赛题条款 | 提交材料 | Owner | 截止 | 状态 |
 |----------|----------|-------|------|------|
@@ -277,7 +277,7 @@ docs/
 
 **预期分数**：60-75 / 100（赛题第 9 条第 4 款公式估算；**待 §2 第 2 项确认后修正**）。
 
-**Baseline 数字公开 vs 不公开 → 评分场景表**（v3 复核补充）：
+**Baseline 数字公开 vs 不公开 → 评分场景表**：
 
 | 场景 | 信号 | 分数区间 | 策略 |
 |------|------|----------|------|
@@ -285,11 +285,9 @@ docs/
 | **赛方部分公开（如仅给单档）** | §2 部分通过 | 45-65 | 集中攻已公开档，其余按比例估算 |
 | **完全自测 baseline**（赛方不公开） | §2 验证失败 | 30-55（**估算失锚**） | 砍必做到 2 项；放弃 8k-16k 档（占 50% 权重） |
 
-## 12. 下一步
+## 12. 剩余硬卡门
 
-1. **本会话内**：v3 spec 提交 + 等用户审阅
-2. **用户审阅通过后** → 调 `superpowers:writing-plans` 转实施计划
-3. **实施计划批准后** → 启动 Phase 0（含 §2 4 项验证）
-4. **P0 验证结果回写本 spec**（如选型有变）→ §5 决策表更新
-5. **P0 末** → subagent 并行调研（vLLM backend 接入点 / DCU 性能特征 / KV 量化方案对比），输出落 `docs/appendices/`
+1. **P0 验证**：DCU 硬件到位后跑 §2 的 4 项（DCU SKU / 官方 baseline / LongBench+RULER 访问 / custom backend 路径）
+2. **验证回写**：P0 结果落本 spec §2 表格 + §5 决策表（如选型有变）
+3. **P0 末调研**：vLLM backend 接入点 / DCU 性能特征 / KV 量化方案对比 → `docs/appendices/`
 

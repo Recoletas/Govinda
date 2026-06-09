@@ -2,7 +2,7 @@
 
 **日期**: 2026-06-09
 **关联任务**: P0 #30 (0.6 vllm-rocm Docker)
-**关联 spec**: `/home/recoletas/Govinda/docs/specs/2026-06-09-qwen-inference-optimization-design.md` v4
+**关联 spec**: `/home/recoletas/Govinda/docs/specs/2026-06-09-qwen-inference-optimization-design.md`
 
 ## 状态
 

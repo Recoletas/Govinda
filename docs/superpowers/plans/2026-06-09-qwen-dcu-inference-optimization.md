@@ -22,7 +22,7 @@ Govinda/
 ├── docs/
 │   ├── index.md                       # 已存在
 │   ├── learning.md                    # 找学习资料的方法 + 术语速查
-│   ├── specs/                         # 已存在（v4 spec 在此）
+│   ├── specs/                         # 已存在（设计文档在此）
 │   ├── superpowers/
 │   │   └── plans/
 │   │       └── 2026-06-09-qwen-dcu-inference-optimization.md  # 本文件
@@ -82,7 +82,7 @@ Govinda/
 
 **目标**：确认 §2 4 项未知（DCU SKU / baseline 数字 / 测试集 / backend 路径）；owner 离线完成各自练手任务。
 
-**出口（CP0）**：4 项验证全过 + owner 各自 PR 合入 + 队长 + 队员 B 双签。
+**出口（CP0）**：4 项验证全过 + owner 各自 PR 合入 + 队长 + 队员 B 共同确认。
 
 ### Task 0.1: 验证 DCU SKU + FP8 支持
 
@@ -565,46 +565,16 @@ git commit -m "P0: vllm-rocm Docker setup"
 
 **Files:**
 - Create: `docs/decisions/0006-vllm-readmap.md`（队员 B 写）
-- Create: `docs/weekly/p0-offline-log.md`（队长汇总）
-- Create: `docs/recordings/p0-triton-tutorial.md`（队员 A 写文字稿）
-- Create: `docs/recordings/p0-vllm-bench.md`（队员 C 写文字稿）
+- Append: `docs/learning.md`（队员 A 写 Triton 笔记 / 队员 C 写 vllm bench 笔记）
+- Append: `docs/weekly/progress.md`（4 人本周条目）
 
-- [ ] **Step 1: 队长 — 写 P0 离线日志骨架**
+- [ ] **Step 1: 队长起 P0 离线条目到 progress.md**
 
-`docs/weekly/p0-offline-log.md` 模板：
-
-```markdown
-# P0 离线周志（2 周）
-
-## 队长
-
-- [ ] 通读 `qwen_use.pdf` 1 遍
-- [ ] 写完 AGENTS.md（已存在）
-- [ ] 用 mmx-cli 查 1 篇 vLLM 论文
-- [ ] 协调 4 项验证
-
-## 队员 A（Kernel）
-
-- [ ] Triton 官方 tutorial 跑通 vector_add
-- [ ] Triton softmax
-- [ ] Triton fused attention
-- [ ] 提交 1 个练习 PR
-
-## 队员 B（vLLM）
-
-- [ ] 精读 `vllm/v1/kv_cache_interface.py`
-- [ ] 精读 `vllm/v1/attention/backends/`
-- [ ] 写 `docs/decisions/0006-vllm-readmap.md`（1 页）
-
-## 队员 C（浮动）
-
-- [ ] 本地 `vllm serve` 跑通
-- [ ] `vllm bench serve` 跑通 + 熟悉输出
-```
+在 `docs/weekly/progress.md` 当前周区块下，加 4 人各 1 行（"本周：通读 qwen_use.pdf / 协调 4 项验证"等）。
 
 - [ ] **Step 2: 队员 A — Triton tutorial 练习**
 
-按 https://triton-lang.org/main/getting-started/tutorials/ 顺序跑 03-matrix-multiplication.py / 05-layer-norm.py / 06-fused-attention.py。在 1 个新分支 `practice/triton-tutorial` 上，每跑通 1 个 = 1 个 commit。
+按 https://triton-lang.org/main/getting-started/tutorials/ 顺序跑 03-matrix-multiplication.py / 05-layer-norm.py / 06-fused-attention.py。完成的 kernel + 关键参数（block size / num_warps）append 到 `docs/learning.md` 的 "Triton" section。
 
 - [ ] **Step 3: 队员 B — vLLM 0.18.1 源码阅读笔记**
 
@@ -622,18 +592,11 @@ vllm serve Qwen/Qwen2.5-0.5B-Instruct --port 8000 &
 sleep 60
 vllm bench serve --model Qwen/Qwen2.5-0.5B-Instruct --num-prompts 10 --burstiness 1.0
 ```
-记录输出格式到 `docs/recordings/p0-vllm-bench.md`。
+记录输出格式 + 关键 metric（TTFT / TPOT / 吞吐）append 到 `docs/learning.md` 的 "vLLM bench" section。
 
 - [ ] **Step 5: 队长收集 4 子任务交付物**
 
 确认 4 个 PR / 文件全部合入 `main` 后，CP0 硬卡门过。
-
-- [ ] **Step 6: Commit 收尾**
-
-```bash
-git add docs/weekly/p0-offline-log.md docs/decisions/0006-vllm-readmap.md docs/recordings/
-git commit -m "P0: offline owner tasks deliverables"
-```
 
 ---
 
@@ -641,48 +604,40 @@ git commit -m "P0: offline owner tasks deliverables"
 
 **目标**：4 人能讲清 LLM 推理基础 + DCU/HIP 区别 + vLLM 0.18.1 架构；Triton DCU smoke test 通过；做 KV 量化 × 块大小耦合矩阵。
 
-**出口（CP1）**：队长 + 队员 B 双签。
+**出口（CP1）**：4 人都能讲清 LLM 推理基础 / DCU-HIP 区别 / vLLM 0.18.1 架构 / 量化 × 块大小耦合。
 
 ### Task 1.1: 知识分享 — Prefill / Decode / KV cache / PagedAttention
 
 **Files:**
-- Create: `docs/recordings/p1-share-1-prefill-decode.md`
-- Create: `docs/recordings/p1-share-2-paged-attention.md`
+- Append: `docs/learning.md`（队员 B 写 Prefill/Decode + KV cache 笔记, 队长写 vLLM 0.18.1 架构）
 
-- [ ] **Step 1: 队员 B 录 30 min "Prefill vs Decode + KV cache 基础"**
+- [ ] **Step 1: 队员 B 写 "Prefill vs Decode + KV cache 基础" 笔记**
 
-内容必须覆盖：
+append 到 `docs/learning.md`，必须覆盖：
 - 为什么需要 KV cache
 - PagedAttention 块管理 vs 连续显存
 - 27B 模型在 4k/8k/16k/32k 上下文下的 KV cache 占用估算
 - 块大小对碎片率的影响
 
-- [ ] **Step 2: 队长录 30 min "vLLM 0.18.1 架构总览"**
+- [ ] **Step 2: 队长写 "vLLM 0.18.1 架构总览" 笔记**
 
-内容：
+append 到 `docs/learning.md`：
 - 整体组件图（Engine / Worker / ModelRunner / Scheduler / KVCacheManager）
 - 1 个请求从 OpenAI API 到 KV cache 写入的端到端路径
-- v0.18.1 vs v0.17 的主要变化（owner 在录之前先查 release notes）
+- v0.18.1 vs v0.17 的主要变化（写之前先查 release notes）
 
 - [ ] **Step 3: 全员做 1 次 quiz**
 
-队长出 10 道题，**闭卷**，内容覆盖上面 2 个分享。80% 正确率 = 通过；不通过 = 重听 + 重考。
-
-- [ ] **Step 4: Commit**
-
-```bash
-git add docs/recordings/p1-share-1-prefill-decode.md docs/recordings/p1-share-2-paged-attention.md
-git commit -m "P1: prefill/decode + vLLM architecture knowledge sharing"
-```
+队长出 10 道题，**闭卷**，内容覆盖上面 2 个笔记。80% 正确率 = 通过；不通过 = 重读 + 重考。
 
 ### Task 1.2: DCU / HIP 培训
 
 **Files:**
-- Create: `docs/recordings/p1-share-3-dcu-hip.md`
+- Append: `docs/learning.md`（队员 A 写 DCU/HIP 笔记）
 
-- [ ] **Step 1: 队员 A 录 30 min "DCU vs NVIDIA GPU + HIP 编程模型"**
+- [ ] **Step 1: 队员 A 写 "DCU vs NVIDIA GPU + HIP 编程模型" 笔记**
 
-内容：
+append 到 `docs/learning.md`：
 - CDNA2 (gfx90a) vs CDNA3 (gfx942) 微架构差异
 - HIP vs CUDA API 差异
 - 27B 模型在 DCU 上 HBM 带宽 / 算力的理论上限
@@ -691,14 +646,7 @@ git commit -m "P1: prefill/decode + vLLM architecture knowledge sharing"
 - [ ] **Step 2: 全员读 ROCm 官方 precision-support 文档**
 
 URL: https://rocm.docs.amd.com/en/latest/reference/precision-support.html
-每人提交 1 个 1-paragraph 总结到 `docs/recordings/p1-share-3-dcu-hip.md` 末尾。
-
-- [ ] **Step 3: Commit**
-
-```bash
-git add docs/recordings/p1-share-3-dcu-hip.md
-git commit -m "P1: DCU/HIP training + ROCm precision docs read"
-```
+每人 1-paragraph 总结 append 到 `docs/learning.md` 的 "DCU/HIP" section 末尾。
 
 ### Task 1.3: 编译决策矩阵（block-size × KV 量化粒度）
 
@@ -741,24 +689,12 @@ git add docs/decisions/0007-coupling-matrix.md
 git commit -m "P1: coupling matrix ADR skeleton"
 ```
 
-### Task 1.4: CP1 硬卡门 sign-off
+### Task 1.4: CP1 硬卡门
 
-**Files:**
-- Create: `docs/weekly/p1-signoff.md`
-
-- [ ] **Step 1: 队长 + 队员 B 在 `docs/weekly/p1-signoff.md` 双签**
-
-内容：
-- 4 人 quiz 通过名单
-- 3 个录屏落 `docs/recordings/`
+CP1 通过条件（**不签**，看实际产出）：
+- 4 人 quiz 通过名单（≥ 80% 正确率）
+- `docs/learning.md` 包含 3 份笔记（Prefill/Decode、vLLM 架构、DCU/HIP）
 - ADR 0007 编译决策矩阵
-
-- [ ] **Step 2: Commit**
-
-```bash
-git add docs/weekly/p1-signoff.md
-git commit -m "P1: CP1 sign-off (双签)"
-```
 
 ---
 
@@ -766,7 +702,7 @@ git commit -m "P1: CP1 sign-off (双签)"
 
 **目标**：3 档 baseline 数字锁定（误差 < 5%），profile 一次，调研 1 个未来可用的优化方向。
 
-**出口（CP2）**：全员 4 签。
+**出口（CP2）**：3 档 baseline 数字落地（4k-8k / 8k-16k / 16k-32k 各 1 份 JSON）+ 1 次 profile 输出 + 块大小假设 ADR。
 
 ### Task 2.1: 建 benchmark 跑分 harness
 
@@ -1074,24 +1010,12 @@ git add benchmarks/profiles/baseline-profile.md
 git commit -m "P2: baseline torch profiler + rocprofv3 analysis"
 ```
 
-### Task 2.4: CP2 硬卡门 sign-off
+### Task 2.4: CP2 硬卡门
 
-**Files:**
-- Create: `docs/weekly/p2-signoff.md`
-
-- [ ] **Step 1: 全员 4 签 `docs/weekly/p2-signoff.md`**
-
-内容：
-- 3 档 baseline 数字（误差 < 5%）
-- 1 份 profile 报告
-- 调研子任务 1 个：block-size 8 vs 128 哪个更可能赢（10 分钟讨论，结论落 ADR 0008）
-
-- [ ] **Step 2: Commit**
-
-```bash
-git add docs/weekly/p2-signoff.md docs/decisions/0008-blocksize-hypothesis.md
-git commit -m "P2: CP2 sign-off (4 签)"
-```
+CP2 通过条件（**不签**，看实际产出）：
+- 3 档 baseline 数字落地（4k-8k / 8k-16k / 16k-32k 各 1 份 JSON, 误差 < 5%）
+- 1 份 profile 报告（torch profiler 或 rocprofv3 输出）
+- 块大小假设 ADR 0008（block-size 8 vs 128 哪个更可能赢的结论）
 
 ---
 
@@ -1101,7 +1025,7 @@ git commit -m "P2: CP2 sign-off (4 签)"
 
 **3 条 stream 独立推进**：A 块管理 / B KV 量化 / C torch.compile。每周末 1 次集成日。
 
-**出口（CP3）**：队长单签 + 全员 ack。
+**出口（CP3）**：3 条 stream（块管理 / KV 量化 / torch.compile）独立提分,集成日 ROI ≥ 10%。
 
 ### Stream A: 块管理 + prefix + chunked prefill
 
@@ -1534,24 +1458,12 @@ git add benchmarks/optimized/integration-*/ docs/decisions/0015-integration-fina
 git commit -m "P3D: integration day final ROI table"
 ```
 
-#### Task 3D.2: CP3 sign-off
+#### Task 3D.2: CP3 硬卡门
 
-**Files:**
-- Create: `docs/weekly/p3-signoff.md`
-
-- [ ] **Step 1: 队长单签 + 全员 ack `docs/weekly/p3-signoff.md`**
-
-内容：
-- 3 必做项各自的 ROI 文档
-- 集成日最终 ROI 表
-- 是否进入 P4 / 是否触发 spec §10 应急
-
-- [ ] **Step 2: Commit**
-
-```bash
-git add docs/weekly/p3-signoff.md
-git commit -m "P3: CP3 sign-off"
-```
+CP3 通过条件（**不签**,看实际产出 + 集成日 ROI）：
+- 3 必做项各自的 ROI 文档（块管理 / KV 量化 / torch.compile）
+- 集成日最终 ROI 表（看是否 ≥ 10%）
+- 决策：进入 P4 / 触发 spec §10 应急
 
 ---
 
@@ -1559,7 +1471,7 @@ git commit -m "P3: CP3 sign-off"
 
 **目标**：3 档 + 4 类任务精度扣分 ≤ 3%；1 次干净全量编译演练完成。
 
-**出口（CP4）**：全员 4 签。
+**出口（CP4）**：3 档 + 4 类任务精度扣分 ≤ 3%；1 次干净全量编译演练完成。
 
 ### Task 4.1: 3 档集成基准（最终 1 次）
 
@@ -1614,7 +1526,7 @@ git commit -m "P4: accuracy validation (4 task types)"
 ### Task 4.3: 1 次干净全量编译演练
 
 **Files:**
-- Create: `docs/weekly/p4-clean-rebuild-log.md`
+- Append: `docs/weekly/progress.md`（总耗时 + 异常 + 修复记录）
 
 - [ ] **Step 1: 删 Docker 镜像 + 容器 + 缓存**
 
@@ -1632,14 +1544,7 @@ cd docker && docker compose build 2>&1 | tee build.log
 
 - [ ] **Step 3: 跑 1 个最小请求确认服务起来**
 
-- [ ] **Step 4: 记录总耗时到 `docs/weekly/p4-clean-rebuild-log.md`**
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add docs/weekly/p4-clean-rebuild-log.md
-git commit -m "P4: clean rebuild exercise log"
-```
+- [ ] **Step 4: 总耗时 + 异常 append 到 `docs/weekly/progress.md` 当周区块**
 
 ### Task 4.4: 提交材料草稿
 
@@ -1667,19 +1572,12 @@ git add reports/
 git commit -m "P4: submission material drafts"
 ```
 
-### Task 4.5: CP4 硬卡门 sign-off
+### Task 4.5: CP4 硬卡门
 
-**Files:**
-- Create: `docs/weekly/p4-signoff.md`
-
-- [ ] **Step 1: 全员 4 签**
-
-- [ ] **Step 2: Commit**
-
-```bash
-git add docs/weekly/p4-signoff.md
-git commit -m "P4: CP4 sign-off (4 签)"
-```
+CP4 通过条件（**不签**,看实际产出）：
+- 3 档集成基准（最终 1 次, 100 prompts × 3 取稳态）落 `benchmarks/optimized/final-3tier/summary.md`
+- 4 类任务精度扣分 ≤ 3%（LongBench / RULER / 短上下文 / 长上下文）
+- 1 次干净全量编译 + 跑通演练
 
 ---
 
@@ -1687,62 +1585,47 @@ git commit -m "P4: CP4 sign-off (4 签)"
 
 **目标**：材料齐全，演练成功。
 
-**出口（CP5）**：队长 + 队员 C 双签。
+**出口（CP5）**：4 份提交材料（§12-15）齐全 + 1 次成功 dry run。
 
 ### Task 5.1: 材料定稿 + 演练
 
 **Files:**
 - Modify: `reports/submission-readme.md`
-- Create: `docs/weekly/p5-dryrun-log.md`
+- Append: `docs/weekly/progress.md`（dry run 结果 + 异常 + 修复记录）
 
 - [ ] **Step 1: 队员 C 跑 1 次完整 dry run**
 
-完整跑一遍：clean build → 服务启动 → bench → 精度 → 关停。记录任何异常到 `docs/weekly/p5-dryrun-log.md`。
+完整跑一遍：clean build → 服务启动 → bench → 精度 → 关停。异常 + 修复 append 到 `docs/weekly/progress.md` 当前周区块。
 
 - [ ] **Step 2: 修 dry run 暴露的问题**
 
 - [ ] **Step 3: 提交材料定稿（按 §12-15 校核）**
 
-- [ ] **Step 4: Commit**
-
-```bash
-git add reports/ docs/weekly/p5-dryrun-log.md
-git commit -m "P5: dry run + submission materials final"
-```
-
 ### Task 5.2: 提交
 
 **Files:**
-- Create: `docs/weekly/p5-submission-log.md`
 
 - [ ] **Step 1: 队长按赛方要求提交**
 
-记录提交流程到 `docs/weekly/p5-submission-log.md`（含时间戳 + 提交确认截图）。
-
-- [ ] **Step 2: Commit**
-
-```bash
-git add docs/weekly/p5-submission-log.md
-git commit -m "P5: submission complete"
-```
+提交流程 + 时间戳 append 到 `docs/weekly/progress.md` 当周区块。
 
 ---
 
 ## 自审（按 writing-plans skill 流程）
 
-**1. Spec coverage** —— spec v4 12 节：
+**1. Spec coverage** —— spec 12 节：
 - §1 Context: Task 0.1-0.7（owner 离线任务）+ 全 phase CP 体现 ✓
 - §2 待验证未知: Task 0.1-0.5（4 项验证）✓
 - §3 用户决策: 隐含在所有 task 的 owner 分配中 ✓
 - §4 边界: Task 2.3 profile 显式检测越界 ✓
 - §5 关键技术决策: Task 3A/3B/3C 3 stream 直接对应 3 必做 + stretch 通过 spec §5 实现 ✓
-- §6 Skills & Tools: Task 1.1-1.2 录屏，Task 2.3 profile 工具 ✓
+- §6 Skills & Tools: Task 1.1-1.2 知识分享, Task 2.3 profile 工具 ✓
 - §7 团队 & 角色: 每个 task 有 owner ✓
 - §8 文档架构: 文件结构骨架落实 ✓
 - §9 Phase 划分: 6 phase 表格一一对应 ✓
 - §10 风险: Task 2.3 profile / Task 3B.2 精度 / Task 4.3 编译演练对应 3 个高概率风险 ✓
 - §11 完工标准: Task 4.1-4.4 + Task 5.1-5.2 对应所有 5 项 ✓
-- §12 下一步: Task 0.1-0.7 是 "本会话后立即做" ✓
+- §12 剩余硬卡门: Task 0.1-0.7 是 P0 立即可启动 ✓
 
 **2. Placeholder scan**: 全文搜索 "TBD" / "TODO" / "实现 later" / "适当错误处理" / "类似 Task N" —— 0 命中。✓
 
