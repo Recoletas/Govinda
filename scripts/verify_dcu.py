@@ -11,6 +11,8 @@ def get_device_props():
         return None
     return torch.cuda.get_device_properties(0)
 
+# Currently unused — reserved for future cross-check with torch's gcnArchName.
+# Plan update pending team decision (Task 0.1 review).
 def get_rocminfo():
     try:
         out = subprocess.check_output(["rocminfo"], text=True)
@@ -50,7 +52,10 @@ def main():
         "total_memory_gb": props.total_memory / (1024 ** 3),
     }
     print(json.dumps(result, indent=2))
-    Path("benchmarks/device_info.json").write_text(json.dumps(result, indent=2))
+    # Resolve output path relative to this script's location (repo root)
+    output_path = Path(__file__).parent.parent / "benchmarks" / "device_info.json"
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(json.dumps(result, indent=2))
 
     # Hard gate
     if gcn_arch == "gfx90a" and fp8 != "NONE":
