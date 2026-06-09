@@ -1,8 +1,8 @@
 # 2026-06-09 Qwen 推理服务优化比赛 · 设计文档
 
-> **状态**：v2（subagent 审查后修订）· **作者**：队长 recoletas · **最后更新**：2026-06-09
-> **配套**：[`AGENTS.md`](../../AGENTS.md) · [`README.md`](../../README.md) · [v1 commit](https://github.com/Recoletas/Govinda/commit/8b763b4)
-> **审查来源**：3 subagent 并行报告（vLLM internals / DCU + Triton + FlashAttention / spec 完整性）
+> **状态**：v3（v2 基础上源码验证 4 项 + subagent 复核）· **作者**：队长 recoletas · **最后更新**：2026-06-09
+> **配套**：[`AGENTS.md`](../../AGENTS.md) · [`README.md`](../../README.md) · [v1 commit](https://github.com/Recoletas/Govinda/commit/8b763b4) · [v2 commit](https://github.com/Recoletas/Govinda/commit/b49d60e)
+> **审查来源**：3 subagent 并行报告（vLLM internals / DCU + Triton + FlashAttention / spec 完整性）+ 1 轮 v3 真·源码验证（vLLM 0.18.1 `registry.py` / `platforms/rocm.py` / AMD FP8 docs / ROCm/flash-attention 仓库）
 
 ---
 
@@ -17,7 +17,7 @@
 | **DCU SKU** | K100 (CDNA2 / gfx90a) 还是 Z100 (CDNA3 / gfx942) | FP8 KV cache 是否可行（CDNA2 无原生 FP8，CDNA3 有） | `rocminfo` 或 `python -c "import torch; print(torch.cuda.get_device_properties(0))"` |
 | **官方 baseline 数字** | 赛方是否下发给我们，还是只能自测 | 60-75 估算是否成立；SLA 自比较还是绝对值 | 询问赛方 / 赛方最新通知 |
 | **LongBench / RULER 测试集** | 开发期可下载 vs 仅评测平台可见 | 1.05× 提速回退规则能否本地验证 | 询问赛方 / 赛方文档 |
-| **vLLM 0.18.1 custom backend 路径** | entry-point 插件 vs 目录 drop-in | 整条 Kernel 战略是否成立 | DCU 上手后读 `vllm/platforms/rocm.py` + `vllm/attention/selector.py` |
+| **vLLM 0.18.1 custom backend 路径** | 机制已源码验证（§5.2：`AttentionBackendEnum` + `register_backend()` + 平台 priority list），**但 DCU 上能否成功 import / 注册 / 端到端跑通未验证** | stretch 4-5 是否可行 | DCU 上手后跑 1 个最小 backend 注册 smoke test（继承 `TritonAttentionBackend` 改 1 行，跑通 `vllm bench serve` 1 个 prompt） |
 
 **任一项不利 → 回到 §5 重新选型。这是 P0 的硬卡门。**
 
@@ -52,17 +52,56 @@
 
 ## 5. 关键技术决策
 
+### 5.1 决策表
+
 | 决策点 | 选择 | 理由 / 风险 |
 |--------|------|-------------|
-| **Decode attention 提速** | **Triton kernel + vLLM backend 注册点接入** | Triton 是 DCU (ROCm) **原生支持**的路径，**不是**风险路径。失败 fallback → vLLM `ROCM_ATTN_V1` backend 或 `torch.compile` |
-| **FA2 vs FA3** | **FA2 only**（vLLM 已带 ROCm 后端） | FA3 是 Hopper WMMA 专用，DCU 不可用 |
-| **KV cache 优化** | **动态 FP8 量化**（per-head/per-token scale，**非持久化**） | 取决于 DCU SKU：CDNA3 (gfx942) 原生支持，CDNA2 (gfx90a) 只能模拟且慢 → **§2 必查**；不行则改 INT8 或保留 bf16 |
+| **Decode attention 提速** | **优先复用 vLLM 已有的 `TRITON_ATTN` backend**（vllm.v1.attention.backends.triton_attn.TritonAttentionBackend），不自己写新 backend | vLLM 0.18.1 `AttentionBackendEnum` 已有 22 个值，包含 `TRITON_ATTN` / `ROCM_ATTN` / `ROCM_AITER_FA` 等。新人写新 backend 风险大；先调通已存在的 TRITON_ATTN |
+| **Custom backend 路径** | 真要扩展：调 `AttentionBackendEnum.register_backend()`，**或**改 `RocmPlatform._get_backend_priorities()` 优先级，**或**用 `AttentionBackendEnum.CUSTOM` 槽位（已存在，CUSTOM = None） | 机制是"enum + register_backend()"，**不是**"丢个 .py 进 vllm/attention/backends/"。改平台优先级需要改 vLLM 源码或 monkey-patch |
+| **FA2 vs FA3** | **FA2 only**（用 ROCm/flash-attention fork） | FA3 是 Hopper WMMA 专用，DCU 不可用。ROCm/flash-attention 覆盖 MI200x/MI250x/MI300x/MI355x |
+| **KV cache 优化** | **动态 FP8 量化**（per-head/per-token scale，**非持久化**） | 取决于 DCU SKU：CDNA3 (gfx942) 原生支持 FNUZ 变体（`__hip_fp8_e4m3_fnuz`）；CDNA2 (gfx90a) **不支持**。**§2 必查**；不行则改 INT8 或保留 bf16 |
 | **torch.compile mode** | **`default` 或 `reduce-overhead`**，**不要 `max-autotune`** | `max-autotune` 在 ROCm 上不完整（很多模板 CUDA-only），可能静默回退 |
 | **块管理调参** | `--block-size` 试 {8, 16, 32, 64, 128} | 有效值受硬件/算法约束，不是任意 |
 | **Python 路径优化** | `compilation_config.use_cudagraph=True` + `enforce_eager=False`，decode ≥ 3 次 warmup | HIP graph 录制有效；注意 warmup 不足会 capture 失败 |
 | **调度** | **不改** vLLM scheduler 代码 | 赛题禁止 + 能力不足 |
-| **vLLM 镜像** | 用 `vllm/vllm-rocm` Docker tag，不用 CUDA 镜像 | CUDA image 装 DCU 必失败 |
-| **不要漏的开关** | `--enable-prefix-caching`、`--enable-chunked-prefill`、`VLLM_USE_V1=1`、`VLLM_ATTENTION_BACKEND` | 这些是 vLLM 0.18.1 现成的开关，先全开再选 |
+| **vLLM 镜像** | 用 `vllm/vllm-rocm` Docker tag，不用 CUDA 镜像；官方 Dockerfile.rocm 用 **ROCm 7.0** 基线（旧分支支持 5.7-6.4） | CUDA image 装 DCU 必失败；ROCm 版本要锁 |
+| **不要漏的开关** | `--enable-prefix-caching`、`--enable-chunked-prefill`、`VLLM_USE_V1=1` | ⚠️ **没找到 `VLLM_ATTENTION_BACKEND` env var**（v0.18.1 `registry.py` 无此引用），后端选择走 platform priority list + `register_backend()` |
+
+### 5.2 vLLM 0.18.1 attention backend 真实机制（已源码验证）
+
+- **枚举**：`AttentionBackendEnum` 在 `vllm/v1/attention/backends/registry.py`，共 22 个值
+- **关键值**：`TRITON_ATTN` / `ROCM_ATTN` / `ROCM_AITER_FA` / `ROCM_AITER_UNIFIED_ATTN` / `FLASH_ATTN` / `FLASHINFER` / `FLEX_ATTENTION` / `TORCH_SDPA` / `CUSTOM` (None)
+- **平台选择**：`RocmPlatform._get_backend_priorities()` (`vllm/platforms/rocm.py:245-283`) 返回按优先级排列的 `AttentionBackendEnum` 列表；`RocmPlatform.get_attn_backend_cls()` (`vllm/platforms/rocm.py:370-429`) 验证
+- **平台 plugin**：`PLATFORM_PLUGINS_GROUP = "vllm.platform_plugins"` (`vllm/plugins/__init__.py`)，通过 `importlib.metadata.entry_points()` 加载；平台用 `builtin_platform_plugins = {'tpu','cuda','rocm','xpu','cpu'}` + 外部 plugin
+- **Pyproject entry-points**：只有 `vllm.general_plugins`（LoRA resolver），**没有** `vllm.platform_plugins` 或 `vllm.attention_backends` 显式声明（意味着第三方可以声明，会被 `load_plugins_by_group` 自动发现）
+
+### 5.3 FlashAttention ROCm 真相（已验证）
+
+- 官方 fork：[ROCm/flash-attention](https://github.com/ROCm/flash-attention)
+- **支持架构**：MI200x / MI250x / MI300x / MI355x / RDNA 3/4（**覆盖 CDNA2 gfx90a 和 CDNA3 gfx942**）
+- **安装**：`pip install flash-attn --no-build-isolation`（需 ROCm 6.0+、PyTorch 2.2+）
+- **两个 backend**：Composable Kernel (CK) 默认 / Triton via `aiter` package
+- vLLM 的 `FLASH_ATTN` enum 值在 ROCm 上是这条 fork 的 wrapper
+
+### 5.4 AMD ROCm FP8 支持（已验证）
+
+来源：[AMD ROCm precision-support docs](https://rocm.docs.amd.com/en/latest/reference/precision-support.html)
+
+| 架构 | GPU | FP8 支持 | 格式 |
+|------|-----|----------|------|
+| CDNA3 (gfx942) | MI300A / MI300X / MI325X | ✅ 原生 | **FNUZ** 变体（`__hip_fp8_e4m3_fnuz`）|
+| CDNA4 | MI350X / MI355X | ✅ 原生 | OCP 变体 |
+| **CDNA2 (gfx90a)** | **MI210 / MI250 / MI250X** | **❌ 不支持** | — |
+| CDNA1 | MI100 | ❌ | — |
+| RDNA4 | RX 9070 / 9070XT | ✅ 原生 | OCP 变体 |
+
+**关键**：FP8 FNUZ 和 NVIDIA H100 的 OCP FP8 **不兼容**（no inf, no signed zero）。任何"FP8 KV cache" 方案在 DCU 上**需要确认是 FNUZ 还是 OCP 变体**，否则对不上。
+
+### 5.5 Triton + DCU 真相（部分验证）
+
+- Triton 3.x 在 ROCm/HIP 上有 first-class backend（target `gfx90a` / `gfx942` / `gfx950`）
+- 装 Triton 走 PyTorch 的 ROCm wheel 路径，**不要** `pip install triton[all]`
+- 已知坑：DCU 上 `tl.atomic_*` for FP8 和部分 `tl.dot` scale 组合有 bug，**P1 必须跑 1 个 5 行 `triton.jit` matmul + FP8 store 的最小 case，失败即降到 bf16 路线**
 
 ### 优化方向砍到 **3 必做 + 3 stretch**
 
@@ -205,7 +244,7 @@ docs/
 
 ## 12. 下一步
 
-1. **本会话内**：v2 spec 提交 + 等用户审阅
+1. **本会话内**：v3 spec 提交 + 等用户审阅
 2. **用户审阅通过后** → 调 `superpowers:writing-plans` 转实施计划
 3. **实施计划批准后** → 启动 Phase 0（含 §2 4 项验证）
 4. **P0 验证结果回写本 spec**（如选型有变）→ §5 决策表更新
@@ -216,7 +255,7 @@ docs/
 ## 修订记录
 
 - **v1** (`8b763b4`)：初稿
-- **v2**（本版）：3 subagent 审查后修订
+- **v2** (`b49d60e`)：3 subagent 审查后修订
   - **新增 §2 待验证未知项 4 项硬卡门**（C B1-B4 + B FP8-SKU 风险）—— Phase 0 入口
   - **反转 §5 Triton fallback 方向**（B blocker：Triton 是支持路径，CUDA-only 才不可用）
   - **砍优化方向 6 → 3 必做 + 3 stretch**（C I1：4 新人 + 5-10h/周太激进）
@@ -229,3 +268,10 @@ docs/
   - **§11 加赛题 §12-15 owner 表**（C I2：之前缺）
   - **§10 加新风险**（ROCm wheel 不匹配 / CDNA SKU / baseline 不可见 / 测试集不可下载）
   - **§7 加 bus factor 录屏机制**（C I4）
+- **v3**（本版）：v2 + 真·源码验证（部分 subagent 因权限延迟未完成的部分由队长补做）
+  - **§5.2 新增**：vLLM 0.18.1 真实 backend 机制（`AttentionBackendEnum` 22 值 / `RocmPlatform._get_backend_priorities()` / 平台 plugin entry point）
+  - **§5.3 新增**：FlashAttention ROCm fork 真实支持范围（MI200x-355x，含 CDNA2/CDNA3）
+  - **§5.4 新增**：AMD FP8 支持矩阵（CDNA3 FNUZ / CDNA2 不支持） + FNUZ vs OCP 不兼容提醒
+  - **§5.5 强化**：Triton + DCU 已知坑 + 具体验证动作（5 行 matmul + FP8 store 最小 case）
+  - **§5.1 决策表细化**：custom backend 路径列明 3 种真实机制（register_backend / 改优先级 / CUSTOM 槽位）
+  - **§2 第 4 项更新**：custom backend 路径"机制已验证，安装待 DCU"
