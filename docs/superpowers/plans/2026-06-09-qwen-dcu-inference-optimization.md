@@ -8,7 +8,20 @@
 
 **Tech Stack:** vLLM 0.18.1 / PyTorch 2.10.0 / Python 3.10.12 / transformers 5.5.0 / ROCm 7.0 / Triton 3.x / FlashAttention 2 (ROCm fork) / vllm/vllm-rocm Docker 镜像 / OpenCompass（精度评测）/ vllm bench serve（性能评测）
 
-**配套 spec:** [`../../specs/2026-06-09-qwen-inference-optimization-design.md`](../../specs/2026-06-09-qwen-inference-optimization-design.md) v4 (commit `0725d0e`)
+**配套 spec:** [`../../specs/2026-06-09-qwen-inference-optimization-design.md`](../../specs/2026-06-09-qwen-inference-optimization-design.md)
+
+## Owner × Phase 分工矩阵
+
+| Phase | 队长 (recoletas, 5-10h) | 队员 A (Kernel, 8-12h) | 队员 B (vLLM, 8-12h) | 队员 C (浮动/QA, 3-5h) |
+|-------|--------------------------|------------------------|----------------------|-------------------------|
+| **P0** 基础统一 (1.5w) | 协调 §2 4 项验证 + 写 AGENTS.md + 查 1 篇 vLLM 论文 | Triton tutorial 3 例 + 1 PR | vLLM 源码阅读笔记 (ADR 0006) | `vllm serve` + `vllm bench serve` 跑通 |
+| **P1** 基础培训 (1.5w) | vLLM 0.18.1 架构笔记 → learning.md | DCU/HIP 笔记 → learning.md | Prefill/Decode/KV cache 笔记 → learning.md | ROCm precision 文档读 + 总结 |
+| **P2** Baseline 锁定 (1.5w) | 3 档 baseline bench 跑分 (DCU) + profile 报告 | FP8 path 在 DCU 上测 | 块大小扫描 + ADR 0008 | bench 数字复核 + 文档校对 |
+| **P3** 优化试错 (3.5w) | **Stream A 块管理** owner + 集成日 | **Stream B KV 量化** owner (主力) | **Stream C torch.compile** owner + vLLM patch | 3 档回归 + 数字复核 |
+| **P4** 集成 + 精度 (0.5w) | 3 档最终集成 + 干净编译演练 | 4 类任务精度回归 (KV 量化侧) | 4 类任务精度回归 (compile 侧) | OpenCompass 跑通 + 数字签收 |
+| **P5** 提交冲刺 (0.5w) | 提交材料定稿 + 按赛方要求提交 | reports/optimization-plan.md 合稿 | reports/env-vars.md 终版 | 1 次完整 dry run + 修复 |
+
+> **3 条优化 stream 分配**: 块管理 → 队长 (主) / KV 量化 → 队员 A (主) / torch.compile → 队员 B (主)。队员 C 跨 3 stream 跑回归 + 数字复核 (bus factor 1, P0 末启动备用 owner 计划)。
 
 ---
 
@@ -1614,26 +1627,26 @@ CP4 通过条件（**不签**,看实际产出）：
 ## 自审（按 writing-plans skill 流程）
 
 **1. Spec coverage** —— spec 12 节：
-- §1 Context: Task 0.1-0.7（owner 离线任务）+ 全 phase CP 体现 ✓
-- §2 待验证未知: Task 0.1-0.5（4 项验证）✓
-- §3 用户决策: 隐含在所有 task 的 owner 分配中 ✓
-- §4 边界: Task 2.3 profile 显式检测越界 ✓
-- §5 关键技术决策: Task 3A/3B/3C 3 stream 直接对应 3 必做 + stretch 通过 spec §5 实现 ✓
-- §6 Skills & Tools: Task 1.1-1.2 知识分享, Task 2.3 profile 工具 ✓
-- §7 团队 & 角色: 每个 task 有 owner ✓
-- §8 文档架构: 文件结构骨架落实 ✓
-- §9 Phase 划分: 6 phase 表格一一对应 ✓
-- §10 风险: Task 2.3 profile / Task 3B.2 精度 / Task 4.3 编译演练对应 3 个高概率风险 ✓
-- §11 完工标准: Task 4.1-4.4 + Task 5.1-5.2 对应所有 5 项 ✓
-- §12 剩余硬卡门: Task 0.1-0.7 是 P0 立即可启动 ✓
+- §1 Context: Task 0.1-0.7（owner 离线任务）+ 全 phase CP 体现
+- §2 待验证未知: Task 0.1-0.5（4 项验证）
+- §3 用户决策: 隐含在所有 task 的 owner 分配中
+- §4 边界: Task 2.3 profile 显式检测越界
+- §5 关键技术决策: Task 3A/3B/3C 3 stream 直接对应 3 必做 + stretch 通过 spec §5 实现
+- §6 Skills & Tools: Task 1.1-1.2 知识分享, Task 2.3 profile 工具
+- §7 团队 & 角色: 每个 task 有 owner
+- §8 文档架构: 文件结构骨架落实
+- §9 Phase 划分: 6 phase 表格一一对应
+- §10 风险: Task 2.3 profile / Task 3B.2 精度 / Task 4.3 编译演练对应 3 个高概率风险
+- §11 完工标准: Task 4.1-4.4 + Task 5.1-5.2 对应所有 5 项
+- §12 剩余硬卡门: Task 0.1-0.7 是 P0 立即可启动
 
-**2. Placeholder scan**: 全文搜索 "TBD" / "TODO" / "实现 later" / "适当错误处理" / "类似 Task N" —— 0 命中。✓
+**2. Placeholder scan**: 全文搜索 "TBD" / "TODO" / "实现 later" / "适当错误处理" / "类似 Task N" —— 0 命中。
 
 **3. Type consistency**:
-- `KVQuantizer.quantize() → (xq, scale)` 在 Task 3B.1 定义，在 Task 3B.1 测试中签名一致 ✓
-- `FP8DynamicQuantizer(scale_mode="per_head" | "per_token")` 在 Task 3B.1 step 1 测试 + step 4 实现一致 ✓
-- `benchmarks/run_bench.py --tier --num-prompts --output --extra-args` 在 Task 2.1 定义，在 Task 2.2 / 3A.1 / 3B.2 / 3C.1 调用一致 ✓
-- `CompileConfig` dataclass 字段在 Task 3C.1 定义，全文中无后续 task 引用不一致字段 ✓
+- `KVQuantizer.quantize() → (xq, scale)` 在 Task 3B.1 定义，在 Task 3B.1 测试中签名一致
+- `FP8DynamicQuantizer(scale_mode="per_head" | "per_token")` 在 Task 3B.1 step 1 测试 + step 4 实现一致
+- `benchmarks/run_bench.py --tier --num-prompts --output --extra-args` 在 Task 2.1 定义，在 Task 2.2 / 3A.1 / 3B.2 / 3C.1 调用一致
+- `CompileConfig` dataclass 字段在 Task 3C.1 定义，全文中无后续 task 引用不一致字段
 
 **4. 已知简化（不构成 placeholder）**:
 - Task 3B.2 "实际接入 vLLM KV cache 流程" 标注 "具体代码需读 vLLM 0.18.1 源码后写" —— 这是合法的 "research-driven implementation" 占位（spec §5.2 给了机制但实装需 P3 期间读源码），不违反 "no placeholder" 规则。

@@ -1,0 +1,4 @@
+/* Hide the right-side TOC. The left nav is the single source of truth. */
+.md-sidebar--secondary {
+    display: none !important;
+}

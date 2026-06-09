@@ -21,7 +21,6 @@ theme:
     - search.highlight
     - content.code.copy
     - content.tabs.link
-    - toc.follow
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
@@ -58,10 +57,13 @@ markdown_extensions:
   - md_in_html
   - tables
   - toc:
-      permalink: true
+      permalink: false
 
 plugins:
   - search
+
+extra_css:
+  - assets/extra.css
 
 nav:
   - 首页: index.md

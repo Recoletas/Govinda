@@ -157,12 +157,22 @@
 
 ## 7. 团队 & 角色
 
-| 角色 | 谁 | 周投入 | 主要交付 |
-|------|----|----|----------|
-| 🅰 队长 + Profiling & 集成 owner | recoletas | 5-10 h | 周主持、决策、3 档压测脚本、最终整合、文档收尾 |
-| 🅱 Kernel owner | 队员 A | 8-12 h | Triton kernel 模板（stretch）；P3 进展不行则降级 |
-| 🅲 vLLM & KV cache owner | 队员 B | 8-12 h | vLLM 源码笔记、KV 量化、块管理调参 |
-| 🅳 浮动支持 / QA | 队员 C | 3-5 h | 跑回归、复核数字、文档校对 |
+| 角色 | 谁 | 周投入 | 主负责 stream | 协作 stream |
+|------|----|----|--------------|------------|
+| 队长 + Profiling & 集成 owner | recoletas | 5-10 h | **块管理 + prefix + chunked prefill** | KV 量化 / torch.compile (集成日) |
+| Kernel owner | 队员 A | 8-12 h | **KV cache 动态量化 (FP8/INT8)** | 块管理 / torch.compile |
+| vLLM & KV cache owner | 队员 B | 8-12 h | **torch.compile + cudagraph** | 块管理 / KV 量化 (vLLM patch) |
+| 浮动支持 / QA | 队员 C | 3-5 h | 跨 3 stream 回归 + 数字复核 | 队员 C 退出时队员 B 接手 |
+
+**3 必做 stream × 4 owner 矩阵 (RACI)**:
+
+| stream | 队长 | 队员 A | 队员 B | 队员 C |
+|--------|------|--------|--------|--------|
+| 块管理 / prefix / chunked prefill | **R** | C | C | I (回归) |
+| KV cache 动态量化 | C | **R** | C (vLLM patch) | I (回归) |
+| torch.compile + cudagraph | I (集成) | C | **R** | I (回归) |
+
+R = 主责任 / C = 协作 / I = 被通知 (跑回归或集成日配合)
 
 **4 人 + AI 辅助 ≈ 5-6 人等效生产力**。
 
