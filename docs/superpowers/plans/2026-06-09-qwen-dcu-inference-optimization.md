@@ -12,16 +12,22 @@
 
 ## Owner × Phase 分工矩阵
 
-| Phase | 队长 (recoletas, 5-10h) | 队员 A (Kernel, 8-12h) | 队员 B (vLLM, 8-12h) | 队员 C (浮动/QA, 3-5h) |
-|-------|--------------------------|------------------------|----------------------|-------------------------|
-| **P0** 基础统一 (1.5w) | 协调 §2 4 项验证 + 写 AGENTS.md + 查 1 篇 vLLM 论文 | Triton tutorial 3 例 + 1 PR | vLLM 源码阅读笔记 (ADR 0006) | `vllm serve` + `vllm bench serve` 跑通 |
+> **周投入配比**: 4 人差距 ≤ 1.5h (7-10h/周), 任何 owner 临时有事 backup 1 天内接手。每行 P3-P5 stream 标注 **R** (主) / **R'** (备份)。
+
+| Phase | 队长 (7-10h) | 队员 A (7-10h) | 队员 B (7-10h) | 队员 C (6-9h) |
+|-------|---------------|----------------|----------------|---------------|
+| **P0** 基础统一 (1.5w) | §2 4 项验证协调 + AGENTS.md + 顺手看 1-2 篇 vLLM 论文 | Triton tutorial 跑 1-3 例 (按兴趣), 心得落 learning.md | 浏览 vLLM 0.18.1 attention + KV cache 关键文件, 关键发现落 ADR 0006 或 learning.md | `vllm serve` + `vllm bench serve` 跑通 + 起 regression checklist 草稿 |
 | **P1** 基础培训 (1.5w) | vLLM 0.18.1 架构笔记 → learning.md | DCU/HIP 笔记 → learning.md | Prefill/Decode/KV cache 笔记 → learning.md | ROCm precision 文档读 + 总结 |
 | **P2** Baseline 锁定 (1.5w) | 3 档 baseline bench 跑分 (DCU) + profile 报告 | FP8 path 在 DCU 上测 | 块大小扫描 + ADR 0008 | bench 数字复核 + 文档校对 |
-| **P3** 优化试错 (3.5w) | **Stream A 块管理** owner + 集成日 | **Stream B KV 量化** owner (主力) | **Stream C torch.compile** owner + vLLM patch | 3 档回归 + 数字复核 |
-| **P4** 集成 + 精度 (0.5w) | 3 档最终集成 + 干净编译演练 | 4 类任务精度回归 (KV 量化侧) | 4 类任务精度回归 (compile 侧) | OpenCompass 跑通 + 数字签收 |
+| **P3** 优化试错 (3.5w) | **Stream A 块管理** (R) + 集成日 | **Stream B KV 量化** (R) | **Stream C torch.compile** (R) | **Stream I 集成+回归** (R); 3 档回归 + 数字复核 |
+| **P4** 集成 + 精度 (0.5w) | 3 档最终集成 + 干净编译演练 (R 集成) | 4 类任务精度回归 (KV 量化侧) | 4 类任务精度回归 (compile 侧) | OpenCompass 跑通 + 数字签收 |
 | **P5** 提交冲刺 (0.5w) | 提交材料定稿 + 按赛方要求提交 | reports/optimization-plan.md 合稿 | reports/env-vars.md 终版 | 1 次完整 dry run + 修复 |
 
-> **3 条优化 stream 分配**: 块管理 → 队长 (主) / KV 量化 → 队员 A (主) / torch.compile → 队员 B (主)。队员 C 跨 3 stream 跑回归 + 数字复核 (bus factor 1, P0 末启动备用 owner 计划)。
+**Stream 备份关系 (P3+)**:
+- Stream A (块管理) **R** 队长, **R'** 队员 B (B 懂 vLLM prefix cache hook, 离 PagedAttention 近)
+- Stream B (KV 量化) **R** 队员 A, **R'** 队员 C (C 学 FP8 量化比 A 学 vLLM 编译快, 数字敏感)
+- Stream C (torch.compile) **R** 队员 B, **R'** 队员 A (A 懂 Triton + compile 是一脉)
+- Stream I (集成+回归) **R** 队员 C, **R'** 队长 (C 走全流程, 队长主集成日)
 
 ---
 
@@ -574,42 +580,38 @@ git add docker/ requirements.txt
 git commit -m "P0: vllm-rocm Docker setup"
 ```
 
-### Task 0.7: Owner 离线练手任务（4 子任务，可并行）
+### Task 0.7: Owner 离线练手任务（建议清单, **非强制**）
+
+> **态度**: 每条是 **建议路径** — 时间紧的 owner 跳过非自己 stream 的部分即可。CP0 关注 §2 4 项验证全过 + standup 写了; 下面 4 个 Step 是 "顺手做做, 涨经验", 不是 "必须完成才有 P1 资格".
 
 **Files:**
-- Create: `docs/decisions/0006-vllm-readmap.md`（队员 B 写）
-- Append: `docs/learning.md`（队员 A 写 Triton 笔记 / 队员 C 写 vllm bench 笔记）
-- Append: `docs/weekly/progress.md`（4 人本周条目）
+- Append: `docs/learning.md` (按 owner 兴趣追加)
+- Create: `docs/decisions/0006-vllm-readmap.md` (队员 B 觉得写下来有用再写, 不必 "1 页" 严格)
+- Append: `docs/weekly/progress.md`（4 人本周条目, 必填, 1 行/人)
 
 - [ ] **Step 1: 队长起 P0 离线条目到 progress.md**
 
-在 `docs/weekly/progress.md` 当前周区块下，加 4 人各 1 行（"本周：通读 qwen_use.pdf / 协调 4 项验证"等）。
+在 `docs/weekly/progress.md` 当前周区块下, 加 4 人各 1 行 ("本周: 通读 qwen_use.pdf / 协调 4 项验证" 等)。
 
-- [ ] **Step 2: 队员 A — Triton tutorial 练习**
+- [ ] **Step 2: 队员 A — Triton 入门 (选做)**
 
-按 https://triton-lang.org/main/getting-started/tutorials/ 顺序跑 03-matrix-multiplication.py / 05-layer-norm.py / 06-fused-attention.py。完成的 kernel + 关键参数（block size / num_warps）append 到 `docs/learning.md` 的 "Triton" section。
+挑感兴趣的 tutorial (03-matrix-multiplication / 05-layer-norm / 06-fused-attention 1-3 个, 不必全跑), 心得落 `docs/learning.md` 的 "Triton" section。**不**要求 "1 个练习 PR"。
 
-- [ ] **Step 3: 队员 B — vLLM 0.18.1 源码阅读笔记**
+- [ ] **Step 3: 队员 B — vLLM 0.18.1 关键文件浏览 (选做)**
 
-读 `vllm/v1/kv_cache_interface.py` + `vllm/v1/attention/backends/registry.py` + 1 个具体 backend 实现（如 `triton_attn.py`）。输出 `docs/decisions/0006-vllm-readmap.md` 至少含：
-- KV cache 块结构
-- 块大小对显存的影响
-- 至少 1 个 backend 的 forward 流程图
-- 至少 3 个 v0.18.1 新增的 enum 值
+浏览 `vllm/v1/kv_cache_interface.py` + `vllm/v1/attention/backends/registry.py` + 1 个具体 backend 实现 (如 `triton_attn.py`)。**如果**觉得对 P3 选 backend 有用, 写 `docs/decisions/0006-vllm-readmap.md` (含 KV cache 块结构 + 块大小对显存影响 + 至少 1 个 backend 的 forward 流程 + 至少 3 个 v0.18.1 新增的 enum 值); **否则**直接口述 / 群里讲一下, 不必落 md。
 
-- [ ] **Step 4: 队员 C — vllm bench 跑通**
+- [ ] **Step 4: 队员 C — vllm bench 跑通 + regression checklist 草稿**
 
-在本地（CPU mock 或 GPU）跑通：
+在本地 (CPU mock 或 GPU) 跑通:
 ```bash
 vllm serve Qwen/Qwen2.5-0.5B-Instruct --port 8000 &
 sleep 60
 vllm bench serve --model Qwen/Qwen2.5-0.5B-Instruct --num-prompts 10 --burstiness 1.0
 ```
-记录输出格式 + 关键 metric（TTFT / TPOT / 吞吐）append 到 `docs/learning.md` 的 "vLLM bench" section。
+记录输出格式 + 关键 metric (TTFT / TPOT / 吞吐) append 到 `docs/learning.md` 的 "vLLM bench" section。**额外**起一个 regression checklist 草稿 (P2 用), 列 3 档 × 关键 metric × 期望范围。
 
-- [ ] **Step 5: 队长收集 4 子任务交付物**
-
-确认 4 个 PR / 文件全部合入 `main` 后，CP0 硬卡门过。
+- [ ] **Step 5: 队长确认 CP0 真正硬卡门过的是 §2 4 项验证 + progress.md 有 4 人条目**
 
 ---
 

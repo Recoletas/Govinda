@@ -157,22 +157,23 @@
 
 ## 7. 团队 & 角色
 
-| 角色 | 谁 | 周投入 | 主负责 stream | 协作 stream |
-|------|----|----|--------------|------------|
-| 队长 + Profiling & 集成 owner | recoletas | 5-10 h | **块管理 + prefix + chunked prefill** | KV 量化 / torch.compile (集成日) |
-| Kernel owner | 队员 A | 8-12 h | **KV cache 动态量化 (FP8/INT8)** | 块管理 / torch.compile |
-| vLLM & KV cache owner | 队员 B | 8-12 h | **torch.compile + cudagraph** | 块管理 / KV 量化 (vLLM patch) |
-| 浮动支持 / QA | 队员 C | 3-5 h | 跨 3 stream 回归 + 数字复核 | 队员 C 退出时队员 B 接手 |
+| 角色 | 谁 | 周投入 | 主负责 stream | 备份 stream (主 R 临时有事时接手) |
+|------|----|----|--------------|------------------------------|
+| 队长 + 集成 owner | recoletas | 7-10 h | **块管理 + prefix + chunked prefill** | 集成 + 回归 (队员 C 临时有事时) |
+| Kernel owner | 队员 A | 7-10 h | **KV cache 动态量化 (FP8/INT8)** | torch.compile (队员 B 临时有事时) |
+| vLLM & compile owner | 队员 B | 7-10 h | **torch.compile + cudagraph** | 块管理 (队长临时有事时) |
+| 集成 / 回归 / 数字 owner | 队员 C | 6-9 h | **跨 stream 集成 + 回归 + 数字复核** | KV 量化 (队员 A 临时有事时) |
 
-**3 必做 stream × 4 owner 矩阵 (RACI)**:
+**3 必做 stream × 4 owner 矩阵 (R + R')**:
 
 | stream | 队长 | 队员 A | 队员 B | 队员 C |
 |--------|------|--------|--------|--------|
-| 块管理 / prefix / chunked prefill | **R** | C | C | I (回归) |
-| KV cache 动态量化 | C | **R** | C (vLLM patch) | I (回归) |
-| torch.compile + cudagraph | I (集成) | C | **R** | I (回归) |
+| 块管理 / prefix / chunked prefill | **R** | C | **R'** | I |
+| KV cache 动态量化 | C | **R** | C | **R'** |
+| torch.compile + cudagraph | I | **R'** | **R** | I |
+| 跨 stream 集成 + 回归 + 数字 | **R'** | I | I | **R** |
 
-R = 主责任 / C = 协作 / I = 被通知 (跑回归或集成日配合)
+R = 主责任 / **R'** = 备份责任 (主 R 临时有事能直接顶, 不需要 24h 升级) / C = 协作 / I = 被通知 (跑回归或集成日配合)
 
 **4 人 + AI 辅助 ≈ 5-6 人等效生产力**。
 
@@ -230,12 +231,14 @@ docs/
 **对照用户预算 8-10 周**：spec 落 9.5 周（取下沿），留 0.5-1.5 周 buffer 给突发（队员退 / DCU 不到位 / 编译撞墙）。
 
 ### P0 离线期间具体任务
-- **队长（5-10h/周 × 1.5 周 = 8-15h）**：通读 `qwen_use.pdf` 1 遍 + 写完 AGENTS.md + 用 `mmx-cli` 查 1 篇 vLLM 论文 + 跑 §2 4 项验证的协调
-- **队员 A / Kernel（8-12h/周 × 1.5 周 = 12-18h）**：Triton 官方 tutorial 跑通 vector_add / softmax / fused attention 3 个例子；提交 1 个练习 PR
-- **队员 B / vLLM（8-12h/周 × 1.5 周 = 12-18h）**：精读 vLLM 0.18.1 `v1/kv_cache_interface.py` + `attention/backends/`，写 1 页阅读笔记落 `docs/decisions/0006-vllm-readmap.md`
-- **队员 C / 浮动（3-5h/周 × 1.5 周 = 5-8h）**：本地 `vllm serve` + `vllm bench serve` 命令跑通（GPU 或 CPU mock），熟悉 vllm bench 输出格式
+> **不强求完成下面所有项**。每条是 **建议路径**, 时间紧的 owner 跳过非自己 stream 的部分即可。backup owner 责任从 P1 起自然过渡 (P0 阶段先读资料, P1 起跟主 owner 跑 1 周).
 
-**注**：P0 任务按 5-12h/周 配比；与 §7 周投入承诺**整体一致**，但**不平衡**（队员 C 1.5 周仅 5-8h 是 bus factor 1，P3 起把"调研笔记 + standup owner"主责任迁到队员 B）。
+- **队长（7-10h/周 × 1.5 周 = 10-15h）**：通读 `qwen_use.pdf` 1 遍 + 写完 AGENTS.md + 协调 §2 4 项验证; 顺手时查 1-2 篇 vLLM/prefix-cache 论文, 心得落 learning.md
+- **队员 A / Kernel（7-10h/周 × 1.5 周 = 10-15h）**：跑 Triton 官方 tutorial 的 vector_add / softmax / fused attention (按兴趣选, 不必跑完 3 个); 写过的 kernel 心得落 learning.md 或一个练习 PR
+- **队员 B / vLLM（7-10h/周 × 1.5 周 = 10-15h）**：浏览 vLLM 0.18.1 `v1/kv_cache_interface.py` + `attention/backends/`; 关键发现落 `docs/decisions/0006-vllm-readmap.md` 或 learning.md, 不必 "1 页" 严格
+- **队员 C / 集成+回归（6-9h/周 × 1.5 周 = 9-14h）**：本地 `vllm serve` + `vllm bench serve` 命令跑通 (GPU 或 CPU mock); 摸熟 vllm bench 输出格式; 起一个 regression checklist 草稿 (P2 用)
+
+**注**: 周投入按 6-10h/周 配比, 4 人差距 ≤ 1.5h, 任何 owner 临时有事 backup 都能 1 天内接手 (P0 末已读完相关资料, P1 起跟主 owner 跑 1 周). 队员 C 数字复核 + regression 路线从 P0 起就有交付, 不再是 "5-8h 干等 P3".
 
 ### Phase 跳过规则（硬化）
 - CP0 不通过 → 不开 P1
@@ -262,7 +265,7 @@ docs/
 | **编译失败撞 P5 截止** | vLLM 全量编译 4-12h 实测 | 演练放在 P4 末而非 P5；保留上次成功构建的 Docker 镜像 |
 | **决赛多卡扩展**（PDF P11 提决赛多卡分布式） | 初赛结束 | P3 末评估 1 个 stretch 项：tensor parallel 路径调研（不实现） |
 | **评测黑盒：请求顺序/时间戳不可见** | PDF P11 第 3 款 | prefix-caching 调参策略要保守；不要假设请求可重放 |
-| **队员 C 退出（bus factor 1）** | 队员 C 连续 2 周 0 交付 | P0 末把"调研笔记 + standup owner"主责任迁到队员 B；队员 C 仅保留 QA |
+| **任一 owner 临时有事 / 退出** | 任何 owner 连续 2 周 0 交付 | backup owner 1 天内接手 (P0 末已读完相关资料, P1 起跟主 owner 跑 1 周), 不开 24h sync, 不动 spec; 整组 ≥ 2 人 OOO 才升级 |
 | **AI 代码未及时审阅合 main** | `git log` 找到无 reviewer 的 AI commit | AGENTS.md 已有 3 关（读 / 跑 / 对比 baseline）；spec 加 24h 内未审 = revert |
 
 ## 11. 完工标准（Phase 5 结束）
