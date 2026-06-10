@@ -1,0 +1,2585 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="2026 全国大学生计算机系统能力大赛 · 智能计算创新设计赛参赛项目">
+      
+      
+      
+        <link rel="canonical" href="https://recoletas.github.io/Govinda/learning/">
+      
+      
+        <link rel="prev" href="..">
+      
+      
+        <link rel="next" href="../specs/2026-06-09-qwen-inference-optimization-design/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>学习资源与方法 - Govinda — Qwen3.5-27B DCU 推理优化</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#_1" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Govinda — Qwen3.5-27B DCU 推理优化" class="md-header__button md-logo" aria-label="Govinda — Qwen3.5-27B DCU 推理优化" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Govinda — Qwen3.5-27B DCU 推理优化
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              学习资源与方法
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换到深色"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="切换到深色" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换到浅色"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="切换到浅色" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Recoletas/Govinda" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Recoletas/Govinda
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Govinda — Qwen3.5-27B DCU 推理优化" class="md-nav__button md-logo" aria-label="Govinda — Qwen3.5-27B DCU 推理优化" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Govinda — Qwen3.5-27B DCU 推理优化
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Recoletas/Govinda" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Recoletas/Govinda
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    首页
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    学习
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    学习
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    学习资源与方法
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    学习资源与方法
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#vllm-0181-pin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        vLLM 0.18.1 (赛方 pin 的版本)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="vLLM 0.18.1 (赛方 pin 的版本)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        源码入口
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        必读模块 (按重要性, 优先级降序)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#grep" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Grep 技巧 (找代码/定义/默认值)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#v3v4-spec-5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        已知结论 (已验, 不用再重读, 标"v3/v4 验证" 在 spec §5)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#amd-rocm-dcu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AMD ROCm / DCU
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="AMD ROCm / DCU">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        官方文档
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fp8-spec-54" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FP8 矩阵 (已验, 标 spec §5.4)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#flashattention-rocm-fork-spec-53" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FlashAttention ROCm fork (已验, 标 spec §5.3)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#triton-dcu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Triton + DCU
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#qwen35-27b" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Qwen3.5-27B 模型
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        工具
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="工具">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        调研用
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        验证用
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        跑分用
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        术语速查
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        KV 量化
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="KV 量化">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        粒度选择
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        数据格式对比
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        代表方案对比
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dcu-rocm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DCU + ROCm 特有坑
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vllm-0181" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        vLLM 0.18.1 接入代码片段
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#per-adr-0002-0001-0006a-0009" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        已知不确定 (per ADR 0002 / 0001 / 0006a / 0009)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#attention-backend-vllm-0181" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Attention backend 选型 (vLLM 0.18.1)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Attention backend 选型 (vLLM 0.18.1)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#24-enum-compact" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        24 个 enum 值分组 (compact 表)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-triton-vs-aiter-fa-vs-aiter-unified" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3 候选对比 (Triton vs AITER-FA vs AITER-Unified)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dcu-fp8-attention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DCU FP8 attention 路径
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        接入方式 (3 选 1 推荐顺序)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#priority-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        平台 priority list 改法 (举例)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        改这份文档
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    设计
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    设计
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../specs/2026-06-09-qwen-inference-optimization-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    设计文档
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    计划
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    计划
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superpowers/plans/2026-06-09-qwen-dcu-inference-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    实施计划
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    决策
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    决策
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../decisions/0001-dcu-sku/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0001 DCU SKU
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../decisions/0002-testset-access/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0002 测试集访问
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../decisions/0003-baseline-source/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0003 Baseline 数字来源
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../decisions/0006-vllm-readmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0006 vLLM 0.18.1 读图
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../decisions/0006a-docker-build/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0006a Docker 构建
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../decisions/0007-coupling-matrix/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0007 编译决策矩阵
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../decisions/0008-blocksize-hypothesis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0008 块大小假设
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../decisions/0009-kv-quant-strategy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0009 KV 量化策略
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../decisions/0010-attention-backend/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0010 Attention backend 选型
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../decisions/0011-p0-research-output/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0011 P0 末调研输出
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../decisions/0013-torch-compile-roi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0013 torch.compile ROI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    进度
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    进度
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../weekly/progress/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Weekly Standup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    资源
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    资源
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../AGENTS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AI 协作
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ai-prompts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AI Prompts 库
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#vllm-0181-pin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        vLLM 0.18.1 (赛方 pin 的版本)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="vLLM 0.18.1 (赛方 pin 的版本)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        源码入口
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        必读模块 (按重要性, 优先级降序)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#grep" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Grep 技巧 (找代码/定义/默认值)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#v3v4-spec-5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        已知结论 (已验, 不用再重读, 标"v3/v4 验证" 在 spec §5)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#amd-rocm-dcu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AMD ROCm / DCU
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="AMD ROCm / DCU">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        官方文档
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fp8-spec-54" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FP8 矩阵 (已验, 标 spec §5.4)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#flashattention-rocm-fork-spec-53" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FlashAttention ROCm fork (已验, 标 spec §5.3)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#triton-dcu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Triton + DCU
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#qwen35-27b" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Qwen3.5-27B 模型
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        工具
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="工具">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        调研用
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        验证用
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        跑分用
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        术语速查
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        KV 量化
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="KV 量化">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        粒度选择
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        数据格式对比
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        代表方案对比
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dcu-rocm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DCU + ROCm 特有坑
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vllm-0181" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        vLLM 0.18.1 接入代码片段
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#per-adr-0002-0001-0006a-0009" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        已知不确定 (per ADR 0002 / 0001 / 0006a / 0009)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#attention-backend-vllm-0181" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Attention backend 选型 (vLLM 0.18.1)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Attention backend 选型 (vLLM 0.18.1)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#24-enum-compact" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        24 个 enum 值分组 (compact 表)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-triton-vs-aiter-fa-vs-aiter-unified" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3 候选对比 (Triton vs AITER-FA vs AITER-Unified)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dcu-fp8-attention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DCU FP8 attention 路径
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        接入方式 (3 选 1 推荐顺序)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#priority-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        平台 priority list 改法 (举例)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        改这份文档
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="_1">学习资源与方法</h1>
+<blockquote>
+<p>给团队 4 人(队长 + 队员 A/B/C)用的索引, 重点是"怎么找" + "去哪读", 不是"读什么结论"。<strong>vLLM / ROCm / DCU 文档更新快, 链接用相对路径 + 入口 URL, 实际章节靠 grep 找</strong>。</p>
+</blockquote>
+<h2 id="vllm-0181-pin">vLLM 0.18.1 (赛方 pin 的版本)</h2>
+<h3 id="_2">源码入口</h3>
+<ul>
+<li>仓库: <code>vllm-project/vllm</code> GitHub, 0.18.1 tag</li>
+<li>装好后源码在 Python 环境中, 例如 <code>python -c "import vllm; print(vllm.__file__)"</code> → 然后从那往下看</li>
+</ul>
+<h3 id="_3">必读模块 (按重要性, 优先级降序)</h3>
+<table>
+<thead>
+<tr>
+<th>优先级</th>
+<th>路径</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>★★★</td>
+<td><code>vllm/attention/backends/</code></td>
+<td>各种 backend 实现; <code>__init__.py</code> + <code>selector.py</code> 看注册机制</td>
+</tr>
+<tr>
+<td>★★★</td>
+<td><code>vllm/v1/kv_cache_interface.py</code></td>
+<td>KV cache 块管理 + 量化 hook</td>
+</tr>
+<tr>
+<td>★★</td>
+<td><code>vllm/v1/worker/model_runner.py</code></td>
+<td>模型前向主循环, decode/prefill 切分</td>
+</tr>
+<tr>
+<td>★★</td>
+<td><code>vllm/v1/core/sched/</code></td>
+<td>调度器(赛题禁止改)</td>
+</tr>
+<tr>
+<td>★</td>
+<td><code>vllm/entrypoints/openai/serving_chat.py</code></td>
+<td>服务入口, 看 API 行为</td>
+</tr>
+<tr>
+<td>★</td>
+<td><code>vllm/envs.py</code></td>
+<td>所有 VLLM_* 环境变量定义</td>
+</tr>
+</tbody>
+</table>
+<h3 id="grep">Grep 技巧 (找代码/定义/默认值)</h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># 找某个 attention backend 怎么注册</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>grep<span class="w"> </span>-rn<span class="w"> </span><span class="s2">&quot;register_backend\|AttentionBackendEnum&quot;</span><span class="w"> </span>vllm/attention/
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># 找某个 vLLM CLI flag 在哪定义</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>grep<span class="w"> </span>-rn<span class="w"> </span><span class="s2">&quot;add_cli_args\|--block-size&quot;</span><span class="w"> </span>vllm/engine/arg_utils.py
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="c1"># 找 FP8 / KV 量化相关代码</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>grep<span class="w"> </span>-rln<span class="w"> </span><span class="s2">&quot;fp8\|kv_cache_dtype&quot;</span><span class="w"> </span>vllm/v1/<span class="w"> </span>vllm/model_executor/
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="c1"># 找某个 env var 在哪里被读</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>grep<span class="w"> </span>-rn<span class="w"> </span><span class="s2">&quot;VLLM_USE_V1\|VLLM_ATTENTION_BACKEND&quot;</span><span class="w"> </span>vllm/
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="c1"># 看 AttentionBackendEnum 全部值</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from vllm.attention.backends.registry import AttentionBackendEnum; print(list(AttentionBackendEnum))&quot;</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="c1"># 看模块级 _get_backend_priorities 实际值 (rocm 平台)</span>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>grep<span class="w"> </span>-A<span class="w"> </span><span class="m">30</span><span class="w"> </span><span class="s2">&quot;_get_backend_priorities&quot;</span><span class="w"> </span>vllm/platforms/rocm.py
+</span></code></pre></div>
+<h3 id="v3v4-spec-5">已知结论 (已验, 不用再重读, 标"v3/v4 验证" 在 spec §5)</h3>
+<ul>
+<li>attention backend 真实机制: <strong>enum + <code>register_backend()</code></strong>, 不是"丢个 .py 进 <code>vllm/attention/backends/</code>"。见 spec §5.2 + ADR 0006</li>
+<li>vLLM 0.18.1 <code>AttentionBackendEnum</code> 有 24 个值, 含 <code>CUSTOM = None</code> 槽位(spec §5.1 表)</li>
+<li><code>--max-model-len</code> / <code>--max-num-seqs</code> / <code>--max-num-batched-tokens</code> <strong>赛题禁止改</strong>(spec §4 + AGENTS.md 赛题硬约束)</li>
+</ul>
+<h2 id="amd-rocm-dcu">AMD ROCm / DCU</h2>
+<h3 id="_4">官方文档</h3>
+<ul>
+<li>ROCm docs 入口: https://rocm.docs.amd.com/</li>
+<li>HIP programming guide: https://rocm.docs.amd.com/projects/HIP/</li>
+<li>DCU 兼容矩阵: 找赛方发的"DCU 软件栈兼容表"(per ADR 0001 待 DCU 验证)</li>
+</ul>
+<h3 id="fp8-spec-54">FP8 矩阵 (已验, 标 spec §5.4)</h3>
+<table>
+<thead>
+<tr>
+<th>架构</th>
+<th>SKU</th>
+<th>FP8 原生</th>
+<th>变体</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CDNA2 (gfx90a)</td>
+<td>MI210 / MI250 / MI250X</td>
+<td><strong>❌ 不支持</strong></td>
+<td>—</td>
+</tr>
+<tr>
+<td>CDNA3 (gfx942)</td>
+<td>MI300A / MI300X / MI325X</td>
+<td>✅</td>
+<td><strong>FNUZ</strong> 变体(<code>__hip_fp8_e4m3_fnuz</code>)</td>
+</tr>
+<tr>
+<td>CDNA4</td>
+<td>MI350X / MI355X</td>
+<td>✅</td>
+<td>OCP 变体</td>
+</tr>
+<tr>
+<td>RDNA4</td>
+<td>RX 9070 / 9070XT</td>
+<td>✅</td>
+<td>OCP 变体</td>
+</tr>
+</tbody>
+</table>
+<p><strong>注意</strong>: FNUZ (Finite + No inf + Unsigned zero) 与 OCP <strong>不兼容</strong>, 同一 bit pattern 解释不同。</p>
+<h3 id="flashattention-rocm-fork-spec-53">FlashAttention ROCm fork (已验, 标 spec §5.3)</h3>
+<ul>
+<li>上游 FlashAttention 2 ROCm fork 支持 MI200x / MI250x / MI300x / MI355x</li>
+<li>含 CDNA2(无 FP8)+ CDNA3(有 FP8, 设 <code>FLASH_ATTENTION_TRITON_AMD_ENABLE=TRUE</code> 启用 FP8 路径)</li>
+</ul>
+<h2 id="triton-dcu">Triton + DCU</h2>
+<ul>
+<li>Triton 3.0+ 原生支持 AMD GPU</li>
+<li>已知坑(spec §5.5): 某些 <code>tl.atomic_*</code> / <code>tl.dot</code> scale 组合编译失败 — P0 期间要跑最小 case 验证</li>
+<li>aiter 库 (AMD 自家优化 kernel 集合): https://github.com/ROCm/aiter</li>
+</ul>
+<h2 id="qwen35-27b">Qwen3.5-27B 模型</h2>
+<ul>
+<li>HuggingFace: <code>Qwen/Qwen3.5-27B</code>(27B 参数, Apache-2.0 权重)</li>
+<li>找模型卡: https://huggingface.co/Qwen/Qwen3.5-27B</li>
+<li>关键信息: max context length / tokenizer / 推理建议的 dtype</li>
+</ul>
+<h2 id="_5">工具</h2>
+<h3 id="_6">调研用</h3>
+<ul>
+<li><code>superpowers:context7</code> skill: 查 vLLM / PyTorch / Triton 最新 API 文档</li>
+<li><code>superpowers:dispatching-parallel-agents</code> skill: 并行调研多个主题</li>
+<li><code>WebSearch</code> + <code>WebFetch</code> (Claude Code 原生): 找最新 issue / 文档</li>
+</ul>
+<h3 id="_7">验证用</h3>
+<ul>
+<li><code>scripts/verify_dcu.py</code>: 跑在 DCU host, 输出 SKU + FP8 支持 (gcnArchName)</li>
+<li><code>scripts/verify_testset_access.py</code>: 跑在能联网环境, 检查 LongBench / RULER 是否可下载</li>
+<li><code>scripts/dry_run.py</code>: P5 末 dry-run 编排(clean build → serve → bench → accuracy → shutdown)</li>
+<li><code>python3 -c "import torch; print(torch.cuda.get_device_properties(0))"</code>: 快速看 DCU 信息</li>
+</ul>
+<h3 id="_8">跑分用</h3>
+<ul>
+<li><code>benchmarks/run_bench.py</code>: 跑单档 bench (3 tiers: 4k-8k / 8k-16k / 16k-32k)</li>
+<li><code>benchmarks/analyze.py</code>: 聚合 JSON → markdown 表格</li>
+</ul>
+<h2 id="_9">术语速查</h2>
+<table>
+<thead>
+<tr>
+<th>术语</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>prefill</td>
+<td>处理整个 prompt, 计算所有 token 的 K/V</td>
+</tr>
+<tr>
+<td>decode</td>
+<td>自回归生成, 每次算 1 个新 token</td>
+</tr>
+<tr>
+<td>PagedAttention</td>
+<td>vLLM 的 KV cache 块管理, 类似 OS 虚拟内存分页</td>
+</tr>
+<tr>
+<td>block size</td>
+<td>PagedAttention 的 KV 块大小 (--block-size), 单位: token</td>
+</tr>
+<tr>
+<td>KV cache</td>
+<td>prefill 算出的 K/V 矩阵, decode 时复用</td>
+</tr>
+<tr>
+<td>cudagraph</td>
+<td>CUDA graph capture, 减少 kernel launch 开销 (DCU 上是 HIP graph)</td>
+</tr>
+<tr>
+<td>torch.compile</td>
+<td>PyTorch 的 JIT 编译, 在 vLLM 0.18.1 走 <code>default</code> mode (不要 max-autotune)</td>
+</tr>
+<tr>
+<td>FNUZ</td>
+<td>AMD FP8 变体, 跟 NVIDIA OCP 不兼容</td>
+</tr>
+<tr>
+<td>GCN arch</td>
+<td>AMD GPU 架构代号, <code>gfx90a</code> = CDNA2, <code>gfx942</code> = CDNA3</td>
+</tr>
+<tr>
+<td>AttentionBackendEnum</td>
+<td>vLLM 0.18.1 attention backend 的 enum 注册表, 24 个值</td>
+</tr>
+</tbody>
+</table>
+<h2 id="kv">KV 量化</h2>
+<blockquote>
+<p>围绕 ADR 0009 的"必做 3 + stretch 2"路线。<strong>赛题禁持久化量化</strong> (AGENTS.md 第 9/21 行), 运行时动态量化是唯一合规路径。spec §5.1 = 接 KV cache hook 不改 scheduler; §5.4 = FP8 FNUZ 已验。</p>
+</blockquote>
+<h3 id="_10">粒度选择</h3>
+<ul>
+<li><strong>per-tensor</strong>: 1 scale 整层, LongBench Δ 3-5%, 排除</li>
+<li><strong>per-head</strong>: 1 scale per head, 跟 PagedAttention 头维对齐, decode 不增 per-token 开销, <strong>必做</strong></li>
+<li><strong>per-token</strong>: 1 scale per token, prefill 写 OK, decode 读收益小开销大</li>
+<li><strong>KIVI 2D</strong>: 关键 cache (首 256 token) 留 FP16, 其余 INT4/FP8 — <strong>stretch</strong>, 占 &lt; 10% token 作 Δ 兜底</li>
+<li><strong>KVQuant outlier-aware</strong>: 异常通道 FP16 其余 INT4 — <strong>stretch</strong>, 27B outlier 集中在少数 head</li>
+</ul>
+<h3 id="_11">数据格式对比</h3>
+<table>
+<thead>
+<tr>
+<th>格式</th>
+<th>动态范围</th>
+<th>异常值</th>
+<th>CDNA2 (gfx90a)</th>
+<th>CDNA3 (gfx942)</th>
+<th>vLLM 0.18.1</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>bf16 (baseline)</td>
+<td>宽</td>
+<td>最优</td>
+<td>支持</td>
+<td>支持</td>
+<td>默认</td>
+</tr>
+<tr>
+<td>FP8 E4M3 FNUZ</td>
+<td>中 (~±448)</td>
+<td>中</td>
+<td><strong>不支持</strong></td>
+<td><strong>支持</strong> 原生</td>
+<td><code>--kv-cache-dtype fp8</code></td>
+</tr>
+<tr>
+<td>INT8 对称</td>
+<td>窄 (±127)</td>
+<td>差 (饱和)</td>
+<td>支持 (FA2)</td>
+<td>支持</td>
+<td><code>--kv-cache-dtype int8</code></td>
+</tr>
+<tr>
+<td>INT4 (stretch)</td>
+<td>极窄 (±7)</td>
+<td>差</td>
+<td>实验性</td>
+<td>实验性</td>
+<td>无内置, 需 hook</td>
+</tr>
+</tbody>
+</table>
+<p>FNUZ (Finite + No inf + Unsigned zero) 跟 NVIDIA OCP FP8 <strong>不兼容</strong> (spec §5.4): 同一 bit pattern 解释不同, DCU 上必须用 <code>__hip_fp8_e4m3_fnuz</code> 而非上游 <code>torch.float8_e4m3fn</code>。</p>
+<h3 id="_12">代表方案对比</h3>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>格式</th>
+<th>粒度</th>
+<th>长 context Δ</th>
+<th>适配 27B / 32k</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>KIVI (2024)</td>
+<td>K-FP16 / V-2D-INT4</td>
+<td>per-token + 关键 cache 留高精度</td>
+<td>&lt; 1% (16k)</td>
+<td>可, stretch 备选</td>
+</tr>
+<tr>
+<td>KVQuant (2024)</td>
+<td>INT4 + outlier FP16</td>
+<td>per-channel</td>
+<td>&lt; 1.5% (32k)</td>
+<td>适合长 context</td>
+</tr>
+<tr>
+<td>Atom (2024)</td>
+<td>INT8</td>
+<td>per-channel</td>
+<td>&lt; 1%</td>
+<td>中 context 友好</td>
+</tr>
+<tr>
+<td>QServe (2024)</td>
+<td>W4A8KV4</td>
+<td>per-head</td>
+<td>&lt; 2%</td>
+<td>主打 weight 量化, KV4 副产物</td>
+</tr>
+<tr>
+<td>SmoothQuant (2022)</td>
+<td>W8A8KV8</td>
+<td>per-tensor</td>
+<td>&lt; 0.5%</td>
+<td>27B 不优 (outlier 多)</td>
+</tr>
+<tr>
+<td>vLLM 0.18.1 内置</td>
+<td>FP8 / INT8</td>
+<td>per-head</td>
+<td><strong>未验, 待 P3 测</strong></td>
+<td><strong>L1 首选路径</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="dcu-rocm">DCU + ROCm 特有坑</h3>
+<ul>
+<li><strong>FNUZ vs OCP 不兼容</strong>: 上游 PyTorch / vLLM 默认 OCP 路径会在 DCU crash 或静默错值; 启动时 <code>assert torch.float8_e4m3fnuz == __hip_fp8_e4m3_fnuz</code> 自检</li>
+<li><strong>CDNA2 (gfx90a) 无原生 FP8</strong>: MI210/MI250/MI250X 走 INT8 退路; FA2 fork 已支持 INT8 路径</li>
+<li><strong>aiter FP8 KV</strong>: <code>VLLM_ROCM_USE_AITER=1</code> 启用, <strong>stretch</strong>, DCU 稳定性未验</li>
+<li><strong>Triton 已知坑</strong> (spec §5.5): <code>tl.atomic_*</code> 跟 FP8 scale 组合编译偶发失败 — P0 0.5 最小 case 验</li>
+</ul>
+<h3 id="vllm-0181">vLLM 0.18.1 接入代码片段</h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># src/kv_quant/hook.py — 队员 B 主笔, AI-generated awaiting verification</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="c1"># L1: 读内置 flag; 失败时 L2 monkey-patch 写路径</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">vllm</span><span class="w"> </span><span class="kn">import</span> <span class="n">LLM</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="k">def</span><span class="w"> </span><span class="nf">build_llm_with_kv_quant</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">kv_dtype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;fp8&quot;</span><span class="p">):</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="n">llm</span> <span class="o">=</span> <span class="n">LLM</span><span class="p">(</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>        <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>        <span class="n">kv_cache_dtype</span><span class="o">=</span><span class="n">kv_dtype</span><span class="p">,</span>  <span class="c1"># &quot;fp8&quot; → FNUZ on CDNA3, &quot;int8&quot; → 退路</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>        <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;bfloat16&quot;</span><span class="p">,</span>          <span class="c1"># 权重保持 bf16 (AGENTS.md 禁持久化)</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>        <span class="n">enforce_eager</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>       <span class="c1"># 配合 torch.compile (ADR 0013)</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="p">)</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    <span class="c1"># L2 回退: 仅在 L1 跑挂时启用</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;VLLM_KV_QUANT_HOOK&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;1&quot;</span><span class="p">:</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>        <span class="kn">from</span><span class="w"> </span><span class="nn">vllm.v1.kv_cache_interface</span><span class="w"> </span><span class="kn">import</span> <span class="n">KVCacheTensor</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>        <span class="n">_orig</span> <span class="o">=</span> <span class="n">KVCacheTensor</span><span class="o">.</span><span class="n">copy_from_blocks</span>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>        <span class="k">def</span><span class="w"> </span><span class="nf">_patched</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blocks</span><span class="p">,</span> <span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>            <span class="c1"># 在写 HBM 前 per-head quantize 到 fp8_fnuz</span>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>            <span class="k">return</span> <span class="n">_orig</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blocks</span><span class="p">,</span> <span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>        <span class="n">KVCacheTensor</span><span class="o">.</span><span class="n">copy_from_blocks</span> <span class="o">=</span> <span class="n">_patched</span>
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>    <span class="k">return</span> <span class="n">llm</span>
+</span></code></pre></div>
+<blockquote>
+<p>完整决策 (粒度 × 格式 × 接入点 × CDNA 分支 + 验证清单) 见 <a href="../decisions/0009-kv-quant-strategy/"><code>docs/decisions/0009-kv-quant-strategy.md</code></a>。</p>
+</blockquote>
+<h2 id="per-adr-0002-0001-0006a-0009">已知不确定 (per ADR 0002 / 0001 / 0006a / 0009)</h2>
+<ul>
+<li>LongBench 数据集 gated, 需赛方 token — <strong>待赛方确认</strong></li>
+<li>RULER 评测是赛方统一跑还是我们跑 — <strong>待赛方确认</strong></li>
+<li>DCU 实际 SKU (gfx90a 还是 gfx942) — <strong>待 P0 0.1 verify_dcu.py 在 DCU 上跑</strong></li>
+<li>vllm-rocm Docker 基础镜像可拉性 — ADR 0006a, 内网 / daocloud 镜像</li>
+<li><code>--kv-cache-dtype fp8</code> 在 CDNA3 (gfx942) 上 Δ 与 SLA 实测 — <strong>未验, 待 P0 0.5 Triton DCU FP8 跑通后确认</strong></li>
+<li>aiter FP8 KV 路径 (CDNA3) 稳定性 — <strong>未验, 待 DCU 上手后最小 case 验证</strong></li>
+</ul>
+<h2 id="attention-backend-vllm-0181">Attention backend 选型 (vLLM 0.18.1)</h2>
+<blockquote>
+<p>围绕 ADR 0010 写的"3 候选 + 接入方式"指南。spec §5.1 决策是"复用 TRITON_ATTN, 不自己写新 backend"; spec §5.2 已验 backend 注册机制; spec §5.3 已验 FlashAttention ROCm fork FP8 路径; ADR 0006 / 0006a 是 Docker 镜像与基础镜像拉取状态。</p>
+</blockquote>
+<h3 id="24-enum-compact">24 个 enum 值分组 (compact 表)</h3>
+<p>源码 <code>vllm/v1/attention/backends/registry.py:34-87</code>, 24 个值, 含义按"用途 + 平台"分类 (路径以模块名前缀 <code>vllm.v1.attention.backends.</code> 省略):</p>
+<table>
+<thead>
+<tr>
+<th>分组</th>
+<th>成员</th>
+<th>平台</th>
+<th>用途 / 备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>NVIDIA 通用</strong></td>
+<td><code>FLASH_ATTN</code> <code>FLASH_ATTN_DIFFKV</code> <code>FLASHINFER</code> <code>FLASHINFER_MLA</code> <code>FLASHINFER_MLA_SPARSE</code> <code>FLEX_ATTENTION</code></td>
+<td>CUDA</td>
+<td>FA2/FA3 wrapper + FlashInfer + PyTorch flex_attention; DCU 上 <code>FLASH_ATTN</code> 走 ROCm/flash-attention fork (spec §5.3)</td>
+</tr>
+<tr>
+<td><strong>NVIDIA Hopper/Blackwell</strong></td>
+<td><code>FLASH_ATTN_MLA</code> <code>FLASHMLA</code> <code>FLASHMLA_SPARSE</code> <code>CUTLASS_MLA</code></td>
+<td>CUDA (SM90/100)</td>
+<td>MLA 专用; DCU 不可用, <strong>NVIDIA-only 硬件特性</strong></td>
+</tr>
+<tr>
+<td><strong>ROCm 通用</strong></td>
+<td><code>TRITON_ATTN</code> <code>ROCM_ATTN</code> <code>ROCM_AITER_FA</code> <code>ROCM_AITER_UNIFIED_ATTN</code> <code>ROCM_AITER_MLA</code> <code>ROCM_AITER_TRITON_MLA</code> <code>ROCM_AITER_MLA_SPARSE</code></td>
+<td>ROCm</td>
+<td>跨平台 Triton + AMD aiter 后端; <code>ROCM_AITER_FA</code> 限制 <code>on_mi3xx()</code> 即 CDNA3 only (源码 <code>vllm/v1/attention/backends/rocm_aiter_fa.py:789-795</code>)</td>
+</tr>
+<tr>
+<td><strong>XPU 专用</strong></td>
+<td><code>XPU_MLA_SPARSE</code></td>
+<td>Intel XPU</td>
+<td>不可移植</td>
+</tr>
+<tr>
+<td><strong>CPU</strong></td>
+<td><code>CPU_ATTN</code></td>
+<td>x86 CPU</td>
+<td>排除</td>
+</tr>
+<tr>
+<td><strong>其他</strong></td>
+<td><code>TORCH_SDPA</code> (ViT only, 仅 <code>""</code> 占位) <code>TREE_ATTN</code> (tree-structured) <code>NO_ATTENTION</code> (mamba/linear 退化) <code>CUSTOM</code> (None 槽位, 须 <code>register_backend</code> 登记后才能用)</td>
+<td>—</td>
+<td>自定义或非 dense</td>
+</tr>
+<tr>
+<td><strong>Mamba 系</strong> (另 enum)</td>
+<td><code>MAMBA1</code> <code>MAMBA2</code> <code>SHORT_CONV</code> <code>LINEAR</code> <code>GDN_ATTN</code> <code>CUSTOM</code></td>
+<td>—</td>
+<td>Qwen3.5 MoE 不会触发, 列在 <code>MambaAttentionBackendEnum</code> 旁路</td>
+</tr>
+</tbody>
+</table>
+<p><strong>DCU 上能用的 3 个核心候选</strong>: <code>TRITON_ATTN</code> (默认) / <code>ROCM_AITER_FA</code> (开 <code>VLLM_ROCM_USE_AITER=1</code> + <code>VLLM_ROCM_USE_AITER_MHA=1</code>) / <code>ROCM_AITER_UNIFIED_ATTN</code> (开 <code>VLLM_ROCM_USE_AITER=1</code> + <code>VLLM_ROCM_USE_AITER_UNIFIED_ATTENTION=1</code>)。源码 <code>vllm/platforms/rocm.py:309-352</code>。</p>
+<h3 id="3-triton-vs-aiter-fa-vs-aiter-unified">3 候选对比 (Triton vs AITER-FA vs AITER-Unified)</h3>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th><code>TRITON_ATTN</code> (默认)</th>
+<th><code>ROCM_AITER_FA</code> (开 aiter)</th>
+<th><code>ROCM_AITER_UNIFIED_ATTN</code> (开 aiter)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>实现位置</td>
+<td><code>vllm/v1/attention/backends/triton_attn.py</code></td>
+<td><code>vllm/v1/attention/backends/rocm_aiter_fa.py</code> (800+ 行)</td>
+<td><code>vllm/v1/attention/backends/rocm_aiter_unified_attn.py</code> (继承 <code>RocmAttentionBackend</code>)</td>
+</tr>
+<tr>
+<td>平台支持</td>
+<td>任意 (<code>supports_compute_capability=True</code>)</td>
+<td><code>on_mi3xx()</code> 即 <strong>CDNA3 only</strong> (gfx942)</td>
+<td>任意 ROCm (无 <code>supports_compute_capability</code> 限制)</td>
+</tr>
+<tr>
+<td>KV cache dtype</td>
+<td>fp16/bf16/fp8/fp8_e4m3/fp8_e5m2</td>
+<td>fp16/bf16/fp8/fp8_e4m3/fp8_e5m2</td>
+<td>fp16/bf16/fp8/fp8_e4m3/fp8_e5m2</td>
+</tr>
+<tr>
+<td>Head size</td>
+<td>&gt;= 32</td>
+<td><code>[64, 128, 256]</code> (Qwen3.5 27B head_size=128 OK)</td>
+<td>&gt;= 32</td>
+</tr>
+<tr>
+<td>Block size</td>
+<td>16 的倍数</td>
+<td><strong>仅 [16, 32]</strong></td>
+<td>16 的倍数</td>
+</tr>
+<tr>
+<td>Prefill</td>
+<td>Triton FA</td>
+<td>aiter <code>flash_attn_varlen_func</code> (MHA)</td>
+<td>aiter <code>unified_attention</code> (Triton)</td>
+</tr>
+<tr>
+<td>Decode</td>
+<td>Triton FA</td>
+<td>aiter <code>paged_attention_v1</code> (ll4mi 汇编) + 兜底 <code>unified_attention</code> (head&lt;64)</td>
+<td>aiter <code>unified_attention</code> (Triton)</td>
+</tr>
+<tr>
+<td>FP8 attention</td>
+<td>走 Triton FP8 (设 <code>FLASH_ATTENTION_TRITON_AMD_ENABLE=TRUE</code> 后, spec §5.3)</td>
+<td>aiter 汇编 FP8 (<code>fp8_e4m3</code>/<code>fp8_e5m2</code>, FNUZ on CDNA3)</td>
+<td>aiter Triton FP8 + scale descale</td>
+</tr>
+<tr>
+<td>cudagraph</td>
+<td>支持 (<code>UNIFORM_BATCH</code>)</td>
+<td>支持</td>
+<td>继承自 ROCM_ATTN, 支持</td>
+</tr>
+<tr>
+<td>DCU 实测稳定性</td>
+<td><strong>未验, 待 P0 0.4 backend smoke</strong></td>
+<td><strong>未验, 待 P0 0.5 Triton DCU FP8 跑通后</strong></td>
+<td><strong>未验, 同上</strong></td>
+</tr>
+<tr>
+<td>已知风险</td>
+<td>Triton FP8 路径某些 <code>tl.atomic_*</code> 组合在 ROCm 失败 (spec §5.5)</td>
+<td>CDNA2 (gfx90a) 上 <code>on_mi3xx()</code> 直接 False, 不可用</td>
+<td>同一 backend 跑 prefill+decode, 单 query/seq 短时不一定比专用路径快</td>
+</tr>
+</tbody>
+</table>
+<h3 id="dcu-fp8-attention">DCU FP8 attention 路径</h3>
+<ul>
+<li><strong>TRITON_ATTN</strong>: 走 <code>flash_attn_varlen_func</code> → 内部走 <code>FLASH_ATTENTION_TRITON_AMD_ENABLE=TRUE</code> 启用的 Triton FP8 (spec §5.3 已验) — CDNA2 (gfx90a) <strong>无 FP8 原生支持</strong> (spec §5.4), 强制 fp16/bf16; CDNA3 (gfx942) 走 FNUZ 变体</li>
+<li><strong>ROCM_AITER_FA</strong>: aiter 的 MHA 汇编 + <code>reshape_and_cache_flash</code> 处理 fp8 KV cache, 内部用 <code>IS_FNUZ</code> 标志 (源码 <code>rocm_aiter_fa.py:213, 299</code>); <strong>仅 CDNA3</strong></li>
+<li><strong>ROCM_AITER_UNIFIED_ATTN</strong>: aiter Triton <code>unified_attention</code> + <code>triton_rope_and_cache</code> 支持 fp8 KV cache, <strong>ROCm 通用</strong></li>
+<li><strong>CDNA2 FP8 限制</strong>: spec §5.4 已验 CDNA2 (gfx90a) 无 FP8 原生硬件, 三家 backend 全部要降级 fp16/bf16</li>
+</ul>
+<h3 id="3-1">接入方式 (3 选 1 推荐顺序)</h3>
+<ol>
+<li><strong>CLI flag <code>--attention-backend</code></strong>: v0.18.1 <code>vllm/engine/arg_utils.py:782</code> 已加, 走 <code>AttentionConfig.backend</code>, <strong>最稳, P0 末用</strong> (例: <code>vllm serve ... --attention-backend TRITON_ATTN</code>)</li>
+<li><strong><code>AttentionBackendEnum.register_backend(CUSTOM, "my.path.MyBackend")</code></strong>: 源码 <code>registry.py:210-262</code>, decorator + 直接调用 2 种 API, 需 import 在 <code>vllm</code> 之前; <strong>P3 stretch 自定义 kernel 时用</strong></li>
+<li><strong>改 <code>_get_backend_priorities()</code> 源码</strong> (<code>vllm/platforms/rocm.py:309-352</code>): 模块级函数, 改 <code>backends.append(...)</code> 顺序即可; 不走 vLLM 镜像的话直接改源码, 走镜像就 monkey-patch。<strong>P0 验证后改源码</strong></li>
+</ol>
+<blockquote>
+<p><strong>注意</strong>: <code>VLLM_ATTENTION_BACKEND</code> env var <strong>在 v0.18.1 不存在</strong> (spec §5.1 第 4 行"没找到"已验, 源码 <code>envs.py</code> 全文 grep 0 命中)。平台选择走 <code>_get_backend_priorities()</code>, <strong>不要</strong>找这个 env var。</p>
+</blockquote>
+<h3 id="priority-list">平台 priority list 改法 (举例)</h3>
+<p>DCU 上验证 <code>ROCM_AITER_UNIFIED_ATTN</code> 比 <code>TRITON_ATTN</code> 快, 想把 Unified 放第 1 位: 编辑 <code>vllm/platforms/rocm.py:_get_backend_priorities</code> 第 332-351 行, 把 <code>if envs.VLLM_ROCM_USE_AITER and envs.VLLM_ROCM_USE_AITER_UNIFIED_ATTENTION:</code> 块放在最前, 删 <code>backends.append(AttentionBackendEnum.TRITON_ATTN)</code> 兜底即可。改前先在 v0.18.1 mirror 上 cp 备份 (<code>docker cp</code> 出来), 改坏直接 restore。</p>
+<h2 id="_13">改这份文档</h2>
+<p>任何人发现新结论 / 新坑 / 新工具, 直接编辑这份文档, commit 即可。<strong>这是活文档, 不是 1 次写完就锁定的 design doc</strong>。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href=".." class="md-footer__link md-footer__link--prev" aria-label="Previous: 首页">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                首页
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../specs/2026-06-09-qwen-inference-optimization-design/" class="md-footer__link md-footer__link--next" aria-label="Next: 设计文档">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                设计文档
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 Recoletas and Govinda contributors · MIT License
+    </div>
+  
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/Recoletas/Govinda" target="_blank" rel="noopener" title="GitHub 仓库" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.index", "navigation.top", "navigation.footer", "navigation.expand", "search.suggest", "search.highlight", "content.code.copy", "content.tabs.link"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
