@@ -15,6 +15,11 @@
 - 阻塞: (待填)
 - 下周计划: (待填)
 
+### 队长 (recoletas)
+- 本周做了什么: 读 SCNet 官方调试文档, 把 P0/P2/P4 全部对齐官方流程 (容器服务 + qwen3.5-dtk26.04:0509 + vllm_cscc + ModelScope + 官方 3 脚本). 写 ADR 0001 (DCU 实测: Hygon K100, gfx90a, DTK 26.04) + ADR 0006b (Accepted). 重写 Plan §0.6 (web console 流程) / 新增 §0.8 (vllm_cscc vs upstream diff) / 改 §2.1 §4.2 用官方 run_*.sh
+- 阻塞: web shell 2h 超时, 但容器实例在后台持续跑; 只要不点"停止容器", `~/` 下数据不丢
+- 下周计划: 容器内跑通 Step 2-6 (vllm 编译 + 模型 + testdata + start_vllm.sh + curl smoke), 跑 baseline 50 prompts/档
+
 ### 队员 B (vLLM)
 - 本周做了什么: 写 ADR 0009 (KV 量化策略) + ADR 0010 (attention backend 选型) + 实读 vLLM 0.18.1 源码确认 24 enum
 - 阻塞: (待填)
