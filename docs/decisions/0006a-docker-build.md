@@ -1,12 +1,15 @@
-# ADR 0006: vllm-rocm Docker 镜像构建状态
+# ADR 0006a: vllm-rocm Docker 镜像构建状态
 
-**日期**: 2026-06-09
+**日期**: 2026-06-09 (初版) / 2026-06-21 (superseded)
 **关联任务**: P0 #30 (0.6 vllm-rocm Docker)
 **关联 spec**: `/home/recoletas/Govinda/docs/specs/2026-06-09-qwen-inference-optimization-design.md`
+**被 superseded by**: [ADR 0006b](0006b-container-instance.md)
 
 ## 状态
 
-**阻塞 — 需 DCU + 镜像可访问的网络环境**
+**Superseded — 2026-06-21** — SCNet 官方调试文档确认 Docker / docker-compose 不适用于本赛事平台, 改用 scnet.cn 控制台"容器服务" + 官方预置 image + container instance. 详见 ADR 0006b.
+
+**历史** (2026-06-09 阻塞): 本地 WSL2 Docker daemon 拉 `rocm/vllm-rocm:v0.18.1` 在 `docker.m.daocloud.io` 镜像源 403 Forbidden, base image 触达不到. 同时 plan 风险中识别的 "pip install flash-attn 在 ROCm 环境失败" 二级风险未触达验证.
 
 ## 决策摘要
 
@@ -71,3 +74,17 @@ failed to solve: rocm/vllm-rocm:v0.18.1: failed to resolve source metadata for
 - 不影响其它 P0 任务（#24 #26 #27 已 completed；#31 等本任务完成）
 - 阻塞 P0 #30 自身的 `DONE` 状态——本 ADR 关闭该任务的条件是"在 DCU 上 build 成功"或"明确决策放弃 flash-attn 预装"
 - 对 P3 Stream A 块管理（task #18）的前置假设是"vllm-rocm image 可用"——若后续发现 base image 选型有变，需回头更新 P3 子任务
+
+---
+
+## 更新 (2026-06-21): 平台实测后, Docker 路线整体废弃
+
+SCNet 官方《选手测试调试文档》(2026-06) 给出确切的运行环境, 不需要选手自建 Docker 镜像:
+
+1. scnet.cn 控制台 → 容器服务 → 镜像仓库 → 搜 `qwen3.5-dtk26.04:0509` 克隆到自己账户
+2. 创建容器实例 → 选 `hx1hdexclu08` 队列 + SSH 开发工具 + 自己的镜像
+3. SSH 进容器 → `git clone` sourcefind.cn 的 vllm_cscc 源码 → `python setup.py bdist_wheel` → `pip install dist/vllm-*.whl`
+4. `modelscope download` Qwen3.5-27B → `/root/Qwen3.5-27B` (加载快)
+5. 跑 `start_vllm.sh` / `run_throughput.sh` / `run_accuracy.sh` (testdata 由赛方提供)
+
+详细步骤与决策见 [ADR 0006b](0006b-container-instance.md). Plan P0 Task 0.6 / P2 2.1 / P4 4.1 一并改为对接官方流程. `docker/` 目录下文件留作 fallback (本地 CPU smoke test 仍可能用到), 不作 P3 必做路径前置.

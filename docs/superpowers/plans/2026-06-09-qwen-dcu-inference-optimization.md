@@ -505,80 +505,135 @@ git add scripts/verify_triton_dcu.py docs/decisions/0005-triton-dcu-fp8.md
 git commit -m "P0: ADR 0005 Triton+DCU FP8 verified"
 ```
 
-### Task 0.6: 起 vllm-rocm Docker 容器
+### Task 0.6: 起容器实例 + vLLM 编译 (web console 流程)
+
+> **2026-06-21 更新**: 不自建 Docker / docker-compose, 改按 SCNet 官方《选手测试调试文档》走容器服务 + 官方预置 image. 详见 [ADR 0006b](../../decisions/0006b-container-instance.md). 老的 `docker/Dockerfile` 等文件留作本地 CPU smoke, 不作 P3 必做路径前置.
+
+**Files (新增 / 改动):**
+- Append: `docs/weekly/progress.md` (本任务交付条目)
+- (web UI 操作, 无代码)
+
+- [ ] **Step 1: web console 创建容器实例**
+
+1. https://www.scnet.cn 登录
+2. 右上角"控制台" → "容器服务" → "镜像管理" → "镜像仓库" → 选"核心节点分区一"
+3. 搜索 `qwen3.5-dtk26.04:0509`, 点"克隆到我的镜像"
+4. "容器实例" → "返回旧版" → "创建容器"
+5. 选 `hx1hdexclu08` 队列, 开发工具 "SSH", 镜像选刚克隆的
+6. 创建, 等待 Running → 点 "SSH" 进入
+
+- [ ] **Step 2: 容器内编译 vLLM 0.18.1 (家目录下, 每次重启重做)**
+
+```bash
+cd ~
+git clone -b v0.18.1 --depth 1 http://developer.sourcefind.cn/codes/OpenDAS/vllm_cscc.git
+cd vllm_cscc
+python setup.py bdist_wheel       # 首次 ~10min, 后续 ~2min
+cd dist && pip install vllm-*.whl --no-deps
+```
+
+期望: `pip show vllm` 显示 0.18.1, `python -c "import vllm; print(vllm.__version__)"` 输出 `0.18.1`.
+
+- [ ] **Step 3: 下载模型 (ModelScope)**
+
+```bash
+cd ~
+pip install modelscope
+modelscope download --model Qwen/Qwen3.5-27B --local_dir ./Qwen3.5-27B
+cp -r ./Qwen3.5-27B /root/Qwen3.5-27B
+```
+
+期望: `ls /root/Qwen3.5-27B/` 含 `config.json` `tokenizer*` `model-*.safetensors` (约 54GB).
+
+- [ ] **Step 4: 下载官方测试数据 + 脚本**
+
+```bash
+cd ~
+curl -f -C - -o testdata.tar.gz \
+  https://zzefile.scnet.cn:65011/efile/s/d/c2N5MTE1OTkxMDU1OQ==/a927e65672549b46
+mkdir -p ./testdata
+tar -xzf testdata.tar.gz -C ./testdata --strip-components=1
+cd testdata && chmod +x *.sh
+ls  # 期望: 3 *-throughput.jsonl + 4 *accuracy*.jsonl + start_vllm.sh + run_throughput.sh + run_accuracy.sh
+```
+
+- [ ] **Step 5: smoke test (`start_vllm.sh` + curl)**
+
+```bash
+cd ~/testdata
+./start_vllm.sh    # 后台启 vLLM, 监听 127.0.0.1:8001, 首次启动 ~10 分钟
+hy-smi             # 看 DCU 显存占用
+curl http://127.0.0.1:8001/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{"model":"Qwen3.5-27B","messages":[{"role":"user","content":"你好, 简单回复一句话。"}],"temperature":0.0,"max_tokens":64}'
+```
+
+期望: 返回非空 `choices[0].message.content`.
+
+- [ ] **Step 6: 吞吐 + 精度各跑 1 次, 出 baseline 数字**
+
+```bash
+./run_throughput.sh all 10      # 3 档各 10 条, 出 baseline 吞吐
+./run_accuracy.sh all 10        # 4 类精度各 10 条, 出 baseline 精度
+```
+
+数字 append 到 `benchmarks/baseline/`, 精度结果同步写到 weekly standup.
+
+**CP0 完成判据**: Step 1-6 全过 + baseline 数字落到 `benchmarks/baseline/`. 之后可以走 P1 (block-size × 量化 耦合矩阵).
+
+### Task 0.8: 验证 vllm_cscc 与 upstream vllm v0.18.1 是否一致
+
+> **为什么**: SCNet 提供的 vllm 来源 `http://developer.sourcefind.cn/codes/OpenDAS/vllm_cscc.git`, 与官方 `vllm/vllm@v0.18.1` 是否一致**未知**. 海光可能 patch 了 attention backend / KV quant / scheduler / INT8 dtype 支持. 如果有 patch, 我们 P3 优化路径要基于 patch 后的源码, 不能直接用 upstream.
 
 **Files:**
-- Create: `docker/Dockerfile`
-- Create: `docker/compose.yml`
-- Create: `requirements.txt`
+- Create: `docs/decisions/0012-vllm-cscc-vs-upstream.md`
+- Append: `docs/learning.md` (差异总结)
 
-- [ ] **Step 1: 写 Dockerfile**
-
-```dockerfile
-# docker/Dockerfile
-# Base: vLLM 官方 ROCm 镜像，ROCm 7.0
-FROM rocm/vllm-rocm:v0.18.1
-
-WORKDIR /workspace
-
-# 装自定义层
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# 预热 vllm 编译缓存（首次 import 触发）
-RUN python -c "import vllm; print(vllm.__version__)"
-```
-
-- [ ] **Step 2: 写 requirements.txt**
-
-```
-# requirements.txt — 自定义层依赖
-# 注意：PyTorch 2.10.0 + ROCm 由基础镜像自带，不要在这里覆盖
-triton>=3.0,<4.0
-flash-attn==2.7.4.post1
-aiter>=0.1
-```
-
-- [ ] **Step 3: 写 compose.yml**
-
-```yaml
-# docker/compose.yml
-services:
-  vllm:
-    build: .
-    image: govinda:vllm-0.18.1
-    devices:
-      - /dev/kfd
-      - /dev/dri
-    group_add:
-      - video
-    cap_add:
-      - SYS_PTRACE
-    security_opt:
-      - seccomp:unconfined
-    volumes:
-      - ..:/workspace
-    working_dir: /workspace
-    environment:
-      - VLLM_USE_V1=1
-      - HIP_VISIBLE_DEVICES=0
-      - NCCL_MIN_NCHANNELS=112
-```
-
-- [ ] **Step 4: 构建并跑通 `vllm --version`**
+- [ ] **Step 1: 双源 clone 到本地 (WSL2 / 任何网络通的地方)**
 
 ```bash
-cd docker && docker compose build && docker compose run --rm vllm vllm --version
+mkdir -p ~/vllm-compare && cd ~/vllm-compare
+git clone --depth 1 -b v0.18.1 https://github.com/vllm-project/vllm.git upstream
+git clone --depth 1 -b v0.18.1 http://developer.sourcefind.cn/codes/OpenDAS/vllm_cscc.git cscc
 ```
 
-Expected: 输出 "vllm 0.18.1"
+> sourcefind.cn 可能只在教育网 / 超算内网可达, 在 WSL2 上 clone 不上就放容器内 clone (`cd ~ && git clone ...`), 然后 `scp` 回来对比. 或干脆把 vllm_cscc 的 git bundle 拷回本地.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 2: 列出所有差异**
 
 ```bash
-git add docker/ requirements.txt
-git commit -m "P0: vllm-rocm Docker setup"
+diff -rq upstream/ cscc/ 2>&1 | head -30
+# 或 git 视角
+diff -ruN <(cd upstream && git ls-files | xargs cat | md5sum) <(cd cscc && git ls-files | xargs cat | md5sum) 2>&1 | head
 ```
+
+期望:
+- **差异 = 0** → 海光没 patch, 直接基于 upstream vLLM 0.18.1 优化 (P3 计划不变)
+- **差异 > 0** → 把每个差异文件读一遍, 总结"海光 patch 了什么 / 为什么" 到 ADR 0012
+
+- [ ] **Step 3: 关注点 (P3 优化会涉及的文件)**
+
+```bash
+# 这些是我们 P3 必动的地方, 看 cscc 是不是已经改了
+diff -ru upstream/vllm/v1/kv_cache_interface.py cscc/vllm/v1/kv_cache_interface.py
+diff -ru upstream/vllm/v1/attention/backends/ cscc/vllm/v1/attention/backends/
+diff -ru upstream/vllm/v1/worker/ cscc/vllm/v1/worker/
+diff -ru upstream/vllm/config/ cscc/vllm/config/
+```
+
+期望:
+- `kv_cache_interface.py`: 看是否多了 INT8/FP8 dtype 字段 (海光可能已经加了 INT8 kv cache dtype)
+- `attention/backends/`: 看是否多了一个 `ROCM_DTK` 或类似 enum
+- `worker/`: 看 ROCm-specific scheduler / chunked prefill 有无 patch
+- `config/`: 看 VLLM_ENGINE env vars 列表
+
+- [ ] **Step 4: 写 ADR 0012 + append learning.md**
+
+把 Step 2-3 结论落到:
+- `docs/decisions/0012-vllm-cscc-vs-upstream.md` — 差异清单 + 对 P3 影响
+- `docs/learning.md` — 末尾 append "海光 vllm patch 调研" section
+
+**CP0 完成判据** (追加): Step 2 跑过, ADR 0012 写完. 如果有 patch, ADR 0009 / 0010 / 0011 状态需要 re-evaluate (海光可能已经实现了我们计划的某些优化).
 
 ### Task 0.7: Owner 离线练手任务（建议清单, **非强制**）
 
@@ -719,205 +774,57 @@ CP1 通过条件（**不签**，看实际产出）：
 
 **出口（CP2）**：3 档 baseline 数字落地（4k-8k / 8k-16k / 16k-32k 各 1 份 JSON）+ 1 次 profile 输出 + 块大小假设 ADR。
 
-### Task 2.1: 建 benchmark 跑分 harness
+### Task 2.1: 跑分 harness — **直接用官方 `run_throughput.sh`**, 自己只做对比 / ROI
+
+> **2026-06-21 更新**: 自写 `run_bench.py` (vllm bench serve 包装器) 不再需要 — SCNet 官方 `testdata/run_throughput.sh` 已直接覆盖 3 档吞吐, 且 output JSON 格式与 spec §3.3 评测指标 (output tokens/s + TTFT P99 + TPOT P99) 一致. 我们自己写的内容只剩 **baseline vs optimized 对比 + ROI 报告**, 即 `benchmarks/compare.py` (保留). `benchmarks/run_bench_3tier.sh` 同步退役.
 
 **Files:**
-- Create: `benchmarks/run_bench.py`
-- Create: `benchmarks/analyze.py`
-- Create: `tests/test_run_bench.py`
+- (官方 `run_throughput.sh` 由 testdata 自带, 不入仓)
+- Create: `benchmarks/compare.py` (已存在, 强化对官方 JSON 格式解析)
+- Create: `benchmarks/baseline/README.md` (文档化官方 JSON 字段映射)
 
-- [ ] **Step 1: 写测试（先 TDD）**
-
-```python
-# tests/test_run_bench.py
-from pathlib import Path
-import json
-import subprocess
-
-def test_run_bench_creates_json(tmp_path):
-    """Smoke test: bench script must write JSON with throughput/TTFT/TPOT."""
-    out_dir = tmp_path / "bench"
-    out_dir.mkdir()
-    # 最小跑 5 个 prompt
-    result = subprocess.run(
-        ["python", "benchmarks/run_bench.py",
-         "--model", "Qwen/Qwen3.5-27B",
-         "--num-prompts", "5",
-         "--tier", "4k-8k",
-         "--output", str(out_dir)],
-        capture_output=True, text=True, timeout=600
-    )
-    assert result.returncode == 0, f"stderr: {result.stderr}"
-    files = list(out_dir.glob("*.json"))
-    assert len(files) == 1
-    data = json.loads(files[0].read_text())
-    assert "throughput_tokens_per_sec" in data
-    assert "ttft_p99_ms" in data
-    assert "tpot_p99_ms" in data
-```
-
-- [ ] **Step 2: 写 `benchmarks/run_bench.py` 最小实现**
-
-```python
-#!/usr/bin/env python3
-# benchmarks/run_bench.py
-# AI-generated, awaiting verification by <team-lead> on <YYYY-MM-DD>
-"""Run vllm bench serve for a specific input-length tier."""
-import argparse
-import json
-import subprocess
-import time
-from pathlib import Path
-
-TIER_PROMPTS = {
-    "4k-8k": ("--random-input-len 6000 --random-output-len 256", 6000),
-    "8k-16k": ("--random-input-len 12000 --random-output-len 256", 12000),
-    "16k-32k": ("--random-input-len 24000 --random-output-len 256", 24000),
-}
-
-def main():
-    p = argparse.ArgumentParser()
-    p.add_argument("--model", default="Qwen/Qwen3.5-27B")
-    p.add_argument("--num-prompts", type=int, default=100)
-    p.add_argument("--tier", choices=list(TIER_PROMPTS), required=True)
-    p.add_argument("--output", required=True)
-    p.add_argument("--extra-args", default="")
-    args = p.parse_args()
-
-    length_arg, _ = TIER_PROMPTS[args.tier]
-    out_dir = Path(args.output)
-    out_dir.mkdir(parents=True, exist_ok=True)
-    out_file = out_dir / f"{args.tier}-{int(time.time())}.json"
-
-    # 启服务
-    serve_log = out_dir / f"serve-{args.tier}.log"
-    serve_cmd = (
-        f"vllm serve {args.model} "
-        f"--max-model-len 32768 --max-num-seqs 1 "
-        f"--served-model-name govinda --port 8000 "
-        f"{args.extra_args}"
-    )
-    print(f"Starting: {serve_cmd}")
-    serve_proc = subprocess.Popen(serve_cmd, shell=True,
-                                   stdout=open(serve_log, "w"),
-                                   stderr=subprocess.STDOUT)
-
-    try:
-        # 等服务起来（最多 5 分钟）
-        for _ in range(60):
-            time.sleep(5)
-            try:
-                import requests
-                if requests.get("http://localhost:8000/v1/models", timeout=2).status_code == 200:
-                    break
-            except Exception:
-                continue
-        else:
-            raise RuntimeError("vllm serve did not start in 5 minutes")
-
-        # 跑 bench
-        bench_cmd = (
-            f"vllm bench serve "
-            f"--model govinda --backend vllm "
-            f"--host localhost --port 8000 "
-            f"--num-prompts {args.num_prompts} "
-            f"--dataset-name random "
-            f"{length_arg} "
-            f"--save-result --result-filepath {out_file}"
-        )
-        print(f"Running: {bench_cmd}")
-        subprocess.run(bench_cmd, shell=True, check=True)
-
-        # 解析输出（vllm bench serve 默认 JSON 包含 throughput / ttft / tpot）
-        data = json.loads(out_file.read_text())
-        # 标准化 key 名（vllm bench 不同版本 key 名略不同）
-        normalized = {
-            "tier": args.tier,
-            "num_prompts": args.num_prompts,
-            "throughput_tokens_per_sec": data.get("total_token_throughput", 0)
-                or data.get("throughput", 0),
-            "ttft_p99_ms": data.get("ttft_p99", 0)
-                or data.get("metrics", {}).get("ttft_p99", 0),
-            "tpot_p99_ms": data.get("tpot_p99", 0)
-                or data.get("metrics", {}).get("tpot_p99", 0),
-            "raw": data,
-        }
-        out_file.write_text(json.dumps(normalized, indent=2))
-        print(f"Wrote {out_file}")
-    finally:
-        serve_proc.terminate()
-        try:
-            serve_proc.wait(timeout=10)
-        except subprocess.TimeoutExpired:
-            serve_proc.kill()
-
-if __name__ == "__main__":
-    main()
-```
-
-- [ ] **Step 3: 跑测试**
+- [ ] **Step 1: 跑 baseline (容器内, 官方脚本)**
 
 ```bash
-pytest tests/test_run_bench.py::test_run_bench_creates_json -v
+# 容器实例内 (web console 创建)
+cd ~/testdata
+./start_vllm.sh &      # 启 vLLM, 监听 127.0.0.1:8001, 首次 ~10min
+sleep 5
+hy-smi                 # 确认 1 张 DCU 显存 ~60GB (27B FP16)
+
+# 3 档各 50 prompts (官方推荐 sample 数, 与 spec §3 权重 20/50/30 对齐)
+./run_throughput.sh 4-8K 50        # → benchmarks/baseline/4-8K.json
+./run_throughput.sh 8-16K 50       # → benchmarks/baseline/8-16K.json
+./run_throughput.sh 16-32K 50      # → benchmarks/baseline/16-32K.json
 ```
 
-Expected: PASS（如果 DCU 上有 27B 模型）；如模型未到位，**先 mock 测试再标 [skip-dcu]**
+期望: 3 个 JSON 各含 `output_tokens_per_sec` / `ttft_p99_ms` / `tpot_p99_ms` 字段 (官方脚本默认输出格式, **不需要我们再写 normalize 层**).
 
-- [ ] **Step 4: 写 `benchmarks/analyze.py` 最小实现**
+- [ ] **Step 2: 验证 `benchmarks/compare.py` 解析官方 JSON**
 
-```python
-#!/usr/bin/env python3
-# benchmarks/analyze.py
-# AI-generated, awaiting verification by <team-lead> on <YYYY-MM-DD>
-"""Aggregate JSON files in a directory into a single markdown table."""
-import argparse
-import json
-from pathlib import Path
-from collections import defaultdict
-
-def main():
-    p = argparse.ArgumentParser()
-    p.add_argument("input_dir")
-    p.add_argument("--output", default=None)
-    args = p.parse_args()
-
-    runs = []
-    for f in sorted(Path(args.input_dir).glob("*.json")):
-        data = json.loads(f.read_text())
-        runs.append(data)
-
-    by_tier = defaultdict(list)
-    for r in runs:
-        by_tier[r.get("tier", "?")].append(r)
-
-    lines = ["# Benchmark summary", "",
-             "| Tier | n | Throughput (tok/s) | TTFT P99 (ms) | TPOT P99 (ms) |",
-             "|------|---|--------------------|---------------|---------------|"]
-    for tier, rs in sorted(by_tier.items()):
-        if not rs: continue
-        latest = rs[-1]
-        lines.append(
-            f"| {tier} | {latest['num_prompts']} | "
-            f"{latest['throughput_tokens_per_sec']:.1f} | "
-            f"{latest['ttft_p99_ms']:.1f} | "
-            f"{latest['tpot_p99_ms']:.2f} |"
-        )
-    output = "\n".join(lines)
-    print(output)
-    if args.output:
-        Path(args.output).write_text(output)
-        print(f"\nWrote {args.output}")
-
-if __name__ == "__main__":
-    main()
-```
-
-- [ ] **Step 5: Commit**
+`benchmarks/compare.py` 已存在 (P0 末 CPU 调研期间写). 跑一次确认它能消化官方脚本输出:
 
 ```bash
-git add tests/test_run_bench.py benchmarks/run_bench.py benchmarks/analyze.py
-git commit -m "P2: benchmark harness with TDD"
+python benchmarks/compare.py \
+  --baseline benchmarks/baseline \
+  --optimized benchmarks/baseline  # 临时用 baseline 对比 baseline, 确认通路
 ```
+
+期望: 输出 markdown 表, 通过 = JSON 字段对得上. 若字段名不匹配 (例如官方脚本叫 `throughput` 不叫 `output_tokens_per_sec`), 在 `benchmarks/compare.py` 里加 alias mapping, 不改官方脚本.
+
+- [ ] **Step 3: 写 `benchmarks/baseline/README.md` 文档化字段映射**
+
+列出官方 `run_throughput.sh` 输出的 JSON 字段名 → spec §3 评测指标 (output_tokens_per_sec, ttft_p99_ms, tpot_p99_ms) 的对应关系. 后续 P3 任何优化点都用同一份 baseline 数字.
+
+- [ ] **Step 4: P2 exit gate**
+
+3 个 JSON 文件 + README + compare.py 跑通 = P2 出口 (3 档 baseline 锁定). 进入 P3.
+
+**附: 退役内容 (2026-06-21 之前)**
+- ~~`benchmarks/run_bench.py`~~ (自写 vllm bench serve 包装器) — 不用, 官方脚本覆盖
+- ~~`benchmarks/analyze.py`~~ — 合并进 `benchmarks/compare.py`
+- ~~`benchmarks/run_bench_3tier.sh`~~ — 不用
+- ~~`tests/test_run_bench.py`~~ — 改成 `tests/test_compare.py` (解析官方 JSON 字段, 已写)
 
 ### Task 2.2: 跑 3 档 baseline（首次大跑）
 
@@ -1511,32 +1418,58 @@ git add benchmarks/optimized/final-3tier/summary.md
 git commit -m "P4: final 3-tier integrated benchmark"
 ```
 
-### Task 4.2: 精度验证（4 类任务）
+### Task 4.2: 精度验证（4 类任务） — **直接用官方 `run_accuracy.sh`**
+
+> **2026-06-21 更新**: 自接 OpenCompass 不再需要 — SCNet 官方 `testdata/run_accuracy.sh` 直接覆盖 4 类精度:
+> - `hotpotqa` (QA, F1) — 走 OpenCompass
+> - `gov_report` (摘要, ROUGE) — 走 OpenCompass
+> - `retrieval_multi_point` — 赛方自定义, 不用 OpenCompass 汇总分
+> - `aggregation_keyword_aggregation` — 赛方自定义, 同上
+>
+> 我们只需: 跑 baseline → 跑 optimized → 对比 Δ → Δ > 3% 立即回退.
 
 **Files:**
-- Create: `reports/accuracy-validation.md`
+- Create: `reports/accuracy-validation.md` (baseline + optimized 对比表)
+- Append: `benchmarks/accuracy/baseline/` (官方脚本原始输出)
 
-- [ ] **Step 1: 跑 OpenCompass 4 类任务（QA / 摘要 / 检索 / 聚合）**
-
-```bash
-# OpenCompass 0.18.1 配合 vllm 部署好的服务
-# 参考 OpenCompass 文档
-```
-
-- [ ] **Step 2: 对比 baseline 输出**
-
-每个任务算 Δ（相对 baseline 性能下降幅度）。
-
-- [ ] **Step 3: Δ > 3% → 立即回退**
-
-按 spec §10 "KV 量化精度塌方" 流程。
-
-- [ ] **Step 4: Commit**
+- [ ] **Step 1: 容器内跑 baseline 精度**
 
 ```bash
-git add reports/accuracy-validation.md
-git commit -m "P4: accuracy validation (4 task types)"
+# 容器实例, start_vllm.sh 已起
+cd ~/testdata
+
+./run_accuracy.sh hotpotqa 50                  # → accuracy_debug/...
+./run_accuracy.sh gov_report 50
+./run_accuracy.sh retrieval_multi_point 50
+./run_accuracy.sh aggregation_keyword_aggregation 50
+
+# 拷 baseline 到 git
+mkdir -p ~/Govinda/benchmarks/accuracy/baseline
+cp -r accuracy_debug/output/local_accuracy_qwen35/* ~/Govinda/benchmarks/accuracy/baseline/
 ```
+
+- [ ] **Step 2: P3 优化点接入后, 同样 4 任务各 50 条, 输出到 `benchmarks/accuracy/optimized/`**
+
+- [ ] **Step 3: 写对比脚本 `benchmarks/accuracy/compare.py`**
+
+4 类任务各算 Δ, 输出 markdown:
+
+```
+| 任务 | baseline | optimized | Δ |
+|------|----------|-----------|---|
+| hotpotqa (F1) | xx.x | xx.x | -x.x% |
+| gov_report (ROUGE) | xx.x | xx.x | -x.x% |
+| retrieval_multi_point | xx.x | xx.x | -x.x% |
+| aggregation_keyword_aggregation | xx.x | xx.x | -x.x% |
+```
+
+Δ > 3% 任意一行红字标出, P3 该优化点**立刻回退** (按 spec §10 KV 量化塌方流程).
+
+- [ ] **Step 4: 写 `reports/accuracy-validation.md`**
+
+贴对比表 + 回退记录 (若有) + CP4 sign-off.
+
+**注意**: `retrieval_multi_point` 和 `aggregation_keyword_aggregation` 不走 OpenCompass 汇总分, 走"模型输出 → 答案列表 → 逐项匹配" — 跑出来若个别样本 log 出现 0 指标属于赛方设计, 不需要排查.
 
 ### Task 4.3: 1 次干净全量编译演练
 

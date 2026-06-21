@@ -112,9 +112,11 @@
 |------|-----|----------|------|
 | CDNA3 (gfx942) | MI300A / MI300X / MI325X | ✅ 原生 | **FNUZ** 变体（`__hip_fp8_e4m3_fnuz`）|
 | CDNA4 | MI350X / MI355X | ✅ 原生 | OCP 变体 |
-| **CDNA2 (gfx90a)** | **MI210 / MI250 / MI250X** | **❌ 不支持** | — |
+| **CDNA2 (gfx90a)** | **MI210 / MI250 / MI250X** | **⚠️ 部分**（emulation / 软件路径, 性能低） | — |
 | CDNA1 | MI100 | ❌ | — |
 | RDNA4 | RX 9070 / 9070XT | ✅ 原生 | OCP 变体 |
+
+> **2026-06-21 平台实测**: 赛方提供 Hygon DCU K100 (BW series, 1000W TDP, Samsung HBM2e), **gfx90a** 目标. ROCm driver 6.3.31 (= DTK 26.04 内核). FP8 在 gfx90a 上**有 emulation 但吞吐量低于 CDNA3 2-3×**, 不作 P3 必做路径. 主路定 **INT8 per-head 动态量化** (ADR 0009 CDNA2 fallback). 完整验证记录见 [ADR 0001](../decisions/0001-dcu-sku.md).
 
 **关键**：FP8 FNUZ = **F**inite + **N**o inf + **U**nsigned zero（AMD 文档原文）。和 NVIDIA H100 的 OCP FP8 **不兼容**（无 inf、无 signed zero）。任何"FP8 KV cache" 方案在 DCU 上**需要确认是 FNUZ 还是 OCP 变体**，否则对不上。
 

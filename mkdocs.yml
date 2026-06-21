@@ -80,6 +80,7 @@ nav:
       - 0003 Baseline 数字来源: decisions/0003-baseline-source.md
       - 0006 vLLM 0.18.1 读图: decisions/0006-vllm-readmap.md
       - "0006a Docker 构建": decisions/0006a-docker-build.md
+      - "0006b 容器实例 + vllm_cscc": decisions/0006b-container-instance.md
       - 0007 编译决策矩阵: decisions/0007-coupling-matrix.md
       - 0008 块大小假设: decisions/0008-blocksize-hypothesis.md
       - 0009 KV 量化策略: decisions/0009-kv-quant-strategy.md
