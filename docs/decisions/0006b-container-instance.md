@@ -117,3 +117,39 @@ curl http://127.0.0.1:8001/v1/chat/completions \
 - [ ] 队员 B: clone vllm_cscc 后 `git diff vllm/vllm v0.18.1` 比对海光 patch (若有, 影响 P3 Stream B/C 路径, 例如海光可能 patch 了 V0.18.1 不支持的 INT8 path)
 - [ ] 队员 A: 比对 `qwen3.5-dtk26.04:0509` 的 Python site-packages vs 官方 `rocm/vllm-rocm:latest`, 看 image 是否已含 torch / vllm 任何 wheel (文档没明说, 取决于 image 内部)
 - [ ] Plan P0 Task 0.6 / P2 2.1 / P4 4.1 改写后, update weekly/progress.md 本周条目
+
+## 附录 A: 实际可用的 `vllm serve` 命令 (2026-06-22 实测)
+
+官方 `start_vllm.sh` 写死 `/root/Qwen3.5-27B` (root user 默认路径), 跟我们实际模型位置 `/public/home/xdzs2026_c087/Qwen3.5-27B` 不一致. **必须用下面命令替换**:
+
+```bash
+vllm serve /public/home/xdzs2026_c087/Qwen3.5-27B \
+  --port 8001 \
+  --trust-remote-code \
+  --dtype bfloat16 \
+  --served-model-name Qwen3.5-27B \
+  --gpu-memory-utilization 0.95 \
+  --max-num-batched-tokens 4096 \
+  --max-num-seqs 128 \
+  --enable-auto-tool-choice \
+  --tool-call-parser qwen3_coder \
+  --reasoning-parser qwen3 \
+  --default-chat-template-kwargs '{"enable_thinking": false}'
+```
+
+**flag 解释** (相对官方调试文档):
+- 模型路径: `/public/home/xdzs2026_c087/Qwen3.5-27B` (不是 `/root/...`, 赛事方不允许)
+- `--dtype bfloat16` (官方文档写的是 fp16, 实际 bf16 更省 VRAM 且不影响精度)
+- `--max-num-batched-tokens 4096` (官方没给具体值, 我们 sweep 后定的)
+- `--max-num-seqs 128` (官方没给; spec §3 写的是 1 但那是**评测**时的并发, 这里调高加速压测)
+- `--enable-auto-tool-choice / --tool-call-parser qwen3_coder / --reasoning-parser qwen3` — Qwen3 专用, 不加精度评估会失败
+- `--default-chat-template-kwargs '{"enable_thinking": false}'` — 关 thinking mode, 不关响应多 2-3× tokens
+
+**用法建议**: 把这命令写进 `~/testdata/start_vllm_local.sh` (override 官方的 `start_vllm.sh`), 后续 bench / 精度都调这个. bench 脚本仍走 127.0.0.1:8001 不变.
+
+**CP0 baseline 数字 (2026-06-21, 4-8K 档 5 prompts smoke)**:
+- Output throughput: 8.83 tok/s
+- Mean TTFT: 3.31s / P99 4.36s
+- Mean TPOT: 69.0 ms / P99 69.3 ms
+
+→ 完整 baseline (50 prompts × 3 档) 还在跑, 数字落地后 append 到本节.
