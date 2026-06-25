@@ -52,11 +52,31 @@ def show_one(path: Path) -> None:
 
 
 def _default_paths() -> list[Path]:
-    """Scan ~/testdata/test/*_throughput/result.json by default."""
-    base = Path(os.path.expanduser("~/testdata/test"))
-    if not base.is_dir():
-        return []
-    return sorted(base.glob("*_throughput/result.json"))
+    """Scan ~/testdata/test/*_throughput/result.json by default.
+
+    Tries several candidate roots in order — useful on SCNet containers
+    where the shell runs as root but the actual user data lives at
+    ``/public/home/<account>/`` (not the root user's ``/root/``).
+
+    Order:
+      1. ``$GOVINDA_TESTDATA`` env var (set explicitly if you like)
+      2. ``<cwd>/testdata/test`` (when run from the repo root)
+      3. ``~/testdata/test``
+      4. ``/public/home/$USER/testdata/test``
+    """
+    candidates: list[Path] = []
+    env_root = os.environ.get("GOVINDA_TESTDATA")
+    if env_root:
+        candidates.append(Path(env_root) / "test")
+    candidates.append(Path.cwd() / "testdata" / "test")
+    candidates.append(Path(os.path.expanduser("~/testdata/test")))
+    user = os.environ.get("USER") or os.environ.get("LOGNAME") or "xdzs2026_c087"
+    candidates.append(Path(f"/public/home/{user}/testdata/test"))
+
+    for base in candidates:
+        if base.is_dir():
+            return sorted(base.glob("*_throughput/result.json"))
+    return []
 
 
 def main(argv: list[str]) -> int:
