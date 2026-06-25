@@ -88,6 +88,7 @@ nav:
       - 0011 P0 末调研输出: decisions/0011-p0-research-output.md
       - "0012 vllm_cscc vs upstream": decisions/0012-vllm-cscc-vs-upstream.md
       - 0013 torch.compile ROI: decisions/0013-torch-compile-roi.md
+      - "0013a 比赛规则解读": decisions/0013-competition-rules-interpretation.md
   - 进度:
       - Weekly Standup: weekly/progress.md
   - 资源:
