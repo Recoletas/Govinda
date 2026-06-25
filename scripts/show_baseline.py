@@ -52,31 +52,47 @@ def show_one(path: Path) -> None:
 
 
 def _default_paths() -> list[Path]:
-    """Scan ~/testdata/test/*_throughput/result.json by default.
+    """Find testdata/test/*_throughput/result.json by trying several roots.
 
-    Tries several candidate roots in order — useful on SCNet containers
-    where the shell runs as root but the actual user data lives at
-    ``/public/home/<account>/`` (not the root user's ``/root/``).
+    Resolution order:
+      1. ``$GOVINDA_TESTDATA`` env var (explicit override)
+      2. Walk up from cwd looking for a ``testdata/test/`` sibling —
+         handles being run from inside the repo (testdata is one level up)
+         as well as from the repo root (testdata lives here).
+      3. ``~/testdata/test`` (ordinary user home)
+      4. ``/public/home/$USER/testdata/test`` (SCNet container, root shell,
+         ``$USER`` not set so we fall back to the team's account name)
 
-    Order:
-      1. ``$GOVINDA_TESTDATA`` env var (set explicitly if you like)
-      2. ``<cwd>/testdata/test`` (when run from the repo root)
-      3. ``~/testdata/test``
-      4. ``/public/home/$USER/testdata/test``
+    The walk-up is the key fix: running ``cd /public/home/<acct>/Govinda
+    && python3 scripts/show_baseline.py`` should work even though the
+    testdata lives at ``../testdata/test``.
     """
     candidates: list[Path] = []
     env_root = os.environ.get("GOVINDA_TESTDATA")
     if env_root:
         candidates.append(Path(env_root) / "test")
-    candidates.append(Path.cwd() / "testdata" / "test")
+    # Walk up from cwd to find testdata/test
+    cur = Path.cwd().resolve()
+    for _ in range(6):  # at most 6 levels up — more than enough
+        candidates.append(cur / "testdata" / "test")
+        if cur.parent == cur:
+            break
+        cur = cur.parent
     candidates.append(Path(os.path.expanduser("~/testdata/test")))
     user = os.environ.get("USER") or os.environ.get("LOGNAME") or "xdzs2026_c087"
     candidates.append(Path(f"/public/home/{user}/testdata/test"))
 
+    seen: set[Path] = set()
+    out: list[Path] = []
     for base in candidates:
+        if base in seen:
+            continue
+        seen.add(base)
         if base.is_dir():
-            return sorted(base.glob("*_throughput/result.json"))
-    return []
+            out.extend(sorted(base.glob("*_throughput/result.json")))
+            if out:
+                return out
+    return out
 
 
 def main(argv: list[str]) -> int:
