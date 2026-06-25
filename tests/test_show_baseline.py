@@ -50,6 +50,29 @@ def test_bad_json_marks_bad(show_mod, tmp_path, capsys):
 
 
 def test_full_metrics_render(show_mod, tmp_path, capsys):
+    # vLLM 0.18.1 actual schema: nested under flat top-level keys.
+    p = tmp_path / "4-8K_throughput" / "result.json"
+    _write_result(
+        p,
+        output_throughput=8.83,
+        mean_ttft_ms=3311, median_ttft_ms=2914, p99_ttft_ms=4356,
+        mean_tpot_ms=68.97, median_tpot_ms=68.98, p99_tpot_ms=69.27,
+        mean_itl_ms=68.14, median_itl_ms=69.02, p99_itl_ms=70.28,
+        mean_e2el_ms=8585, median_e2el_ms=9812, p99_e2el_ms=10563,
+    )
+    show_mod.show_one(p)
+    out = capsys.readouterr().out
+    assert "=== 4-8K ===" in out
+    assert "8.83" in out
+    assert "3311" in out
+    assert "2914" in out
+    assert "4356" in out
+    assert "68.97" in out
+    assert "69.27" in out
+
+
+def test_full_metrics_render_legacy_schema(show_mod, tmp_path, capsys):
+    # Older vLLM schema with ttft_p50/ttft_p99 etc. — also handled.
     p = tmp_path / "4-8K_throughput" / "result.json"
     _write_result(
         p,
@@ -61,12 +84,19 @@ def test_full_metrics_render(show_mod, tmp_path, capsys):
     )
     show_mod.show_one(p)
     out = capsys.readouterr().out
-    assert "=== 4-8K ===" in out
     assert "8.83" in out
     assert "2914" in out
-    assert "4356" in out
-    assert "68.98" in out
-    assert "69.27" in out
+
+
+def test_unknown_schema_shows_raw_keys(show_mod, tmp_path, capsys):
+    """If no known keys match, dump top-level numeric/string keys for triage."""
+    p = tmp_path / "weird_throughput" / "result.json"
+    _write_result(p, custom_field_x=42, custom_field_y="hello")
+    show_mod.show_one(p)
+    out = capsys.readouterr().out
+    assert "no matching fields" in out
+    assert "custom_field_x" in out
+    assert "custom_field_y" in out
 
 
 def test_default_paths_glob(show_mod, tmp_path, monkeypatch):
