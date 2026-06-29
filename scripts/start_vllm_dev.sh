@@ -46,8 +46,8 @@ fi
 
 # ===== DCU / HIP 特有 (海光 ROCm 体系) =====
 export HIP_VISIBLE_DEVICES=0                            # 指定可见 DCU
-# HSA_OVERRIDE_GFX_VERSION: 按 rocminfo | grep gfx 查实际架构填; gfx90a = 9.0.0.
-export HSA_OVERRIDE_GFX_VERSION=9.0.0
+# HSA_OVERRIDE_GFX_VERSION 不设 — 之前实测设了 9.0.0 报 "invalid device function",
+# 让 torch 自动用 rocminfo 报的实际 gfx (gfx90a) 最稳. 启动失败再考虑手动 override.
 export PYTORCH_HIP_ALLOC_CONF=expandable_segments:True  # 缓解长跑显存碎片
 export HIP_FORCE_DEV_KERNARG=1                          # HIP kernel 参数直传, 降 launch 开销
 export SAFETENSORS_FAST_GPU=1                            # safetensors 更快搬到显存

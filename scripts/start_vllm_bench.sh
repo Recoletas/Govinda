@@ -39,7 +39,7 @@ fi
 
 # ===== DCU / HIP 特有 env =====
 export HIP_VISIBLE_DEVICES=0
-export HSA_OVERRIDE_GFX_VERSION=9.0.0
+# HSA_OVERRIDE_GFX_VERSION 不设 — 之前实测 9.0.0 跟实际 gfx90a 不匹配, kernel 加载失败.
 export PYTORCH_HIP_ALLOC_CONF=expandable_segments:True
 export HIP_FORCE_DEV_KERNARG=1
 export SAFETENSORS_FAST_GPU=1
