@@ -18,17 +18,13 @@ set -o pipefail
 export Q=/public/home/xdzs2026_c087
 export GOVINDA_DIR=$Q/Govinda
 export VLLM_WHEEL_DIR=$GOVINDA_DIR/dist
+export VLLM_SRC_DIR=$Q/vllm_cscc
 
-# ===== Python 路径修复 (image 装在 python3.10, PATH 没带) =====
-PYTHON_BIN=/usr/local/python3.10/bin/python3.10
-PYTHON_BIN_DIR=/usr/local/python3.10/bin
-if [[ ! -x "$PYTHON_BIN" ]]; then
-  PYTHON_BIN=python
-  PYTHON_BIN_DIR=""
-fi
-export PATH="$PYTHON_BIN_DIR:$PATH"
+# ===== Python + vllm 调用方式 (跟 dev 一致) =====
+PYTHON_BIN=${PYTHON_BIN:-python}
+VLLM_RUNNER="$PYTHON_BIN -m vllm.entrypoints.cli.main"
 
-# ===== Pre-flight: 按需装 vllm + runai_streamer (跟 dev 一致) =====
+# ===== Pre-flight: 按需装 vllm + runai_streamer =====
 VLLM_EXPECTED="0.18.1"
 if ! "$PYTHON_BIN" -c "import vllm; assert vllm.__version__ == '$VLLM_EXPECTED'" 2>/dev/null; then
   echo "[start_vllm_bench] vllm $VLLM_EXPECTED 不在 / 版本不对, 按需装..."
@@ -58,8 +54,11 @@ export MIOPEN_CUSTOM_CACHE_DIR=$Q/miopen_cache
 export VLLM_USE_TRITON_FLASH_ATTN=1
 export VLLM_ROCM_USE_AITER=0
 
+# ===== 启动 vllm =====
+cd "$VLLM_SRC_DIR" || { echo "FAIL: $VLLM_SRC_DIR 不存在"; exit 1; }
+
 # ===== 严格按 §9(7) — 唯一 flag =====
-vllm serve "$Q/Qwen3.5-27B" \
+exec $VLLM_RUNNER serve "$Q/Qwen3.5-27B" \
     --max-model-len 32768 \
     --load-format runai_streamer \
     --compilation-config '{"cudagraph_capture_sizes":[1]}'
