@@ -25,6 +25,15 @@ VLLM_RUNNER="$PYTHON_BIN -m vllm.entrypoints.cli.main"
 
 cd "$VLLM_SRC_DIR" || { echo "FAIL: $VLLM_SRC_DIR 不存在"; exit 1; }
 
+# ===== Pre-flight: vllm._C 编译 =====
+# vllm editable install 默认不会 build C++ 扩展. 没编译时 model 加载阶段会崩:
+#   AttributeError: '_OpNamespace' '_C' object has no attribute 'silu_and_mul'
+# 编法: setup.py build_ext --inplace (输出到源码目录, editable install 找得到)
+if ! "$PYTHON_BIN" -c "import vllm._C; print(vllm._C.silu_and_mul)" 2>/dev/null; then
+  echo "[start_vllm_dev] vllm._C 不在, 编 C 扩展 (~5-10min 首次)..."
+  "$PYTHON_BIN" setup.py build_ext --inplace 2>&1 | tail -5
+fi
+
 # ===== 启动 vllm (用官方已经验证的命令, 改 python -m 调用) =====
 # 这是官方 testdata/start_vllm.sh 的命令, 用户实测能起来:
 #   vllm serve $MODEL_DIR --port 8001 --trust-remote-code --dtype bfloat16
