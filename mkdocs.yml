@@ -89,6 +89,7 @@ nav:
       - "0012 vllm_cscc vs upstream": decisions/0012-vllm-cscc-vs-upstream.md
       - 0013 torch.compile ROI: decisions/0013-torch-compile-roi.md
       - "0013a 比赛规则解读": decisions/0013-competition-rules-interpretation.md
+      - "0014 DCU 冷启动优化": decisions/0014-dcu-startup-optimization.md
   - 进度:
       - Weekly Standup: weekly/progress.md
   - 资源:
