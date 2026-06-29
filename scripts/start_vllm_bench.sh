@@ -19,18 +19,27 @@ export Q=/public/home/xdzs2026_c087
 export GOVINDA_DIR=$Q/Govinda
 export VLLM_WHEEL_DIR=$GOVINDA_DIR/dist
 
+# ===== Python 路径修复 (image 装在 python3.10, PATH 没带) =====
+PYTHON_BIN=/usr/local/python3.10/bin/python3.10
+PYTHON_BIN_DIR=/usr/local/python3.10/bin
+if [[ ! -x "$PYTHON_BIN" ]]; then
+  PYTHON_BIN=python
+  PYTHON_BIN_DIR=""
+fi
+export PATH="$PYTHON_BIN_DIR:$PATH"
+
 # ===== Pre-flight: 按需装 vllm + runai_streamer (跟 dev 一致) =====
 VLLM_EXPECTED="0.18.1"
-if ! python -c "import vllm; assert vllm.__version__ == '$VLLM_EXPECTED'" 2>/dev/null; then
+if ! "$PYTHON_BIN" -c "import vllm; assert vllm.__version__ == '$VLLM_EXPECTED'" 2>/dev/null; then
   echo "[start_vllm_bench] vllm $VLLM_EXPECTED 不在 / 版本不对, 按需装..."
   if ls "$VLLM_WHEEL_DIR"/vllm-${VLLM_EXPECTED}*.whl 1> /dev/null 2>&1; then
-    pip install --no-deps -q "$VLLM_WHEEL_DIR"/vllm-${VLLM_EXPECTED}*.whl
+    "$PYTHON_BIN" -m pip install --no-deps -q "$VLLM_WHEEL_DIR"/vllm-${VLLM_EXPECTED}*.whl
   else
     echo "  WARN: 找不到 $VLLM_WHEEL_DIR/vllm-${VLLM_EXPECTED}*.whl"
     exit 1
   fi
 fi
-python -c "import runai_streamer" 2>/dev/null || pip install -q runai-model-streamer
+"$PYTHON_BIN" -c "import runai_streamer" 2>/dev/null || "$PYTHON_BIN" -m pip install -q runai-model-streamer
 
 # ===== DCU / HIP 特有 env =====
 export HIP_VISIBLE_DEVICES=0

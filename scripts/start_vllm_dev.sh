@@ -17,20 +17,32 @@ export Q=/public/home/xdzs2026_c087
 export GOVINDA_DIR=$Q/Govinda
 export VLLM_WHEEL_DIR=$GOVINDA_DIR/dist          # 自编译 vllm wheel 落地点 (bdist_wheel 输出)
 
+# ===== Python 路径修复 (image 装在 python3.10, PATH 没带) =====
+# image 预装 Python 3.10.12 + vLLM 0.18.1, 但 `python` / `vllm` 都不在默认 PATH.
+# 强制指 python3.10 + 把 bin 加到 PATH, 后续 python / pip / vllm 都用它.
+PYTHON_BIN=/usr/local/python3.10/bin/python3.10
+PYTHON_BIN_DIR=/usr/local/python3.10/bin
+if [[ ! -x "$PYTHON_BIN" ]]; then
+  echo "[start_vllm_dev] 找不到 $PYTHON_BIN, 假设 vllm 已装在默认 python 路径"
+  PYTHON_BIN=python
+  PYTHON_BIN_DIR=""
+fi
+export PATH="$PYTHON_BIN_DIR:$PATH"
+
 # ===== Pre-flight: 按需装 vllm + runai_streamer =====
 # 如果 vllm 已经装好 (image 预装, 或之前装过) 且版本对, 跳过; 否则从
 # $VLLM_WHEEL_DIR 装. runai_streamer 是 article 推荐, ~1s 装好, idempotent.
 
 VLLM_EXPECTED="0.18.1"
-if ! python -c "import vllm; assert vllm.__version__ == '$VLLM_EXPECTED'" 2>/dev/null; then
+if ! "$PYTHON_BIN" -c "import vllm; assert vllm.__version__ == '$VLLM_EXPECTED'" 2>/dev/null; then
   echo "[start_vllm_dev] vllm $VLLM_EXPECTED 不在 / 版本不对, 按需装..."
   if ls "$VLLM_WHEEL_DIR"/vllm-${VLLM_EXPECTED}*.whl 1> /dev/null 2>&1; then
-    pip install --no-deps -q "$VLLM_WHEEL_DIR"/vllm-${VLLM_EXPECTED}*.whl
+    "$PYTHON_BIN" -m pip install --no-deps -q "$VLLM_WHEEL_DIR"/vllm-${VLLM_EXPECTED}*.whl
     echo "  -> 从 $VLLM_WHEEL_DIR 装好"
   else
     echo "  WARN: 找不到 $VLLM_WHEEL_DIR/vllm-${VLLM_EXPECTED}*.whl"
-    echo "  第一次跑需先编译: cd ~/vllm_cscc && python setup.py bdist_wheel"
-    echo "  或者 pip install vllm==$VLLM_EXPECTED (网络允许时)"
+    echo "  第一次跑需先编译: cd ~/vllm_cscc && $PYTHON_BIN setup.py bdist_wheel"
+    echo "  或者 $PYTHON_BIN -m pip install vllm==$VLLM_EXPECTED (网络允许时)"
     exit 1
   fi
 else
@@ -38,7 +50,7 @@ else
 fi
 
 # runai_streamer 必装 (article 推荐的快速权重加载器)
-python -c "import runai_streamer" 2>/dev/null || pip install -q runai-model-streamer
+"$PYTHON_BIN" -c "import runai_streamer" 2>/dev/null || "$PYTHON_BIN" -m pip install -q runai-model-streamer
 
 # ===== DCU / HIP 特有 (海光 ROCm 体系) =====
 export HIP_VISIBLE_DEVICES=0                            # 指定可见 DCU
