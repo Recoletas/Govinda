@@ -188,14 +188,20 @@ def build_llm_with_kv_quant(model: str, kv_dtype: str = "fp8"):
 
 > 完整决策 (粒度 × 格式 × 接入点 × CDNA 分支 + 验证清单) 见 [`docs/decisions/0009-kv-quant-strategy.md`](decisions/0009-kv-quant-strategy.md)。
 
-## 已知不确定 (per ADR 0002 / 0001 / 0006a / 0009)
+## 已知不确定 (2026-07-01 状态)
 
-- LongBench 数据集 gated, 需赛方 token — **待赛方确认**
-- RULER 评测是赛方统一跑还是我们跑 — **待赛方确认**
-- DCU 实际 SKU (gfx90a 还是 gfx942) — **待 P0 0.1 verify_dcu.py 在 DCU 上跑**
-- vllm-rocm Docker 基础镜像可拉性 — ADR 0006a, 内网 / daocloud 镜像
-- `--kv-cache-dtype fp8` 在 CDNA3 (gfx942) 上 Δ 与 SLA 实测 — **未验, 待 P0 0.5 Triton DCU FP8 跑通后确认**
-- aiter FP8 KV 路径 (CDNA3) 稳定性 — **未验, 待 DCU 上手后最小 case 验证**
+| 项 | 状态 | 来源 |
+|----|------|------|
+| DCU 实际 SKU | **已确认** gfx90a (CDNA2), Hygon DCU K100 | [ADR 0001](decisions/0001-dcu-sku.md) |
+| 测试集访问 | **已确认** 3 档吞吐 (4-8K / 8-16K / 16-32K) + 4 类精度 (hotpotqa / gov_report / retrieval_multi_point / aggregation_keyword_aggregation) | [ADR 0006b](decisions/0006b-container-instance.md) |
+| vllm_cscc vs upstream | **已对齐**, 0.18.1+das.dtk2604 wheel | HANDOVER §6 |
+| 官方 baseline 数字 | **已确认** 12.95 / 10.03 / 5.75 tok/s (官方提交, 2026-07-01) | [ADR 0003](decisions/0003-baseline-source.md) |
+| `--kv-cache-dtype fp8` 在 CDNA2 (gfx90a) | **不适用** — CDNA2 无原生 FP8, 走 INT8 退路 (gfx90a 上 FP8 emulation 性能 < CDNA3 2-3×) | spec §5.4 |
+| aiter FP8 KV 路径稳定性 | **未验, INT8 smoke 阶段一并验证** | — |
+
+## Content path lesson (2026-06-30 baseline 调试)
+
+OpenAI chat messages.content 可以是 string 或 list of `{"type":"text","text":"..."}`. 后者走 vLLM 多模态分支, 对纯文本模型 (Qwen3.5-27B) 会触发额外 vision encoder 处理 → SLA / 精度风险. **本地 bench 必须用 string content**, 跟 vllm bench serve 默认行为一致. 评测平台 vllm bench 也走 string, 所以两路径结果可比. (历史 12.16 tok/s 走 list path, 跟当前数字**不可比对**, 见 [ADR 0003](decisions/0003-baseline-source.md).)
 
 ## Attention backend 选型 (vLLM 0.18.1)
 

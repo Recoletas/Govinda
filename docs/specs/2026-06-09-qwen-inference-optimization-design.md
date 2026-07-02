@@ -1,5 +1,8 @@
 # 2026-06-09 Qwen 推理服务优化比赛 · 设计文档
 
+> **状态**: 历史设计文档 (2026-06-09 定稿), P0/P1/P2/P3/P4/P5 阶段已走完
+> **当前状态 (2026-07-01)**: 官方 baseline 已 AC (4-8K=12.95 / 8-16K=10.03 / 16-32K=5.75 tok/s, 总分 59.9119 / rank 56/76, SLA=0 精度=0). 剩 14 天优化窗口.
+> **当前操作指南**: 看 [`AGENTS.md` 当前阶段](../../AGENTS.md) + [HANDOVER.md](../../../HANDOVER.md) (本地) + [ADR 0003 baseline 台账](../decisions/0003-baseline-source.md) + [ADR 0008 sweep 计划](../decisions/0008-blocksize-hypothesis.md)
 > **作者**：队长 recoletas · **最后更新**：2026-06-09
 > **配套**：[`AGENTS.md`](../../AGENTS.md) · [`README.md`](../../README.md)
 

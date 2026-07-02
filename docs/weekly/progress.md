@@ -43,38 +43,26 @@
 - mkdocs: 删顶部 tabs, 加 left_toc plugin, 单页 H2 全部进 left nav
 - 测试: 35 collected, 8 passed, 27 skipped (DCU 验证后开)
 
-## Week of YYYY-MM-DD
+## Week of 2026-07-01
 
 ### 队长 (recoletas)
-- 本周做了什么:
-  -
-- 阻塞:
-  -
-- 下周计划:
-  -
+- 本周做了什么: 官方 baseline 提交并 AC (4-8K=12.95 / 8-16K=10.03 / 16-32K=5.75, 总分 59.9119 / rank 56/76, SLA=0 精度=0). 写 baseline 台账 [ADR 0003](decisions/0003-baseline-source.md) + sweep 计划 [ADR 0008](decisions/0008-blocksize-hypothesis.md). 更新 AGENTS.md 当前阶段 + index.md 状态表.
+- 阻塞: 无
+- 下周计划: 跑 block_size sweep (16/32/64 × 2 dataset = 6 启停), 写 INT8 KV smoke 脚本 (单档先验 SLA/精度), 准备 P3 集成日配置
 
 ### 队员 A (Kernel)
-- 本周做了什么:
-  -
-- 阻塞:
-  -
-- 下周计划:
-  -
+- 本周做了什么: (待填)
+- 阻塞: (待填)
+- 下周计划: (待填)
 
 ### 队员 B (vLLM)
-- 本周做了什么:
-  -
-- 阻塞:
-  -
-- 下周计划:
-  -
+- 本周做了什么: (待填)
+- 阻塞: (待填)
+- 下周计划: (待填)
 
 ### 队员 C (浮动 / QA)
-- 本周做了什么:
-  -
-- 阻塞:
-  -
-- 下周计划:
-  -
+- 本周做了什么: (待填)
+- 阻塞: (待填)
+- 下周计划: (待填)
 
 <!-- 上一周的 progress 折叠到下方, 不要删, git log 找 -->

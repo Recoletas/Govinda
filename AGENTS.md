@@ -24,9 +24,28 @@
 
 **精度硬约束**（赛题第 9 条第 6 款）：Δ > 10% → 该类任务不计分（系数 = 0）。
 
-## 当前阶段
+## 当前阶段 (2026-07-01)
 
-参见 [`docs/specs/2026-06-09-qwen-inference-optimization-design.md` §阶段与检查点](docs/specs/2026-06-09-qwen-inference-optimization-design.md)。每次开始会话前先 read 一下。
+**官方 baseline 已 AC**: 4-8K=12.95 / 8-16K=10.03 / 16-32K=5.75 tok/s, 得分 59.9119 (rank 56/76), SLA=0, 精度=0.
+
+**截止**: 2026-07-15 (剩 14 天).
+
+**优先级** (低风险先):
+1. **block_size sweep** (16/32/64, 重点 4-8K + 8-16K) — ADR 0008 + `scripts/sweep_block_size.sh`
+2. **INT8 KV cache** (smoke 4-8K → 三档 → 验 SLA/精度 → 再提交) — ADR 0009 + 0012
+3. 启动侧大改 — **暂不做** (bench 路径已对标评测平台, ROI 低)
+
+**当前状态台账**:
+- 官方 baseline 数字 + 来源: [`docs/decisions/0003-baseline-source.md`](docs/decisions/0003-baseline-source.md)
+- 规则边界 + LOCKED flag: [`docs/decisions/0013-competition-rules-interpretation.md`](docs/decisions/0013-competition-rules-interpretation.md)
+- bench/dev 命令分清: [`docs/decisions/0014-dcu-startup-optimization.md`](docs/decisions/0014-dcu-startup-optimization.md) + `scripts/start_vllm_{bench,dev}.sh`
+- 容器/SSH 操作: `/home/recoletas/HANDOVER.md` (本地, 不入仓)
+- 优化前必读硬约束: 本文件 `赛题硬约束` 段
+
+**风控约束** (每次提案必答):
+1. 动哪些 LOCKED flag (§9(8))? 不动 = 合规
+2. 动哪些持久化权重 (§7)? 不动 = 合规
+3. 先跑哪一档 smoke 验 SLA + 精度? 4-8K 是首选
 
 ## AI 使用约定
 

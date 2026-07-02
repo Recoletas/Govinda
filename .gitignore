@@ -93,3 +93,7 @@ benchmarks/dryrun/logs/
 # Claude auto-tmp files (subagent scratch)
 /.claude/agents/
 /.claude/sessions/
+
+# SCNet SSH private keys — never commit
+*xdzs2026_c087*
+*zzeshell*
