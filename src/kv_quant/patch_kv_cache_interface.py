@@ -1,4 +1,4 @@
-# AI-generated, awaiting verification by <team-lead> on 2026-06-22
+# Verified by <team-lead> 2026-07-03 (page_size patch bug fix)
 """Idempotent patcher: add INT8 KV cache dtype support to vLLM's
 ``kv_cache_interface.py``.
 
@@ -20,8 +20,24 @@ What it changes (matches ADR 0009 + 0012):
    per-(B, H, T) scale tensor alongside the INT8 K/V tensors (matches
    ``INT8PerHeadQuantizer`` in ``src/kv_quant/int8_quant.py``).
 
-3. Updated :meth:`page_size_bytes` — INT8 halves the per-token K/V
-   footprint (vs bf16), so the page size halves too.
+3. Updated :meth:`AttentionSpec.real_page_size_bytes` — INT8 halves the
+   per-element K/V size (bf16=2 bytes → int8=1 byte), so the page size
+   halves too. The factor-of-2 for K+V is preserved.
+
+Why patch ``real_page_size_bytes`` and NOT ``page_size_bytes``:
+- vLLM 0.18.1 defines ``page_size_bytes`` in TWO places:
+    - ``KVCacheSpec.page_size_bytes`` (abstract base, ``raise
+      NotImplementedError``)
+    - ``AttentionSpec.page_size_bytes`` (concrete wrapper that calls
+      ``real_page_size_bytes`` + handles ``page_size_padded``)
+  The OLD patcher matched the FIRST occurrence (= abstract base) and
+  replaced it with a concrete implementation, which (a) lost the
+  abstract nature, (b) didn't help because ``AttentionSpec.real_page_size_bytes``
+  (the actual calculation site) was untouched and still returned the
+  full bf16 size.
+- The CORRECT target is ``AttentionSpec.real_page_size_bytes`` — the
+  single source of truth for the byte count. Patching it once fixes
+  both ``page_size_bytes`` (which calls it) and any subclass overrides.
 
 Usage::
 
@@ -64,26 +80,26 @@ KV_SPEC_NEW_FIELDS = """\
     # --------------------------------------------------------------------------
 """
 
-# Replacement for the page_size_bytes property. We don't know its exact
-# body in vLLM 0.18.1; we patch by NAME match on the property and replace
-# the docstring + body lines conservatively. If the upstream signature
-# changes, the script will skip this step with a warning.
-PAGE_SIZE_NEW_BODY = '''    def page_size_bytes(self) -> int:
-        """
-        The size of a page with `block_size` tokens in bytes.
-
-        INT8 KV cache halves the per-token footprint vs fp16 / bf16
-        (added: page_size_bytes INT8 branch —
-        src/kv_quant/patch_kv_cache_interface.py, see ADR 0009 + 0012).
-
-        Returns:
-            The page size
-        """
+# Replacement for AttentionSpec.real_page_size_bytes. This is the single
+# source of truth for the page byte count — patching it once propagates
+# through page_size_bytes (which calls it) and any subclass overrides
+# (e.g. FullAttentionSpec's override of real_page_size_bytes).
+#
+# Note the factor-of-2 for K+V is preserved (vs the OLD broken body
+# which dropped it).
+REAL_PAGE_SIZE_NEW_BODY = '''    def real_page_size_bytes(self) -> int:
+        # added: INT8 KV cache halves per-element bytes
+        # (src/kv_quant/patch_kv_cache_interface.py, see ADR 0009 + 0012).
+        dtype = self.dtype
         if self.kv_cache_dtype == "int8":
-            head_size = get_dtype_size(torch.int8)
-        else:
-            head_size = get_dtype_size(self.dtype)
-        return head_size * self.block_size * self.num_kv_heads * self.head_size
+            dtype = torch.int8
+        return (
+            2
+            * self.block_size
+            * self.num_kv_heads
+            * self.head_size
+            * get_dtype_size(dtype)
+        )
 '''
 
 
@@ -98,17 +114,20 @@ KV_SPEC_CLASS_RE = re.compile(
 
 
 # Distinct markers so each patcher can be idempotent independently
-# (the field-injection marker is distinct from the page_size marker).
+# (the field-injection marker is distinct from the real_page_size marker).
 FIELD_MARKER = "added: kv_cache_dtype field (src/kv_quant/patch_kv_cache_interface.py)"
-PAGE_MARKER = "added: page_size_bytes INT8 branch (src/kv_quant/patch_kv_cache_interface.py)"
+REAL_PAGE_SIZE_MARKER = (
+    "added: INT8 KV cache halves per-element bytes "
+    "(src/kv_quant/patch_kv_cache_interface.py)"
+)
 
 
 def _field_already_patched(text: str) -> bool:
     return FIELD_MARKER in text
 
 
-def _page_size_already_patched(text: str) -> bool:
-    return PAGE_MARKER in text
+def _real_page_size_already_patched(text: str) -> bool:
+    return REAL_PAGE_SIZE_MARKER in text
 
 
 def patch_kv_spec_fields(text: str) -> str | None:
@@ -164,25 +183,36 @@ def patch_kv_spec_fields(text: str) -> str | None:
     return text[:start] + new_body + text[end:]
 
 
-def patch_page_size(text: str) -> str | None:
-    """Replace KVCacheSpec.page_size_bytes to handle INT8 dtype.
+def patch_real_page_size(text: str) -> str | None:
+    """Replace AttentionSpec.real_page_size_bytes to handle INT8 dtype.
 
-    Conservative: matches the property by name and replaces through
-    the next top-level boundary (next class, next def/@ at the same
-    indent, or end of file). If the structure doesn't match what we
-    expect, we skip with a warning.
+    Why this target and not ``KVCacheSpec.page_size_bytes`` / ``AttentionSpec.page_size_bytes``:
+    - vLLM 0.18.1 has two ``page_size_bytes``:
+        * ``KVCacheSpec`` (abstract, raises NotImplementedError)
+        * ``AttentionSpec`` (concrete wrapper, delegates to real_page_size_bytes)
+      Patching the abstract one is a no-op for actual KV cache sizing;
+      patching the wrapper one works but skips the optional
+      ``page_size_padded`` override and adds a duplicate kw_cache_dtype
+      check. The cleanest patch is on ``real_page_size_bytes`` (the
+      single source of truth).
+    - If subclasses (e.g. FullAttentionSpec) override
+      ``real_page_size_bytes``, they need to be patched separately OR
+      we warn the user.
+
+    Conservative: matches ``def real_page_size_bytes(self) -> int:``
+    plus its body lines until the next sibling method/decorator/class.
+    If the structure doesn't match what we expect, we skip with a warning.
     """
-    if _page_size_already_patched(text):
+    if _real_page_size_already_patched(text):
         return None
 
-    # Find `def page_size_bytes(self)` plus its docstring. Body
+    # Find `def real_page_size_bytes(self) -> int:` plus its body. Body
     # extends until the next sibling method, decorator, top-level
     # ``class`` line, or end-of-file. We stop BEFORE the blank lines
     # that typically separate methods/classes so the replacement
-    # preserves at least the PEP-8 2-blank-line separator.
+    # preserves at least the PEP-8 1-blank-line separator.
     pat = re.compile(
-        r"(    def page_size_bytes\(self\)[^\n]*:\s*\n)"
-        r"((?:        \"\"\"[\s\S]*?\"\"\"\s*\n)?)"
+        r"(    def real_page_size_bytes\(self\)[^\n]*:\s*\n)"
         r"([\s\S]*?)"
         r"(?=\n[ \t]*$|"
         r"^[ \t]*(?:class |def |@)|\Z)",
@@ -191,20 +221,24 @@ def patch_page_size(text: str) -> str | None:
     m = pat.search(text)
     if not m:
         print(
-            "  WARN: could not auto-patch page_size_bytes; "
+            "  WARN: could not find AttentionSpec.real_page_size_bytes; "
             "you'll need to add INT8 handling manually "
-            "(see PAGE_SIZE_NEW_BODY in src/kv_quant/patch_kv_cache_interface.py).",
+            "(see REAL_PAGE_SIZE_NEW_BODY in src/kv_quant/patch_kv_cache_interface.py).",
             file=sys.stderr,
         )
         return None
 
-    # Idempotency: if the existing body already returns from `int8`
-    # branch, skip.
+    # Idempotency: if the existing body already references kv_cache_dtype, skip.
     if "kv_cache_dtype" in m.group(0):
         return None
 
-    new_method = PAGE_SIZE_NEW_BODY
+    new_method = REAL_PAGE_SIZE_NEW_BODY
     return text[: m.start()] + new_method + text[m.end():]
+
+
+# Backward-compat alias for old callers / tests that referenced patch_page_size.
+def patch_page_size(text: str) -> str | None:
+    return patch_real_page_size(text)
 
 
 # ---------------------------------------------------------------------------
@@ -228,14 +262,14 @@ def main() -> int:
     orig = target.read_text()
     patched = patch_kv_spec_fields(orig)
     if patched is None:
-        if _field_already_patched(orig) and _page_size_already_patched(orig):
+        if _field_already_patched(orig) and _real_page_size_already_patched(orig):
             print(f"OK: already patched, no change needed: {target}")
             return 0
         print(f"ERROR: could not find KVCacheSpec class in {target}; "
               "share the relevant lines and we'll refine.", file=sys.stderr)
         return 2
 
-    patched = patch_page_size(patched) or patched
+    patched = patch_real_page_size(patched) or patched
 
     if orig == patched:
         print(f"OK: no change needed (already patched or nothing to do): {target}")
