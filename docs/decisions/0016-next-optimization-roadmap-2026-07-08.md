@@ -335,24 +335,32 @@ Unsubmitted experiment branch:
 Fast recovery smoke sequence after container access returns:
 
 ```bash
-# Inside container, after deploying the selected vLLM source and starting vLLM.
+# Inside container. These env vars are read when the vLLM server process imports
+# the modules, so set them before starting vLLM. Setting them only before
+# `vllm bench serve` does not change the already-running server.
+#
+# After deploying the selected vLLM source and starting vLLM, the smoke helper
+# prints both the running vLLM PID and the server-side env values from
+# /proc/$PID/environ to avoid false A/B tests.
+#
 # Confirm the current GitLab main candidate first.
 RANGE=4-8K NUM_PROMPTS=3 bash /public/home/xdzs2026_c087/Govinda/tools/codex_smoke_p0_gdn.sh
 
-# If testing the GDN experiment branch, first run baseline behavior on that branch:
-VLLM_GDN_CAUSAL_CONV1D_BLOCK_M=8 \
+# If testing the GDN experiment branch, restart vLLM with each server env below,
+# then run the same smoke command. First run baseline behavior on that branch:
+#   server env: VLLM_GDN_CAUSAL_CONV1D_BLOCK_M=8
 RANGE=4-8K NUM_PROMPTS=3 bash /public/home/xdzs2026_c087/Govinda/tools/codex_smoke_p0_gdn.sh
 
 # Then test the experimental default:
-VLLM_GDN_CAUSAL_CONV1D_BLOCK_M=16 \
+#   server env: VLLM_GDN_CAUSAL_CONV1D_BLOCK_M=16
 RANGE=4-8K NUM_PROMPTS=3 bash /public/home/xdzs2026_c087/Govinda/tools/codex_smoke_p0_gdn.sh
 
 # Env-only GDN output-kernel BT test, no source change beyond current branch:
-FLA_GDN_FIX_BT=1 VLLM_GDN_CAUSAL_CONV1D_BLOCK_M=16 \
+#   server env: VLLM_GDN_CAUSAL_CONV1D_BLOCK_M=16 FLA_GDN_FIX_BT=1
 RANGE=4-8K NUM_PROMPTS=3 bash /public/home/xdzs2026_c087/Govinda/tools/codex_smoke_p0_gdn.sh
 
 # Only if 4K-8K does not regress or crash:
-VLLM_GDN_CAUSAL_CONV1D_BLOCK_M=16 \
+#   server env: same winning 4K-8K setting
 RANGE=8-16K NUM_PROMPTS=3 bash /public/home/xdzs2026_c087/Govinda/tools/codex_smoke_p0_gdn.sh
 ```
 
