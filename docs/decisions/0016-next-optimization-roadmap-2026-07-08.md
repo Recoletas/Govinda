@@ -399,6 +399,22 @@ Decode fusion experiment branch:
 - Status: Python syntax check only. Needs HIP/C++ build, `tools/codex_llmm1_microbench.py`,
   then 4K-8K smoke before it can be considered for submit.
 
+Prefill attention launch-knob experiment branch:
+
+- Branch: `experiment/mid-attn-launch-knobs-20260709`
+- Commit: `f4d92ab Experiment prefill attention launch knobs`
+- Base: `3b0e230` (`mid` tile64 default).
+- Change: adds import/start-time env knobs to `triton_unified_attention.py`:
+  - `VLLM_TRITON_PREFILL_NUM_WARPS=1/2/4/8`
+  - `VLLM_TRITON_PREFILL_DOT_PRECISION=ieee/tf32`
+- Default behavior is unchanged:
+  - No `num_warps` is passed unless the env is set.
+  - `DOT_PRECISION=None` matches existing Triton default.
+  - Decode 3D path is pinned to `DOT_PRECISION=None`; the prefill env does not
+    alter decode numerics.
+- Status: Python syntax check only. Needs 8K-16K smoke first because that is
+  where `mid` tile64 currently gives benefit.
+
 Fast recovery smoke sequence after container access returns:
 
 ```bash
@@ -411,6 +427,9 @@ RUN_PROFILE=gdn bash /public/home/xdzs2026_c087/Govinda/tools/codex_run_p0_ab_se
 
 # To test the decode fusion branch after the mid branch survives:
 RUN_PROFILE=decode bash /public/home/xdzs2026_c087/Govinda/tools/codex_run_p0_ab_sequence.sh
+
+# To test prefill attention launch knobs:
+RUN_PROFILE=attn bash /public/home/xdzs2026_c087/Govinda/tools/codex_run_p0_ab_sequence.sh
 
 # Manual commands remain below for single-case debugging.
 
