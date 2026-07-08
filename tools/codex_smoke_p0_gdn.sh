@@ -28,7 +28,7 @@ VLLM_PID="$(
 if [[ -n "$VLLM_PID" && -r "/proc/$VLLM_PID/environ" ]]; then
     echo "vllm_pid=$VLLM_PID"
     tr '\0' '\n' < "/proc/$VLLM_PID/environ" | grep -E \
-        '^(VLLM_TRITON_PREFILL_TILE64_POLICY|VLLM_GDN_CAUSAL_CONV1D_BLOCK_M|VLLM_GDN_CHUNK_SIZE|FLA_GDN_FIX_BT)=' \
+        '^(VLLM_TRITON_PREFILL_TILE64_POLICY|VLLM_GDN_CAUSAL_CONV1D_BLOCK_M|VLLM_GDN_CHUNK_SIZE|FLA_GDN_FIX_BT|FLA_TRIL_PRECISION)=' \
         || true
 else
     echo "vllm_pid=not-found"
@@ -37,6 +37,7 @@ echo "bench_env_tile64_policy=${VLLM_TRITON_PREFILL_TILE64_POLICY:-unset}"
 echo "bench_env_gdn_conv_block_m=${VLLM_GDN_CAUSAL_CONV1D_BLOCK_M:-unset}"
 echo "bench_env_gdn_chunk_size=${VLLM_GDN_CHUNK_SIZE:-unset}"
 echo "bench_env_fla_gdn_fix_bt=${FLA_GDN_FIX_BT:-unset}"
+echo "bench_env_fla_tril_precision=${FLA_TRIL_PRECISION:-unset}"
 
 curl -fsS --noproxy 127.0.0.1 "http://127.0.0.1:${PORT}/health" >/dev/null
 

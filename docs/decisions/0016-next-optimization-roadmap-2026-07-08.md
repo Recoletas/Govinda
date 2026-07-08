@@ -362,6 +362,27 @@ Stacked GDN experiment branch:
   `VLLM_GDN_CAUSAL_CONV1D_BLOCK_M=8/16/32`, defaulting to `16`.
 - Status: static syntax/import check only. Do not promote before smoke.
 
+Stacked GDN chunk experiment branch:
+
+- Branch: `experiment/tile64-mid-gdn-chunk-20260709`
+- Commit: `0f49eea Add runtime GDN chunk size knob`
+- Base: `f05e2bb` (`mid` tile64 + GDN causal-conv block knob).
+- Change: makes GDN/FLA chunk size selectable via
+  `VLLM_GDN_CHUNK_SIZE=16/32/64`, defaulting to `64`.
+- Risk: chunk size changes the GDN recurrence grouping and can affect both
+  performance and numerics. Treat this as smoke-only until it beats the mid
+  default on the same container.
+
+Env-only FLA solve-tril candidate:
+
+- Existing code already supports `FLA_TRIL_PRECISION=ieee/tf32` in
+  `vllm/model_executor/layers/fla/ops/solve_tril.py`.
+- This is an import/start-time environment knob, so it must be set before
+  starting vLLM, not only before running `vllm bench serve`.
+- Expected upside is limited but cheap to test on the GDN path. Accuracy risk is
+  non-zero because it changes triangular-solve math precision, so do not make
+  `tf32` default without official-style smoke and a no-penalty submission check.
+
 Fast recovery smoke sequence after container access returns:
 
 ```bash
