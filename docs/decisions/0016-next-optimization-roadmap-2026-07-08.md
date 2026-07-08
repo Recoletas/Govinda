@@ -308,6 +308,47 @@ When a new container is available:
    - validate with short smoke, then 8K-16K 10 prompts
 5. Start P1 decode-fusion branch only after P0 is either positive or exhausted.
 
+## 2026-07-09 Active Submit And Experiment Lines
+
+Scoring `main` on GitLab:
+
+- `3e2df97 Add long prefill tile64 policy switch`
+- Default behavior keeps the broad long-prefill `TILE_SIZE=64` policy
+  (`max(max_seqlen_q, max_seqlen_k) > 8192`).
+- Runtime policy switch:
+  - `VLLM_TRITON_PREFILL_TILE64_POLICY=broad` default, use 64 for all >8K.
+  - `VLLM_TRITON_PREFILL_TILE64_POLICY=mid`, use 64 only for 8K-16K.
+  - `VLLM_TRITON_PREFILL_TILE64_POLICY=long`, use 64 only for >16K.
+  - `VLLM_TRITON_PREFILL_TILE64_POLICY=off`, keep prefill tile 32.
+
+Unsubmitted experiment branch:
+
+- `experiment/gdn-causal-conv-block-20260709`
+- Commit: `76827e1 Experiment GDN causal conv token block`
+- Change: makes GDN prefill `causal_conv1d` token block selectable via
+  `VLLM_GDN_CAUSAL_CONV1D_BLOCK_M=8/16/32`, defaulting to `16`.
+- Do not promote this branch to `main` until at least a 4K-8K smoke completes.
+
+Fast recovery smoke sequence after container access returns:
+
+```bash
+# Inside container, after deploying the selected vLLM source and starting vLLM.
+# Confirm the current GitLab main candidate first.
+RANGE=4-8K NUM_PROMPTS=3 bash /public/home/xdzs2026_c087/Govinda/tools/codex_smoke_p0_gdn.sh
+
+# If testing the GDN experiment branch, first run baseline behavior on that branch:
+VLLM_GDN_CAUSAL_CONV1D_BLOCK_M=8 \
+RANGE=4-8K NUM_PROMPTS=3 bash /public/home/xdzs2026_c087/Govinda/tools/codex_smoke_p0_gdn.sh
+
+# Then test the experimental default:
+VLLM_GDN_CAUSAL_CONV1D_BLOCK_M=16 \
+RANGE=4-8K NUM_PROMPTS=3 bash /public/home/xdzs2026_c087/Govinda/tools/codex_smoke_p0_gdn.sh
+
+# Only if 4K-8K does not regress or crash:
+VLLM_GDN_CAUSAL_CONV1D_BLOCK_M=16 \
+RANGE=8-16K NUM_PROMPTS=3 bash /public/home/xdzs2026_c087/Govinda/tools/codex_smoke_p0_gdn.sh
+```
+
 ## Suggested Prompts For Claude/Teammates
 
 Prompt for prefill worker:
