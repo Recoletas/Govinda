@@ -9,6 +9,7 @@ set -euo pipefail
 Q="${Q:-/public/home/xdzs2026_c087}"
 VLLM_DIR="${VLLM_DIR:-$Q/vllm_cscc}"
 REMOTE="${REMOTE:-origin}"
+REMOTE_URL="${REMOTE_URL:-}"
 REF="${1:-main}"
 
 if [[ ! -d "$VLLM_DIR/.git" ]]; then
@@ -17,6 +18,15 @@ if [[ ! -d "$VLLM_DIR/.git" ]]; then
 fi
 
 cd "$VLLM_DIR"
+
+if [[ -n "$REMOTE_URL" ]]; then
+    REMOTE="${REMOTE_NAME:-codex-gitlab}"
+    if git remote get-url "$REMOTE" >/dev/null 2>&1; then
+        git remote set-url "$REMOTE" "$REMOTE_URL"
+    else
+        git remote add "$REMOTE" "$REMOTE_URL"
+    fi
+fi
 
 echo "=== before ==="
 git status --short --branch

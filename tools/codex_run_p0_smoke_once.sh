@@ -18,6 +18,7 @@ PORT="${PORT:-8000}"
 
 echo "=== P0 smoke once $(date +%F_%T) ==="
 echo "REF=$REF RANGE=$RANGE NUM_PROMPTS=$NUM_PROMPTS START_VLLM=$START_VLLM"
+echo "REMOTE=${REMOTE:-origin} REMOTE_URL=${REMOTE_URL:+set}"
 
 bash "$GOVINDA_DIR/tools/codex_checkout_vllm_branch.sh" "$REF"
 
