@@ -415,6 +415,23 @@ Prefill attention launch-knob experiment branch:
 - Status: Python syntax check only. Needs 8K-16K smoke first because that is
   where `mid` tile64 currently gives benefit.
 
+GDN dot-precision experiment branch:
+
+- Branch: `experiment/mid-gdn-dot-precision-20260709`
+- Commit: `b8b4fda Experiment GDN dot precision knob`
+- Base: `0f49eea` (`mid` tile64 + GDN causal-conv and chunk-size knobs).
+- Change: adds import/start-time env knob `FLA_GDN_DOT_PRECISION=ieee/tf32`
+  for the main GDN/FLA chunk path:
+  - `chunk_scaled_dot_kkt.py`
+  - `wy_fast.py`
+  - `chunk_o.py`
+- Default behavior:
+  - Unset env keeps most dots on Triton default precision.
+  - The `wy_fast` dot that was explicitly `allow_tf32=False` is represented as
+    `input_precision="ieee"` by default.
+- Risk: `tf32` may change numerics in the linear-attention recurrence. Treat as
+  a smoke-only candidate until official-style accuracy confirms it.
+
 Fast recovery smoke sequence after container access returns:
 
 ```bash

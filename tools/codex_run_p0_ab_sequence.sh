@@ -33,6 +33,7 @@ case_lines_gdn=(
   "mid_gdn32_4_8|experiment/tile64-mid-gdn-conv-20260709|mid|32|64|0|ieee|0|||4-8K|3"
   "mid_gdn16_chunk32_4_8|experiment/tile64-mid-gdn-chunk-20260709|mid|16|32|0|ieee|0|||4-8K|3"
   "mid_gdn16_tf32_4_8|experiment/tile64-mid-gdn-conv-20260709|mid|16|64|0|tf32|0|||4-8K|3"
+  "mid_gdn16_dot_tf32_4_8|experiment/mid-gdn-dot-precision-20260709|mid|16|64|0|ieee|0|||4-8K|3"
   "mid_gdn16_fla_4_8|experiment/tile64-mid-gdn-conv-20260709|mid|16|64|1|ieee|0|||4-8K|3"
 )
 
@@ -57,6 +58,7 @@ case_lines_full=(
   "mid_gdn16_4_8|experiment/tile64-mid-gdn-conv-20260709|mid|16|64|0|ieee|0|||4-8K|3"
   "mid_gdn16_chunk32_4_8|experiment/tile64-mid-gdn-chunk-20260709|mid|16|32|0|ieee|0|||4-8K|3"
   "mid_gdn16_tf32_4_8|experiment/tile64-mid-gdn-conv-20260709|mid|16|64|0|tf32|0|||4-8K|3"
+  "mid_gdn16_dot_tf32_4_8|experiment/mid-gdn-dot-precision-20260709|mid|16|64|0|ieee|0|||4-8K|3"
   "mid_gdn16_fla_4_8|experiment/tile64-mid-gdn-conv-20260709|mid|16|64|1|ieee|0|||4-8K|3"
   "mid_gdn16_8_16|experiment/tile64-mid-gdn-conv-20260709|mid|16|64|0|ieee|0|||8-16K|3"
   "mid_llmm1silu_4_8|experiment/mid-llmm1silu-20260709|mid|16|64|0|ieee|1|||4-8K|3"
@@ -87,7 +89,7 @@ esac
 
 mkdir -p "$OUT_ROOT"
 summary="$OUT_ROOT/summary.tsv"
-printf "case\tref\tpolicy\tgdn_block\tgdn_chunk\tfla_fix_bt\ttril_precision\tllmm1silu\tprefill_warps\tprefill_dot\trange\tnum_prompts\tstatus\tresult_dir\n" \
+printf "case\tref\tpolicy\tgdn_block\tgdn_chunk\tfla_fix_bt\ttril_precision\tgdn_dot_precision\tllmm1silu\tprefill_warps\tprefill_dot\trange\tnum_prompts\tstatus\tresult_dir\n" \
   > "$summary"
 
 for line in "${selected_cases[@]}"; do
@@ -97,7 +99,11 @@ for line in "${selected_cases[@]}"; do
 
     echo
     echo "=== case $label ==="
-    echo "ref=$ref policy=$tile_policy gdn_block=$gdn_block gdn_chunk=$gdn_chunk fla_fix=$fla_fix tril_precision=$tril_precision llmm1silu=$llmm1silu prefill_warps=${prefill_warps:-unset} prefill_dot=${prefill_dot:-unset} range=$range prompts=$num_prompts"
+    gdn_dot_precision=""
+    if [[ "$label" == *"gdn16_dot_tf32"* ]]; then
+        gdn_dot_precision="tf32"
+    fi
+    echo "ref=$ref policy=$tile_policy gdn_block=$gdn_block gdn_chunk=$gdn_chunk fla_fix=$fla_fix tril_precision=$tril_precision gdn_dot=${gdn_dot_precision:-unset} llmm1silu=$llmm1silu prefill_warps=${prefill_warps:-unset} prefill_dot=${prefill_dot:-unset} range=$range prompts=$num_prompts"
 
     set +e
     REMOTE_URL="$REMOTE_URL" \
@@ -107,6 +113,7 @@ for line in "${selected_cases[@]}"; do
     VLLM_GDN_CHUNK_SIZE="$gdn_chunk" \
     FLA_GDN_FIX_BT="$fla_fix" \
     FLA_TRIL_PRECISION="$tril_precision" \
+    FLA_GDN_DOT_PRECISION="$gdn_dot_precision" \
     VLLM_GFX936_FUSED_GATE_UP_SILU="$llmm1silu" \
     VLLM_TRITON_PREFILL_NUM_WARPS="$prefill_warps" \
     VLLM_TRITON_PREFILL_DOT_PRECISION="$prefill_dot" \
@@ -126,8 +133,8 @@ for line in "${selected_cases[@]}"; do
     else
         status_text="fail:$status"
     fi
-    printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" \
-        "$label" "$ref" "$tile_policy" "$gdn_block" "$gdn_chunk" "$fla_fix" "$tril_precision" "$llmm1silu" "$prefill_warps" "$prefill_dot" \
+    printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" \
+        "$label" "$ref" "$tile_policy" "$gdn_block" "$gdn_chunk" "$fla_fix" "$tril_precision" "$gdn_dot_precision" "$llmm1silu" "$prefill_warps" "$prefill_dot" \
         "$range" "$num_prompts" "$status_text" "$case_out" >> "$summary"
 
     if [[ "$status" != "0" ]]; then
