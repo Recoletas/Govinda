@@ -51,6 +51,28 @@ Remaining decode work should inspect the exact hot linear shapes not yet covered
 
 This is the current safe default. It should not be lowered or made adaptive without a same-dataset smoke comparison.
 
+### Long-Prefill Tile Size 64 Candidate
+
+P0 follow-up result, same container and same local bench conditions:
+
+| Dataset | `TILE_SIZE=64` candidate | `TILE_SIZE=32` baseline | Direction |
+| --- | ---: | ---: | --- |
+| 8K-16K | 11.61 tok/s | 9.45 tok/s | +22.9% |
+| 16K-32K | 9.05 tok/s | 9.09 tok/s | flat |
+
+Implementation shape:
+
+- `triton_unified_attention.py::_get_tile_size()` returns `64` only for prefill
+  when `max_seqlen_q > 8192`; shorter prefills stay at `32`.
+- `VLLM_TRITON_PREFILL_TILE_SIZE=32/64` remains available for A/B override.
+- `kernel_unified_attention_2d` launch uses `num_stages=1`; DCU LDS limits can
+  make the `TILE_SIZE=64` variant fail compilation with higher/default stages.
+
+Decision: promote to candidate submit line after one scoring-style smoke. The
+absolute tok/s values above are lower than the historical safe score because the
+container/bench conditions changed; rely on same-container A/B direction, not
+cross-container absolute numbers.
+
 ### CUDA Graph Capture Sizes
 
 The exact small decode graph list is safe and has a small positive effect. Avoid reintroducing conflicting `cudagraph_capture_sizes` through both top-level args and compilation config; vLLM rejects that combination at startup.

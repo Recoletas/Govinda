@@ -146,6 +146,17 @@ Minimum validation after container returns:
 - 8K-16K 10 prompts: catches the `BLOCK_M=128` style instability.
 - 16K-32K 3 prompts: checks long-context TTFT/SLA direction.
 
+Current P0 candidate:
+
+- Keep `BLOCK_M=64`.
+- Add `VLLM_TRITON_PREFILL_TILE_SIZE=32/64` override.
+- Use `TILE_SIZE=64` only when `max_seqlen_q > 8192`; keep 4K-8K on `32`.
+- Launch the 2D unified attention kernel with `num_stages=1` to avoid DCU LDS
+  resource failures.
+- Same-container A/B showed `8K-16K` improving from `9.45` to `11.61` tok/s
+  and `16K-32K` flat at about `9.05` tok/s. Cross-container absolute values are
+  not comparable to the historical `79.1109` safe score.
+
 ## Direction B: Decode Skinny GEMV and Fusion
 
 Priority: P1.
