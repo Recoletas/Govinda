@@ -1,0 +1,2083 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="2026 全国大学生计算机系统能力大赛 · 智能计算创新设计赛参赛项目">
+      
+      
+      
+        <link rel="canonical" href="https://recoletas.github.io/Govinda/decisions/0016-next-optimization-roadmap-2026-07-08/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>0016 Next Optimization Roadmap 2026-07-08 - Govinda — Qwen3.5-27B DCU 推理优化</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#0016-next-optimization-roadmap-2026-07-08" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Govinda — Qwen3.5-27B DCU 推理优化" class="md-header__button md-logo" aria-label="Govinda — Qwen3.5-27B DCU 推理优化" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Govinda — Qwen3.5-27B DCU 推理优化
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              0016 Next Optimization Roadmap 2026-07-08
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换到深色"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="切换到深色" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换到浅色"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="切换到浅色" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Recoletas/Govinda" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Recoletas/Govinda
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Govinda — Qwen3.5-27B DCU 推理优化" class="md-nav__button md-logo" aria-label="Govinda — Qwen3.5-27B DCU 推理优化" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Govinda — Qwen3.5-27B DCU 推理优化
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Recoletas/Govinda" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Recoletas/Govinda
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    首页
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    学习
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    学习
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../learning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    学习资源与方法
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    设计
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    设计
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../specs/2026-06-09-qwen-inference-optimization-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    设计文档
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    计划
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    计划
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superpowers/plans/2026-06-09-qwen-dcu-inference-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    实施计划
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    决策
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    决策
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0001-dcu-sku/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0001 DCU SKU
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0002-testset-access/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0002 测试集访问
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0003-baseline-source/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0003 Baseline 数字来源
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0006-vllm-readmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0006 vLLM 0.18.1 读图
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0006a-docker-build/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0006a Docker 构建
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0006b-container-instance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0006b 容器实例 + vllm_cscc
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0007-coupling-matrix/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0007 编译决策矩阵
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0008-blocksize-hypothesis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0008 块大小假设
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0009-kv-quant-strategy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0009 KV 量化策略
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0010-attention-backend/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0010 Attention backend 选型
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0011-p0-research-output/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0011 P0 末调研输出
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0012-vllm-cscc-vs-upstream/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0012 vllm_cscc vs upstream
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0013-torch-compile-roi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0013 torch.compile ROI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0013-competition-rules-interpretation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0013a 比赛规则解读
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../0014-dcu-startup-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0014 DCU 冷启动优化
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    进度
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    进度
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../weekly/progress/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Weekly Standup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    资源
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    资源
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../AGENTS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AI 协作
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ai-prompts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AI Prompts 库
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#current-workspace-map" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Current Workspace Map
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dirty-diff-classification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dirty Diff Classification
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rule-boundary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule Boundary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#evidence-from-user-tutorials" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Evidence From User Tutorials
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#direction-a-prefill-attention-kernel-main-scoring-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Direction A: Prefill Attention Kernel, Main Scoring Path
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#direction-b-decode-skinny-gemv-and-fusion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Direction B: Decode Skinny GEMV and Fusion
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#direction-c-runtime-int8-kv-cache" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Direction C: Runtime INT8 KV Cache
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#direction-d-aiter-backend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Direction D: AITER Backend
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#direction-e-gdn-linear-attention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Direction E: GDN / Linear Attention
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#container-recovery-execution-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Container Recovery Execution Order
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2026-07-09-active-submit-and-experiment-lines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2026-07-09 Active Submit And Experiment Lines
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#suggested-prompts-for-claudeteammates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Suggested Prompts For Claude/Teammates
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#submit-gate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Submit Gate
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="0016-next-optimization-roadmap-2026-07-08">0016 Next Optimization Roadmap 2026-07-08</h1>
+<p>Status: active roadmap.</p>
+<p>Owner: recoletas + agents.</p>
+<p>Purpose: container is temporarily unavailable, so this document consolidates the
+local workspace state, verified results, failed paths, and the next engineering
+directions. The goal is to prevent another cycle of parameter fiddling, unstable
+backend switching, or accidental submission of dirty experiments.</p>
+<h2 id="current-workspace-map">Current Workspace Map</h2>
+<p>There are two separate layers in <code>/home/recoletas/Govinda</code>:</p>
+<ul>
+<li>Outer project workspace: docs, scripts, smoke helpers, ADRs, and local
+  coordination files.</li>
+<li>Scoring code tree: <code>vllm_cscc_work/</code>, the vLLM source that should be pushed
+  for scoring after verification.</li>
+</ul>
+<p>Current scoring code safe line:</p>
+<ul>
+<li>Repo: <code>vllm_cscc_work</code></li>
+<li>Safe HEAD: <code>2c73297 Capture exact Qwen decode graph sizes</code></li>
+<li>Latest known safe score: <code>79.1109</code></li>
+<li>Throughput: <code>4K-8K=15.97</code>, <code>8K-16K=14.44</code>, <code>16K-32K=11.04</code></li>
+<li>Penalties: <code>SLA=0.0</code>, <code>accuracy=0.0</code></li>
+</ul>
+<p>Do not submit dirty worktree state until each diff below is classified and
+either verified or reverted.</p>
+<h2 id="dirty-diff-classification">Dirty Diff Classification</h2>
+<p>Current dirty files in <code>vllm_cscc_work</code>:</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Classification</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>vllm/envs.py</code></td>
+<td>AITER default-on experiment</td>
+<td>Revert before submit. AITER was unstable and not the current scoring path.</td>
+</tr>
+<tr>
+<td><code>vllm/v1/attention/ops/vit_attn_wrappers.py</code></td>
+<td>AITER ViT fallback experiment</td>
+<td>Revert unless a later AITER branch is explicitly revived. Text benchmark does not need this.</td>
+</tr>
+<tr>
+<td><code>csrc/rocm/ops.h</code></td>
+<td><code>LLMM1Silu</code> custom op declaration</td>
+<td>Keep only in a separate decode-fusion branch. Not verified for submit.</td>
+</tr>
+<tr>
+<td><code>csrc/rocm/skinny_gemms.cu</code></td>
+<td><code>LLMM1Silu</code> custom kernel</td>
+<td>Keep only behind env gate and microbench. Not default.</td>
+</tr>
+<tr>
+<td><code>csrc/rocm/torch_bindings.cpp</code></td>
+<td><code>LLMM1Silu</code> binding</td>
+<td>Same as above.</td>
+</tr>
+<tr>
+<td><code>vllm/_custom_ops.py</code></td>
+<td><code>LLMM1Silu</code> Python wrapper</td>
+<td>Same as above.</td>
+</tr>
+<tr>
+<td><code>vllm/model_executor/models/qwen2_moe.py</code></td>
+<td>MLP fused path experiment</td>
+<td>Keep only if shape probe confirms Qwen3.5 dense MLP shape and smoke improves. Current hard-coded <code>(34816,5120)</code> is not safe as a general default.</td>
+</tr>
+</tbody>
+</table>
+<p>Outer workspace dirty files:</p>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Classification</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>docs/decisions/0015-optimization-ledger-2026-07-08.md</code></td>
+<td>Useful ledger</td>
+<td>Keep.</td>
+</tr>
+<tr>
+<td><code>docs/decisions/0016-next-optimization-roadmap-2026-07-08.md</code></td>
+<td>This roadmap</td>
+<td>Keep.</td>
+</tr>
+<tr>
+<td>HTML tutorial files in <code>docs/</code></td>
+<td>Reference material from user</td>
+<td>Keep.</td>
+</tr>
+<tr>
+<td><code>tools/codex_*</code></td>
+<td>Local smoke/microbench helpers</td>
+<td>Keep local unless needed in final report.</td>
+</tr>
+<tr>
+<td><code>scripts/run_fp8_smoke.sh</code></td>
+<td>FP8 KV smoke script modified from <code>fp8_e4m3fnuz</code> to <code>fp8</code></td>
+<td>Do not use for submit; FP8 KV direct path is high risk.</td>
+</tr>
+<tr>
+<td><code>scripts/run_today_work.sh</code></td>
+<td>Local orchestration helper</td>
+<td>Keep local; review before use.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="rule-boundary">Rule Boundary</h2>
+<p>Allowed and still worth pursuing:</p>
+<ul>
+<li>Triton/HIP kernel tiling, block shape, launch shape, and memory-access
+  optimization.</li>
+<li>Runtime-only activation/KV cache low precision if it does not persist
+  transformed weights or reusable outputs.</li>
+<li>Custom kernels compiled in the scoring container.</li>
+<li>CUDA graph capture size changes if they do not conflict with vLLM config and
+  are verified with bench command behavior.</li>
+</ul>
+<p>Forbidden or too risky for this contest line:</p>
+<ul>
+<li>Persistent weight quantization or weight rewrite/reorder/compression.</li>
+<li>FP8 weight path: already showed high throughput but catastrophic accuracy
+  penalty.</li>
+<li>Scheduler locked flag changes: <code>--max-model-len</code>, <code>--max-num-seqs</code>,
+  <code>--max-num-batched-tokens</code>, or equivalent behavioral changes.</li>
+<li>Skipping layers/tokens/heads, speculative decoding, auxiliary models,
+  answer/testset caching, truncating samples, or filtering hard cases.</li>
+</ul>
+<h2 id="evidence-from-user-tutorials">Evidence From User Tutorials</h2>
+<p>The DCU decode tutorial supports two conclusions that match our measurements:</p>
+<ol>
+<li>Decode is weight-IO bound. A single-token GEMV spends almost all time reading
+   weights from HBM; adding software double buffering does not help if achieved
+   bandwidth is already near peak.</li>
+<li>Prefill is compute/attention bound. Weight IO is amortized across many
+   tokens, and long-context full attention grows roughly as <code>O(S^2)</code>.</li>
+</ol>
+<p>The bandwidth-utilization tutorial gives the useful checklist:</p>
+<ul>
+<li>If achieved bandwidth is far below the read-only probe, optimize coalescing,
+  alignment, kernel specialization, and fusion.</li>
+<li>If a kernel is already near bandwidth peak, stop adding concurrency or double
+  buffering; reduce bytes or fuse surrounding launches.</li>
+<li>For decode GEMV, generic BLAS may be bad for <code>M=1</code>; custom skinny GEMV is
+  justified only for shapes whose microbench proves it beats torch/rocBLAS.</li>
+</ul>
+<p>Local evidence agrees:</p>
+<ul>
+<li>LLMM1 helps <code>gate_up</code> and <code>mid_up</code>.</li>
+<li>LLMM1 hurts <code>down</code>, <code>full_qkv</code>, <code>full_o</code>, and <code>lm_head</code> in current form.</li>
+<li>Prefill <code>BLOCK_M=64</code> produced the largest stable improvement so far.</li>
+<li><code>BLOCK_M=128</code> looked good on 3 prompts but failed real stability smoke.</li>
+</ul>
+<h2 id="direction-a-prefill-attention-kernel-main-scoring-path">Direction A: Prefill Attention Kernel, Main Scoring Path</h2>
+<p>Priority: P0.</p>
+<p>Why:</p>
+<ul>
+<li>It is the only path that produced the jump from roughly high-60s to 79.</li>
+<li>It targets the long-context bottleneck directly.</li>
+<li>It is compliant kernel tuning, not semantic change.</li>
+</ul>
+<p>Files to inspect first:</p>
+<ul>
+<li><code>vllm_cscc_work/vllm/v1/attention/ops/prefix_prefill.py</code></li>
+<li><code>vllm_cscc_work/vllm/v1/attention/ops/triton_prefill_attention.py</code></li>
+<li><code>vllm_cscc_work/vllm/v1/attention/ops/triton_unified_attention.py</code></li>
+<li><code>vllm_cscc_work/vllm/v1/attention/backends/rocm_attn.py</code></li>
+</ul>
+<p>Next experiments:</p>
+<ol>
+<li>Keep safe default <code>BLOCK_M=64</code>.</li>
+<li>Tune around it, not away from it:</li>
+<li><code>BLOCK_N</code></li>
+<li><code>num_warps</code></li>
+<li><code>num_stages</code></li>
+<li>cache/unroll constants for GQA K/V reuse</li>
+<li>Check that all full-attention prefill variants actually hit the tuned path:</li>
+<li>pure prefill</li>
+<li>chunked prefill</li>
+<li>prefix/paged prefill</li>
+<li>Add shape-specific branches only for Qwen3.5 GQA conditions, not broad
+   global defaults.</li>
+</ol>
+<p>Do not:</p>
+<ul>
+<li>Re-enable <code>BLOCK_M=128</code> by default.</li>
+<li>Accept 3-prompt success as proof for this path.</li>
+<li>Change scheduler limits to make prefill look better.</li>
+</ul>
+<p>Minimum validation after container returns:</p>
+<ul>
+<li>4K-8K 3 prompts: startup and completion smoke.</li>
+<li>8K-16K 10 prompts: catches the <code>BLOCK_M=128</code> style instability.</li>
+<li>16K-32K 3 prompts: checks long-context TTFT/SLA direction.</li>
+</ul>
+<p>Current P0 candidate:</p>
+<ul>
+<li>Keep <code>BLOCK_M=64</code>.</li>
+<li>Add <code>VLLM_TRITON_PREFILL_TILE_SIZE=32/64</code> override.</li>
+<li>Use <code>TILE_SIZE=64</code> only when
+  <code>8192 &lt; max(max_seqlen_q, max_seqlen_k) &lt;= 16384</code>; keep 4K-8K and 16K-32K on
+  <code>32</code> by default.</li>
+<li>Launch the 2D unified attention kernel with <code>num_stages=1</code> to avoid DCU LDS
+  resource failures.</li>
+<li>Same-container A/B showed <code>8K-16K</code> improving from <code>9.45</code> to <code>11.61</code> tok/s
+  and <code>16K-32K</code> flat at about <code>9.05</code> tok/s. Cross-container absolute values are
+  not comparable to the historical <code>79.1109</code> safe score.</li>
+<li>Rationale for the narrowed band: the broad KV-length trigger submitted as
+  <code>1b7f156</code> improved official 8K-16K throughput but added <code>0.5974</code> accuracy
+  penalty and did not move official 16K-32K throughput. Do not expose the long
+  band to a different online-softmax tile partition unless it proves a real
+  score gain.</li>
+</ul>
+<h2 id="direction-b-decode-skinny-gemv-and-fusion">Direction B: Decode Skinny GEMV and Fusion</h2>
+<p>Priority: P1.</p>
+<p>Why:</p>
+<ul>
+<li>Decode remains important, but current simple shape expansion is exhausted.</li>
+<li>The correct target is effective HBM utilization and launch/fusion overhead,
+  not generic parameter tuning.</li>
+</ul>
+<p>Known good:</p>
+<ul>
+<li><code>gate_up (34816, 5120)</code> with LLMM1.</li>
+<li><code>mid_up (17408, 5120)</code> with LLMM1.</li>
+</ul>
+<p>Known bad or not worth enabling with current kernel:</p>
+<ul>
+<li><code>down (5120, 17408)</code></li>
+<li><code>full_qkv (8192, 5120)</code></li>
+<li><code>full_o / linear_out (5120, 6144)</code></li>
+<li><code>lm_head (248320, 5120)</code></li>
+</ul>
+<p>Important model-path finding:</p>
+<ul>
+<li><code>qwen3_5.py</code> imports <code>Qwen2MoeMLP as Qwen3NextMLP</code>.</li>
+<li>Therefore <code>qwen2_moe.py</code> MLP changes can affect Qwen3.5 dense layers.</li>
+<li>The current <code>LLMM1Silu</code> experiment is hard-coded for <code>(34816,5120)</code> and
+  should not be assumed correct until the live model config and weight shapes
+  are probed again inside the container.</li>
+</ul>
+<p>Next experiments:</p>
+<ol>
+<li>Probe exact Qwen3.5 dense MLP shapes from live model config and loaded
+   module weights.</li>
+<li>Microbench <code>LLMM1Silu</code> for those exact shapes.</li>
+<li>If microbench is positive, keep it behind
+   <code>VLLM_GFX936_FUSED_GATE_UP_SILU=1</code>.</li>
+<li>Smoke end-to-end before making it default.</li>
+</ol>
+<p>Do not:</p>
+<ul>
+<li>Enable LLMM1 on <code>down</code> again without a different kernel design.</li>
+<li>Add more LLMM1 shapes only because they look similar.</li>
+<li>Submit <code>LLMM1Silu</code> unless 8K-16K and 16K-32K show real end-to-end gain.</li>
+</ul>
+<h2 id="direction-c-runtime-int8-kv-cache">Direction C: Runtime INT8 KV Cache</h2>
+<p>Priority: P2 research branch, not immediate submit path.</p>
+<p>Why:</p>
+<ul>
+<li>It is compliant and could help long-context memory pressure.</li>
+<li>It is not a config-toggle feature in this tree.</li>
+<li>The risk is correctness/accuracy and dequant overhead.</li>
+</ul>
+<p>Current code evidence:</p>
+<ul>
+<li><code>csrc/cache_kernels.cu</code> has <code>reshape_and_cache_flash</code> with <code>k_scale/v_scale</code>
+  and supports scale shapes <code>[1]</code> or <code>[num_heads]</code>.</li>
+<li><code>csrc/rocm/attention.cu</code> ROCm attention dispatch explicitly handles <code>auto</code>
+  and <code>fp8/fp8_e4m3</code>, not a complete INT8 KV path.</li>
+<li><code>vllm/v1/attention/backends/rocm_attn.py</code> checks quantized cache mostly via
+  <code>kv_cache_dtype.startswith("fp8")</code>.</li>
+<li>ADR 0012 already found no hidden Hygon INT8 KV cache implementation; existing
+  INT8 ops are generic activation/communication utilities, not KV cache.</li>
+</ul>
+<p>Correct implementation shape:</p>
+<ol>
+<li>Cache write path:</li>
+<li>bf16 K/V -&gt; int8 K/V</li>
+<li>per-head or per-block scale</li>
+<li>no disk persistence</li>
+<li>Attention read path:</li>
+<li>fused int8 dequant inside attention kernel</li>
+<li>avoid a separate dequant kernel</li>
+<li>Metadata:</li>
+<li>scale tensors are runtime-only</li>
+<li>do not create reusable quantized cache files</li>
+</ol>
+<p>Expected benefit:</p>
+<ul>
+<li>Mostly 16K-32K.</li>
+<li>4K-8K may show little change because decode is dominated by weight IO.</li>
+</ul>
+<p>Do not:</p>
+<ul>
+<li>Use FP8 weight quantization.</li>
+<li>Use direct <code>--kv-cache-dtype fp8</code> as a shortcut; it already failed on q-scale
+  constraints and FP8 on this card/path is risky.</li>
+<li>Treat <code>scripts/run_fp8_smoke.sh</code> as a submit path.</li>
+</ul>
+<h2 id="direction-d-aiter-backend">Direction D: AITER Backend</h2>
+<p>Priority: paused.</p>
+<p>Why:</p>
+<ul>
+<li>Import can be fixed with careful <code>LD_LIBRARY_PATH</code>, but backend behavior was
+  not stable enough.</li>
+<li><code>ROCM_AITER_FA</code> did not become the main text backend in observed logs.</li>
+<li><code>ROCM_AITER_UNIFIED_ATTENTION</code> needs <code>--block-size 16</code> to get past one KV
+  issue, then still disappeared during model load.</li>
+</ul>
+<p>Current decision:</p>
+<ul>
+<li>Revert default-on AITER changes before any submit.</li>
+<li>Only revisit in a clean branch and clean container with a single
+  start-wait-bench-stop command, never as mixed dirty default.</li>
+</ul>
+<h2 id="direction-e-gdn-linear-attention">Direction E: GDN / Linear Attention</h2>
+<p>Priority: P3.</p>
+<p>Why:</p>
+<ul>
+<li>Qwen3.5 hybrid architecture has many linear-attention/GDN layers, so this may
+  matter.</li>
+<li>But the obvious chunk-size 128 attempt is structurally unsupported:
+  <code>solve_tril</code> asserts chunk sizes in <code>[16, 32, 64]</code>.</li>
+</ul>
+<p>Next experiments:</p>
+<ul>
+<li>Stay within chunk size 64.</li>
+<li>Inspect supported FLA/GDN kernels for launch overhead or shape-specific paths.</li>
+<li>Only proceed after prefill and decode-fusion branches are cleaner.</li>
+</ul>
+<h2 id="container-recovery-execution-order">Container Recovery Execution Order</h2>
+<p>When a new container is available:</p>
+<ol>
+<li>Copy or mount only the safe line first:</li>
+<li><code>vllm_cscc_work</code> at <code>2c73297</code></li>
+<li>no dirty AITER default-on files</li>
+<li>Confirm model config and actual loaded MLP shapes:</li>
+<li>run <code>tools/codex_qwen35_config_probe.py</code></li>
+<li>add a small module-shape probe if needed</li>
+<li>Run one baseline smoke using the safe line:</li>
+<li>same bench command family as official scoring</li>
+<li>proxy env unset</li>
+<li>Start P0 prefill branch:</li>
+<li>only change one kernel parameter group around <code>BLOCK_M=64</code></li>
+<li>validate with short smoke, then 8K-16K 10 prompts</li>
+<li>Start P1 decode-fusion branch only after P0 is either positive or exhausted.</li>
+</ol>
+<h2 id="2026-07-09-active-submit-and-experiment-lines">2026-07-09 Active Submit And Experiment Lines</h2>
+<p>Scoring <code>main</code> on GitLab:</p>
+<ul>
+<li><code>3e2df97 Add long prefill tile64 policy switch</code></li>
+<li>Default behavior keeps the broad long-prefill <code>TILE_SIZE=64</code> policy
+  (<code>max(max_seqlen_q, max_seqlen_k) &gt; 8192</code>).</li>
+<li>Runtime policy switch:</li>
+<li><code>VLLM_TRITON_PREFILL_TILE64_POLICY=broad</code> default, use 64 for all &gt;8K.</li>
+<li><code>VLLM_TRITON_PREFILL_TILE64_POLICY=mid</code>, use 64 only for 8K-16K.</li>
+<li><code>VLLM_TRITON_PREFILL_TILE64_POLICY=long</code>, use 64 only for &gt;16K.</li>
+<li><code>VLLM_TRITON_PREFILL_TILE64_POLICY=off</code>, keep prefill tile 32.</li>
+</ul>
+<p>Latest official feedback on this line:</p>
+<ul>
+<li>Score: <code>79.0567</code></li>
+<li>Throughput: <code>4K-8K=15.97</code>, <code>8K-16K=14.82</code>, <code>16K-32K=11.04</code></li>
+<li>Penalties: <code>SLA=0.0</code>, <code>accuracy=0.5974</code></li>
+<li>Working hypothesis: the broad <code>TILE_SIZE=64</code> policy changes the online
+  softmax reduction partition for long prefill. It improves the 8K-16K
+  throughput band, but the official 16K-32K throughput did not move, so exposing
+  the 16K-32K band to a different reduction order is not currently justified.</li>
+</ul>
+<p>Accuracy-risk reduction branch:</p>
+<ul>
+<li>Branch: <code>experiment/tile64-mid-default-20260709</code></li>
+<li>Commit: <code>3b0e230 Default long prefill tile64 policy to mid</code></li>
+<li>Change: keep the same policy switch, but default to <code>mid</code> and fall back to
+  <code>mid</code> for invalid env values.</li>
+<li>Intended behavior: <code>TILE_SIZE=64</code> only for <code>8192 &lt; max(q_len, kv_len) &lt;= 16384</code>;
+  4K-8K and 16K-32K use <code>32</code> by default.</li>
+<li>Status: static syntax/import check only. Needs container smoke before promote
+  to GitLab <code>main</code>.</li>
+</ul>
+<p>Unsubmitted experiment branch:</p>
+<ul>
+<li><code>experiment/gdn-causal-conv-block-20260709</code></li>
+<li>Commit: <code>76827e1 Experiment GDN causal conv token block</code></li>
+<li>Change: makes GDN prefill <code>causal_conv1d</code> token block selectable via
+  <code>VLLM_GDN_CAUSAL_CONV1D_BLOCK_M=8/16/32</code>, defaulting to <code>16</code>.</li>
+<li>Do not promote this branch to <code>main</code> until at least a 4K-8K smoke completes.</li>
+<li>Existing FLA env candidate: <code>FLA_GDN_FIX_BT=1</code> forces GDN <code>chunk_fwd_o</code> to use
+  <code>BT=64</code> instead of adapting to <code>min(64, max(16, next_power_of_2(T)))</code>.
+  This should be tested as an env-only A/B before adding new GDN code.</li>
+</ul>
+<p>Stacked GDN experiment branch:</p>
+<ul>
+<li>Branch: <code>experiment/tile64-mid-gdn-conv-20260709</code></li>
+<li>Commit: <code>f05e2bb Experiment GDN causal conv token block</code></li>
+<li>Base: <code>3b0e230</code> (<code>mid</code> tile64 default), not the broad policy.</li>
+<li>Change: makes GDN prefill causal-conv token block selectable via
+  <code>VLLM_GDN_CAUSAL_CONV1D_BLOCK_M=8/16/32</code>, defaulting to <code>16</code>.</li>
+<li>Status: static syntax/import check only. Do not promote before smoke.</li>
+</ul>
+<p>Stacked GDN chunk experiment branch:</p>
+<ul>
+<li>Branch: <code>experiment/tile64-mid-gdn-chunk-20260709</code></li>
+<li>Commit: <code>0f49eea Add runtime GDN chunk size knob</code></li>
+<li>Base: <code>f05e2bb</code> (<code>mid</code> tile64 + GDN causal-conv block knob).</li>
+<li>Change: makes GDN/FLA chunk size selectable via
+  <code>VLLM_GDN_CHUNK_SIZE=16/32/64</code>, defaulting to <code>64</code>.</li>
+<li>Risk: chunk size changes the GDN recurrence grouping and can affect both
+  performance and numerics. Treat this as smoke-only until it beats the mid
+  default on the same container.</li>
+</ul>
+<p>Env-only FLA solve-tril candidate:</p>
+<ul>
+<li>Existing code already supports <code>FLA_TRIL_PRECISION=ieee/tf32</code> in
+  <code>vllm/model_executor/layers/fla/ops/solve_tril.py</code>.</li>
+<li>This is an import/start-time environment knob, so it must be set before
+  starting vLLM, not only before running <code>vllm bench serve</code>.</li>
+<li>Expected upside is limited but cheap to test on the GDN path. Accuracy risk is
+  non-zero because it changes triangular-solve math precision, so do not make
+  <code>tf32</code> default without official-style smoke and a no-penalty submission check.</li>
+</ul>
+<p>Decode fusion experiment branch:</p>
+<ul>
+<li>Branch: <code>experiment/mid-llmm1silu-20260709</code></li>
+<li>Commit: <code>736c97a Experiment gfx936 fused gate up silu</code></li>
+<li>Base: <code>3b0e230</code> (<code>mid</code> tile64 default).</li>
+<li>Change: adds a ROCm custom op <code>LLMM1Silu</code> and routes Qwen3.5 dense MLP
+  single-token decode through fused <code>gate_up + silu_and_mul</code> only when
+  <code>VLLM_GFX936_FUSED_GATE_UP_SILU=1</code>.</li>
+<li>Guardrails:</li>
+<li>Default is off.</li>
+<li>Runtime path checks gfx936, no quant config, no expert gate, exact
+    Qwen3.5 dense MLP dimensions, exact weight shape <code>(34816, 5120)</code>, no bias,
+    and <code>x</code> is a single token.</li>
+<li>Status: Python syntax check only. Needs HIP/C++ build, <code>tools/codex_llmm1_microbench.py</code>,
+  then 4K-8K smoke before it can be considered for submit.</li>
+</ul>
+<p>Prefill attention launch-knob experiment branch:</p>
+<ul>
+<li>Branch: <code>experiment/mid-attn-launch-knobs-20260709</code></li>
+<li>Commit: <code>f4d92ab Experiment prefill attention launch knobs</code></li>
+<li>Base: <code>3b0e230</code> (<code>mid</code> tile64 default).</li>
+<li>Change: adds import/start-time env knobs to <code>triton_unified_attention.py</code>:</li>
+<li><code>VLLM_TRITON_PREFILL_NUM_WARPS=1/2/4/8</code></li>
+<li><code>VLLM_TRITON_PREFILL_DOT_PRECISION=ieee/tf32</code></li>
+<li>Default behavior is unchanged:</li>
+<li>No <code>num_warps</code> is passed unless the env is set.</li>
+<li><code>DOT_PRECISION=None</code> matches existing Triton default.</li>
+<li>Decode 3D path is pinned to <code>DOT_PRECISION=None</code>; the prefill env does not
+    alter decode numerics.</li>
+<li>Status: Python syntax check only. Needs 8K-16K smoke first because that is
+  where <code>mid</code> tile64 currently gives benefit.</li>
+</ul>
+<p>GDN dot-precision experiment branch:</p>
+<ul>
+<li>Branch: <code>experiment/mid-gdn-dot-precision-20260709</code></li>
+<li>Commit: <code>b8b4fda Experiment GDN dot precision knob</code></li>
+<li>Base: <code>0f49eea</code> (<code>mid</code> tile64 + GDN causal-conv and chunk-size knobs).</li>
+<li>Change: adds import/start-time env knob <code>FLA_GDN_DOT_PRECISION=ieee/tf32</code>
+  for the main GDN/FLA chunk path:</li>
+<li><code>chunk_scaled_dot_kkt.py</code></li>
+<li><code>wy_fast.py</code></li>
+<li><code>chunk_o.py</code></li>
+<li>Default behavior:</li>
+<li>Unset env keeps most dots on Triton default precision.</li>
+<li>The <code>wy_fast</code> dot that was explicitly <code>allow_tf32=False</code> is represented as
+    <code>input_precision="ieee"</code> by default.</li>
+<li>Risk: <code>tf32</code> may change numerics in the linear-attention recurrence. Treat as
+  a smoke-only candidate until official-style accuracy confirms it.</li>
+</ul>
+<p>Combined knob experiment branch:</p>
+<ul>
+<li>Branch: <code>experiment/mid-combo-knobs-20260709</code></li>
+<li>Commit: <code>ef8d787 Experiment gfx936 fused gate up silu</code></li>
+<li>Base: <code>3b0e230</code>, then stacked:</li>
+<li>GDN causal-conv block knob</li>
+<li>GDN chunk-size knob</li>
+<li>GDN dot-precision knob</li>
+<li>prefill attention launch knobs</li>
+<li>gfx936 <code>LLMM1Silu</code> decode fusion</li>
+<li>Purpose: reduce branch switching and recompilation once the container is
+  available. Defaults remain conservative/off, so this branch can first be
+  smoked with no experimental env enabled, then individual knobs can be turned
+  on one at a time.</li>
+<li>Do not promote this branch to <code>main</code> as a bundle. Only promote a specific
+  knob after same-container A/B and official-style smoke.</li>
+</ul>
+<p>Fast recovery smoke sequence after container access returns:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Preferred one-shot sequence. This restarts vLLM between cases because all</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="c1"># tested env knobs are server-import-time settings.</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nv">RUN_PROFILE</span><span class="o">=</span>quick<span class="w"> </span>bash<span class="w"> </span>/public/home/xdzs2026_c087/Govinda/tools/codex_run_p0_ab_sequence.sh
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="c1"># To focus only on GDN after the mid branch survives:</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="nv">RUN_PROFILE</span><span class="o">=</span>gdn<span class="w"> </span>bash<span class="w"> </span>/public/home/xdzs2026_c087/Govinda/tools/codex_run_p0_ab_sequence.sh
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="c1"># To test the decode fusion branch after the mid branch survives:</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="nv">RUN_PROFILE</span><span class="o">=</span>decode<span class="w"> </span>bash<span class="w"> </span>/public/home/xdzs2026_c087/Govinda/tools/codex_run_p0_ab_sequence.sh
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="c1"># To test prefill attention launch knobs:</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="nv">RUN_PROFILE</span><span class="o">=</span>attn<span class="w"> </span>bash<span class="w"> </span>/public/home/xdzs2026_c087/Govinda/tools/codex_run_p0_ab_sequence.sh
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="c1"># To reduce branch switching and test default-off knobs from one source tree:</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="nv">RUN_PROFILE</span><span class="o">=</span>combo<span class="w"> </span>bash<span class="w"> </span>/public/home/xdzs2026_c087/Govinda/tools/codex_run_p0_ab_sequence.sh
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="c1"># After any sequence, the runner calls this automatically. It can also be run</span>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="c1"># manually on an existing output directory:</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>python3<span class="w"> </span>/public/home/xdzs2026_c087/Govinda/tools/codex_summarize_ab_results.py<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$OUT_ROOT</span><span class="s2">&quot;</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="c1"># Manual commands remain below for single-case debugging.</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="c1"># Inside container. These env vars are read when the vLLM server process imports</span>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="c1"># the modules, so set them before starting vLLM. Setting them only before</span>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="c1"># `vllm bench serve` does not change the already-running server.</span>
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="c1">#</span>
+</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="c1"># After deploying the selected vLLM source and starting vLLM, the smoke helper</span>
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="c1"># prints both the running vLLM PID and the server-side env values from</span>
+</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="c1"># /proc/$PID/environ to avoid false A/B tests.</span>
+</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="c1">#</span>
+</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="c1"># Confirm the current GitLab main candidate first.</span>
+</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="nv">RANGE</span><span class="o">=</span><span class="m">4</span>-8K<span class="w"> </span><span class="nv">NUM_PROMPTS</span><span class="o">=</span><span class="m">3</span><span class="w"> </span>bash<span class="w"> </span>/public/home/xdzs2026_c087/Govinda/tools/codex_smoke_p0_gdn.sh
+</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>
+</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a><span class="c1"># Then test the accuracy-risk reduction branch:</span>
+</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a><span class="c1">#   REF=experiment/tile64-mid-default-20260709</span>
+</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a><span class="c1">#   server env: VLLM_TRITON_PREFILL_TILE64_POLICY=mid</span>
+</span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a><span class="nv">RANGE</span><span class="o">=</span><span class="m">4</span>-8K<span class="w"> </span><span class="nv">NUM_PROMPTS</span><span class="o">=</span><span class="m">3</span><span class="w"> </span>bash<span class="w"> </span>/public/home/xdzs2026_c087/Govinda/tools/codex_smoke_p0_gdn.sh
+</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a>
+</span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a><span class="c1"># If startup and 4K-8K survive, test the official-benefit band:</span>
+</span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a><span class="nv">RANGE</span><span class="o">=</span><span class="m">8</span>-16K<span class="w"> </span><span class="nv">NUM_PROMPTS</span><span class="o">=</span><span class="m">3</span><span class="w"> </span>bash<span class="w"> </span>/public/home/xdzs2026_c087/Govinda/tools/codex_smoke_p0_gdn.sh
+</span><span id="__span-0-41"><a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a>
+</span><span id="__span-0-42"><a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a><span class="c1"># If testing the GDN experiment branch, restart vLLM with each server env below,</span>
+</span><span id="__span-0-43"><a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a><span class="c1"># then run the same smoke command. First run baseline behavior on that branch:</span>
+</span><span id="__span-0-44"><a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a><span class="c1">#   REF=experiment/tile64-mid-gdn-conv-20260709</span>
+</span><span id="__span-0-45"><a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a><span class="c1">#   server env: VLLM_TRITON_PREFILL_TILE64_POLICY=mid VLLM_GDN_CAUSAL_CONV1D_BLOCK_M=8</span>
+</span><span id="__span-0-46"><a id="__codelineno-0-46" name="__codelineno-0-46" href="#__codelineno-0-46"></a><span class="nv">RANGE</span><span class="o">=</span><span class="m">4</span>-8K<span class="w"> </span><span class="nv">NUM_PROMPTS</span><span class="o">=</span><span class="m">3</span><span class="w"> </span>bash<span class="w"> </span>/public/home/xdzs2026_c087/Govinda/tools/codex_smoke_p0_gdn.sh
+</span><span id="__span-0-47"><a id="__codelineno-0-47" name="__codelineno-0-47" href="#__codelineno-0-47"></a>
+</span><span id="__span-0-48"><a id="__codelineno-0-48" name="__codelineno-0-48" href="#__codelineno-0-48"></a><span class="c1"># Then test the experimental default:</span>
+</span><span id="__span-0-49"><a id="__codelineno-0-49" name="__codelineno-0-49" href="#__codelineno-0-49"></a><span class="c1">#   server env: VLLM_TRITON_PREFILL_TILE64_POLICY=mid VLLM_GDN_CAUSAL_CONV1D_BLOCK_M=16</span>
+</span><span id="__span-0-50"><a id="__codelineno-0-50" name="__codelineno-0-50" href="#__codelineno-0-50"></a><span class="nv">RANGE</span><span class="o">=</span><span class="m">4</span>-8K<span class="w"> </span><span class="nv">NUM_PROMPTS</span><span class="o">=</span><span class="m">3</span><span class="w"> </span>bash<span class="w"> </span>/public/home/xdzs2026_c087/Govinda/tools/codex_smoke_p0_gdn.sh
+</span><span id="__span-0-51"><a id="__codelineno-0-51" name="__codelineno-0-51" href="#__codelineno-0-51"></a>
+</span><span id="__span-0-52"><a id="__codelineno-0-52" name="__codelineno-0-52" href="#__codelineno-0-52"></a><span class="c1"># Env-only GDN output-kernel BT test, no source change beyond current branch:</span>
+</span><span id="__span-0-53"><a id="__codelineno-0-53" name="__codelineno-0-53" href="#__codelineno-0-53"></a><span class="c1">#   server env: VLLM_TRITON_PREFILL_TILE64_POLICY=mid VLLM_GDN_CAUSAL_CONV1D_BLOCK_M=16 FLA_GDN_FIX_BT=1</span>
+</span><span id="__span-0-54"><a id="__codelineno-0-54" name="__codelineno-0-54" href="#__codelineno-0-54"></a><span class="nv">RANGE</span><span class="o">=</span><span class="m">4</span>-8K<span class="w"> </span><span class="nv">NUM_PROMPTS</span><span class="o">=</span><span class="m">3</span><span class="w"> </span>bash<span class="w"> </span>/public/home/xdzs2026_c087/Govinda/tools/codex_smoke_p0_gdn.sh
+</span><span id="__span-0-55"><a id="__codelineno-0-55" name="__codelineno-0-55" href="#__codelineno-0-55"></a>
+</span><span id="__span-0-56"><a id="__codelineno-0-56" name="__codelineno-0-56" href="#__codelineno-0-56"></a><span class="c1"># Only if 4K-8K does not regress or crash:</span>
+</span><span id="__span-0-57"><a id="__codelineno-0-57" name="__codelineno-0-57" href="#__codelineno-0-57"></a><span class="c1">#   server env: same winning 4K-8K setting</span>
+</span><span id="__span-0-58"><a id="__codelineno-0-58" name="__codelineno-0-58" href="#__codelineno-0-58"></a><span class="nv">RANGE</span><span class="o">=</span><span class="m">8</span>-16K<span class="w"> </span><span class="nv">NUM_PROMPTS</span><span class="o">=</span><span class="m">3</span><span class="w"> </span>bash<span class="w"> </span>/public/home/xdzs2026_c087/Govinda/tools/codex_smoke_p0_gdn.sh
+</span></code></pre></div>
+<h2 id="suggested-prompts-for-claudeteammates">Suggested Prompts For Claude/Teammates</h2>
+<p>Prompt for prefill worker:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>你只研究 vllm_cscc_work 的 prefill attention kernel，不碰 AITER、不碰 scheduler flag、不碰权重/采样。安全线是 2c73297，当前稳定优化是 Qwen3.5 full-attention prefill BLOCK_M=64。请阅读 prefix_prefill.py、triton_prefill_attention.py、triton_unified_attention.py、rocm_attn.py，找出哪些 prefill 路径没有吃到 BLOCK_M=64 或 K/V reuse 优化。输出具体文件/函数/候选改动和最小 smoke 方案，不要直接改代码。
+</span></code></pre></div>
+<p>Prompt for decode worker:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>你只研究 decode skinny GEMV/fusion，不碰 prefill、不碰 AITER、不碰 KV dtype。安全线是 2c73297。已知 LLMM1 对 gate_up/mid_up 有效，对 down/full_qkv/full_o/lm_head 无效。请确认 Qwen3.5 实际 MLP shape 和 qwen3_5.py -&gt; Qwen2MoeMLP 调用链，评估 LLMM1Silu 是否应该按真实 shape 重写。输出 microbench 脚本和接入点，不要默认启用。
+</span></code></pre></div>
+<p>Prompt for KV quant worker:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>你只做 INT8 KV cache 可行性调研，不写持久化量化、不碰权重、不改 scheduler。请阅读 csrc/cache_kernels.cu、csrc/rocm/attention.cu、vllm/v1/attention/backends/rocm_attn.py、vllm/v1/kv_cache_interface.py，判断要实现 runtime per-head/per-block INT8 KV 需要改哪些 cache 写入和 attention 读取路径。输出设计和最小 correctness 测试，不接入提交线。
+</span></code></pre></div>
+<h2 id="submit-gate">Submit Gate</h2>
+<p>Before any GitLab submit:</p>
+<ol>
+<li><code>git -C vllm_cscc_work status --short</code> must contain only intended diffs.</li>
+<li><code>vllm/envs.py</code> must not default-enable AITER.</li>
+<li>No FP8 weight path or direct risky KV FP8 flag should be default.</li>
+<li>Smoke must include at least:</li>
+<li>4K-8K quick completion</li>
+<li>8K-16K 10 prompts for stability</li>
+<li>16K-32K quick completion</li>
+<li>Keep official-result files separate from <code>_nonbench_</code> or local smoke result
+   files.</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 Recoletas and Govinda contributors · MIT License
+    </div>
+  
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/Recoletas/Govinda" target="_blank" rel="noopener" title="GitHub 仓库" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.sections", "navigation.index", "navigation.top", "navigation.footer", "navigation.expand", "search.suggest", "search.highlight", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,2788 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="2026 全国大学生计算机系统能力大赛 · 智能计算创新设计赛参赛项目">
+      
+      
+      
+        <link rel="canonical" href="https://recoletas.github.io/Govinda/specs/2026-06-09-qwen-inference-optimization-design/">
+      
+      
+        <link rel="prev" href="../../learning/">
+      
+      
+        <link rel="next" href="../../superpowers/plans/2026-06-09-qwen-dcu-inference-optimization/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>设计文档 - Govinda — Qwen3.5-27B DCU 推理优化</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#2026-06-09-qwen" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Govinda — Qwen3.5-27B DCU 推理优化" class="md-header__button md-logo" aria-label="Govinda — Qwen3.5-27B DCU 推理优化" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Govinda — Qwen3.5-27B DCU 推理优化
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              设计文档
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换到深色"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="切换到深色" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="切换到浅色"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="切换到浅色" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Recoletas/Govinda" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Recoletas/Govinda
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Govinda — Qwen3.5-27B DCU 推理优化" class="md-nav__button md-logo" aria-label="Govinda — Qwen3.5-27B DCU 推理优化" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Govinda — Qwen3.5-27B DCU 推理优化
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Recoletas/Govinda" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Recoletas/Govinda
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    首页
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    学习
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    学习
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../learning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    学习资源与方法
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    设计
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    设计
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    设计文档
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    设计文档
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Context
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-phase-0-phase-1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. 待验证未知项（Phase 0 硬卡门，确认前不开 Phase 1）
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. 用户决策（已确认）
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. 边界（明确不做的）
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. 关键技术决策
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. 关键技术决策">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 决策表
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-vllm-0181-attention-backend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 vLLM 0.18.1 attention backend 真实机制（已源码验证）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-flashattention-rocm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 FlashAttention ROCm 真相（已验证）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-amd-rocm-fp8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 AMD ROCm FP8 支持（已验证）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#55-triton-dcu-p0-case" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.5 Triton + DCU 真相（部分未验证，需 P0 跑最小 case）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-3-stretch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        优化方向砍到 3 必做 + 3 stretch
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-skills-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. 可用 Skills &amp; Tools
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. 团队 &amp; 角色
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. 团队 &amp; 角色">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        决策机制
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        协作机制
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. 文档架构
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-phase" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. 推进原则（软 Phase，硬卡门）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. 推进原则（软 Phase，硬卡门）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        核心原则
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 划分（9 周预算）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p0" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P0 离线期间具体任务
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 跳过规则（硬化）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. 风险与对策
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-phase-5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. 完工标准（Phase 5 结束）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. 完工标准（Phase 5 结束）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#12-15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        赛题第 12-15 条提交材料清单
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. 剩余硬卡门
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    计划
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    计划
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superpowers/plans/2026-06-09-qwen-dcu-inference-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    实施计划
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    决策
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    决策
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../decisions/0001-dcu-sku/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0001 DCU SKU
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../decisions/0002-testset-access/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0002 测试集访问
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../decisions/0003-baseline-source/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0003 Baseline 数字来源
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../decisions/0006-vllm-readmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0006 vLLM 0.18.1 读图
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../decisions/0006a-docker-build/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0006a Docker 构建
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../decisions/0006b-container-instance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0006b 容器实例 + vllm_cscc
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../decisions/0007-coupling-matrix/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0007 编译决策矩阵
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../decisions/0008-blocksize-hypothesis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0008 块大小假设
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../decisions/0009-kv-quant-strategy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0009 KV 量化策略
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../decisions/0010-attention-backend/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0010 Attention backend 选型
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../decisions/0011-p0-research-output/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0011 P0 末调研输出
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../decisions/0012-vllm-cscc-vs-upstream/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0012 vllm_cscc vs upstream
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../decisions/0013-torch-compile-roi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0013 torch.compile ROI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../decisions/0013-competition-rules-interpretation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0013a 比赛规则解读
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../decisions/0014-dcu-startup-optimization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    0014 DCU 冷启动优化
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    进度
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    进度
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../weekly/progress/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Weekly Standup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    资源
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    资源
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../AGENTS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AI 协作
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ai-prompts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AI Prompts 库
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Context
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-phase-0-phase-1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. 待验证未知项（Phase 0 硬卡门，确认前不开 Phase 1）
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. 用户决策（已确认）
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. 边界（明确不做的）
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. 关键技术决策
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. 关键技术决策">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 决策表
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-vllm-0181-attention-backend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 vLLM 0.18.1 attention backend 真实机制（已源码验证）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-flashattention-rocm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 FlashAttention ROCm 真相（已验证）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-amd-rocm-fp8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 AMD ROCm FP8 支持（已验证）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#55-triton-dcu-p0-case" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.5 Triton + DCU 真相（部分未验证，需 P0 跑最小 case）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-3-stretch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        优化方向砍到 3 必做 + 3 stretch
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-skills-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. 可用 Skills &amp; Tools
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. 团队 &amp; 角色
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. 团队 &amp; 角色">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        决策机制
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        协作机制
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. 文档架构
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-phase" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. 推进原则（软 Phase，硬卡门）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. 推进原则（软 Phase，硬卡门）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        核心原则
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 划分（9 周预算）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#p0" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        P0 离线期间具体任务
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 跳过规则（硬化）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. 风险与对策
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-phase-5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. 完工标准（Phase 5 结束）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. 完工标准（Phase 5 结束）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#12-15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        赛题第 12-15 条提交材料清单
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. 剩余硬卡门
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="2026-06-09-qwen">2026-06-09 Qwen 推理服务优化比赛 · 设计文档</h1>
+<blockquote>
+<p><strong>状态</strong>: 历史设计文档 (2026-06-09 定稿), P0/P1/P2/P3/P4/P5 阶段已走完
+<strong>当前状态 (2026-07-01)</strong>: 官方 baseline 已 AC (4-8K=12.95 / 8-16K=10.03 / 16-32K=5.75 tok/s, 总分 59.9119 / rank 56/76, SLA=0 精度=0). 剩 14 天优化窗口.
+<strong>当前操作指南</strong>: 看 <a href="../../AGENTS.md"><code>AGENTS.md</code> 当前阶段</a> + <a href="../../../HANDOVER.md">HANDOVER.md</a> (本地) + <a href="../../decisions/0003-baseline-source/">ADR 0003 baseline 台账</a> + <a href="../../decisions/0008-blocksize-hypothesis/">ADR 0008 sweep 计划</a>
+<strong>作者</strong>：队长 recoletas · <strong>最后更新</strong>：2026-06-09
+<strong>配套</strong>：<a href="../../AGENTS.md"><code>AGENTS.md</code></a> · <a href="../../README.md"><code>README.md</code></a></p>
+</blockquote>
+<hr />
+<h2 id="1-context">1. Context</h2>
+<p>参加 2026 全国大学生计算机系统能力大赛 · 智能计算创新设计赛（先导杯），赛题为"基于国产加速卡（DCU）的 Qwen3.5-27B 推理服务优化"。初赛单卡、并发=1、长上下文场景（4k-32k 三档）。<strong>团队 4 人均为新人，9.5 周时间预算（从 2 周后有时间为起算点），目标稳定拿 60-75 / 100 分而非冲击高分</strong>。</p>
+<p><strong>对手画像假设</strong>：先导杯强校如清华/中科院/上交战队多为成熟团队，<strong>不</strong>与头部争 90+ — 60-75 是合理对位，避免中途焦虑动方案。</p>
+<h2 id="2-phase-0-phase-1">2. 待验证未知项（<strong>Phase 0 硬卡门</strong>，确认前不开 Phase 1）</h2>
+<table>
+<thead>
+<tr>
+<th>项</th>
+<th>不确定点</th>
+<th>影响</th>
+<th>验证方法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>DCU SKU</strong></td>
+<td>K100 (CDNA2 / gfx90a) 还是 Z100 (CDNA3 / gfx942)</td>
+<td>FP8 KV cache 是否可行（CDNA2 无原生 FP8，CDNA3 有）</td>
+<td><code>rocminfo</code> 或 <code>python -c "import torch; print(torch.cuda.get_device_properties(0))"</code></td>
+</tr>
+<tr>
+<td><strong>官方 baseline 数字</strong></td>
+<td>赛方是否下发给我们，还是只能自测</td>
+<td>60-75 估算是否成立；SLA 自比较还是绝对值</td>
+<td>询问赛方 / 赛方最新通知</td>
+</tr>
+<tr>
+<td><strong>LongBench / RULER 测试集</strong></td>
+<td>开发期可下载 vs 仅评测平台可见</td>
+<td>1.05× 提速回退规则能否本地验证</td>
+<td>询问赛方 / 赛方文档</td>
+</tr>
+<tr>
+<td><strong>vLLM 0.18.1 custom backend 路径</strong></td>
+<td>机制已源码验证（§5.2：<code>AttentionBackendEnum</code> + <code>register_backend()</code> + 平台 priority list），<strong>但 DCU 上能否成功 import / 注册 / 端到端跑通未验证</strong></td>
+<td>stretch 4-5 是否可行</td>
+<td>DCU 上手后跑 1 个最小 backend 注册 smoke test（继承 <code>TritonAttentionBackend</code> 改 1 行，跑通 <code>vllm bench serve</code> 1 个 prompt）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>任一项不利 → 回到 §5 重新选型。这是 P0 的硬卡门。</strong></p>
+<h2 id="3">3. 用户决策（已确认）</h2>
+<table>
+<thead>
+<tr>
+<th>项</th>
+<th>决策</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>项目仓库</td>
+<td><code>/home/recoletas/Govinda/</code>（GitHub: <code>Recoletas/Govinda</code>）</td>
+</tr>
+<tr>
+<td>团队组成</td>
+<td>4 人队（队长 + 3 队员），全新人（CS 课程级 DL）</td>
+</tr>
+<tr>
+<td>时间预算</td>
+<td>8-10 周，从"队长有时间的那个点"起算；前 2 周完全离线</td>
+</tr>
+<tr>
+<td>DCU 硬件</td>
+<td>1-2 周后到位；之前无硬件</td>
+</tr>
+<tr>
+<td>AI 用法</td>
+<td>当开发助手（写代码/调研/文档），<strong>不接进推理路径</strong></td>
+</tr>
+<tr>
+<td>角色分配</td>
+<td>队长 = Profiling &amp; 集成 owner（5-10h/周）；其余 3 人分 Kernel / vLLM / 浮动支持</td>
+</tr>
+<tr>
+<td>文档站</td>
+<td>mkdocs-material + GitHub Pages 自动部署</td>
+</tr>
+<tr>
+<td>License</td>
+<td>MIT</td>
+</tr>
+<tr>
+<td>预期分数</td>
+<td>60-75 / 100，不熔断，精度扣分 ≤ 3%</td>
+</tr>
+</tbody>
+</table>
+<h2 id="4">4. 边界（明确<strong>不</strong>做的）</h2>
+<p><strong>赛题原文</strong>（PDF P3 第 7 条）已明确禁止项，spec 不增不减：</p>
+<ul>
+<li>❌ 修改采样参数、截断输入、跳过长样本、过滤困难样本、<strong>跳过层</strong>（PDF P3.1）</li>
+<li>❌ 预缓存测试集与答案、预生成中间结果（PDF P3.2）</li>
+<li>❌ 绕开统一服务接口 / 评测流程 / 资源统计路径；引入外援模型（PDF P3.3）</li>
+<li>❌ 严禁修改模型结构、替换权重、改变推理语义或输出口径；后训练/蒸馏/微调（PDF P3.3.(1)）</li>
+<li>❌ <strong>量化操作边界</strong>（PDF P3.3.(2)）：权重加载前/后、服务初始化、正式推理前对权重的<strong>持久化</strong>量化、结构化剪枝、权重重排压缩、<strong>模型图重构</strong>（指<strong>权重层级的图重写</strong>，如 ONNX 重导出 / TensorRT engine 持久化；<strong>不</strong>指运行时 cudagraph / torch.compile graph capture）、模型格式转换、可复用量化权重缓存</li>
+<li>❌ <strong>任何形式剪枝</strong>（PDF P3.3.(3)）：结构化 / 非结构化 / 动态通道跳过 / 动态层跳过 / 注意力头裁剪 / token pruning / early-exit</li>
+<li>❌ 推理过程生成可复用新模型 / 量化 / 剪枝 / 压缩权重文件（PDF P3.3.(4)）</li>
+<li>❌ <strong>batch scheduler 相关</strong>（PDF P5 lock-list）：<code>--max-model-len</code> / <code>--max-num-seqs</code> / <code>--max-num-batched-tokens</code> / 其它 batch scheduler 参数 + vLLM 内部 <code>v1/core/sched/*.py</code> 代码修改</li>
+<li>❌ 投机解码：draft model / MTP / 多头预测 / 外挂小模型 / 自训练预测器 / 早退 draft / 预生成 token 缓存（PDF P5 锁）</li>
+<li>❌ 改 bench percentile 统计口径 / 结果保存 / 解析脚本（PDF P5 锁）</li>
+<li>❌ 改服务接口：served-model-name / API 路径 / 请求响应格式 / host:port（PDF P5 锁）</li>
+</ul>
+<p><strong>赛题原文</strong>（PDF P2 + P3.3.(2) 括号 + P6 + P7.3）已明确<strong>允许</strong>：</p>
+<ul>
+<li>✅ 选手可叠加自定义层（PDF P2）：<strong>安装 Python 包、编译 custom kernel</strong>（在容器内，<strong>不</strong>从外网下载）</li>
+<li>✅ <strong>推理过程中非持久化、算子级低精度</strong>（PDF P3.3.(2) 括号）：激活值动态量化、KV Cache 量化、kernel 内部临时类型转换、低精度矩阵乘法、<strong>Attention 内核优化</strong></li>
+<li>✅ KV Cache 分配机制、显存预算、块管理策略优化（PDF P6.2）</li>
+<li>✅ Decode 阶段调度深度定制（PDF P6.1，<strong>注</strong>：与"batch scheduler 代码锁定"是 attention/sampling 调度，非 batch scheduler）</li>
+<li>✅ DCU 资源组织调度适配（PDF P6.3）</li>
+</ul>
+<p><strong>spec 自身硬约束</strong>（赛题 + 团队新人约束合并）：
+- 4 新人时间预算不支持"从零写新 attention backend"；优先复用 vLLM 已注册 backend + 算子级优化
+- <strong>不</strong>改 vLLM 0.18.1 核心源码；任何 vLLM 源码 patch 必须有 PR diff 评审 + 至少 1 项精度验证
+- 输出必须基于<strong>标准自回归解码流程</strong>（PDF P5 锁）</p>
+<h2 id="5">5. 关键技术决策</h2>
+<h3 id="51">5.1 决策表</h3>
+<table>
+<thead>
+<tr>
+<th>决策点</th>
+<th>选择</th>
+<th>理由 / 风险</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Decode attention 提速</strong></td>
+<td><strong>优先复用 vLLM 已有的 <code>TRITON_ATTN</code> backend</strong>（vllm.v1.attention.backends.triton_attn.TritonAttentionBackend），不自己写新 backend</td>
+<td>vLLM 0.18.1 <code>AttentionBackendEnum</code> 已有 24 个值,含 <code>TRITON_ATTN</code> / <code>ROCM_ATTN</code> / <code>ROCM_AITER_FA</code> / <code>ROCM_AITER_UNIFIED_ATTN</code> / <code>FLASH_ATTN</code> / <code>FLASH_ATTN_DIFFKV</code> / <code>CPU_ATTN</code> / <code>TREE_ATTN</code> 等。新人写新 backend 风险大；先调通已存在的 TRITON_ATTN</td>
+</tr>
+<tr>
+<td><strong>Custom backend 路径</strong></td>
+<td>真要扩展：调 <code>AttentionBackendEnum.register_backend()</code>，<strong>或</strong>改模块级 <code>_get_backend_priorities()</code>（非 RocmPlatform 方法）优先级，<strong>或</strong>用 <code>AttentionBackendEnum.CUSTOM</code> 槽位（已存在，CUSTOM = None）</td>
+<td>机制是"enum + register_backend()"，<strong>不是</strong>"丢个 .py 进 vllm/attention/backends/"。改平台优先级需改 vLLM 源码或 monkey-patch</td>
+</tr>
+<tr>
+<td><strong>FA2 vs FA3</strong></td>
+<td><strong>FA2 only</strong>（用 ROCm/flash-attention fork）</td>
+<td>FA3 是 Hopper WMMA 专用，DCU 不可用。ROCm/flash-attention 覆盖 MI200x/MI250x/MI300x/MI355x；CK backend 默认仅 fp16/bf16，FP8 走 aiter/Triton</td>
+</tr>
+<tr>
+<td><strong>KV cache 优化</strong></td>
+<td><strong>动态 FP8 量化</strong>（per-head/per-token scale，<strong>非持久化</strong>）</td>
+<td>取决于 DCU SKU：CDNA3 (gfx942) 原生支持 FNUZ 变体（<code>__hip_fp8_e4m3_fnuz</code>）；CDNA2 (gfx90a) <strong>不支持</strong>。<strong>§2 必查</strong>；不行则改 INT8 或保留 bf16</td>
+</tr>
+<tr>
+<td><strong>torch.compile mode</strong></td>
+<td><strong><code>default</code> 或 <code>reduce-overhead</code></strong>，<strong>不要 <code>max-autotune</code></strong></td>
+<td><code>max-autotune</code> 在 ROCm 上不完整（很多模板 CUDA-only），可能静默回退</td>
+</tr>
+<tr>
+<td><strong>图优化边界</strong></td>
+<td><strong><code>torch.compile</code> + cudagraph 允许</strong>（运行时 graph capture，<strong>不</strong>改模型权重/结构）</td>
+<td>赛题 P3.3.(2) "模型图重构" 限定在<strong>权重层级持久化图重写</strong>（ONNX 重导出 / TensorRT engine 持久化等）；<strong>不</strong>含运行时 cudagraph / torch.compile graph capture</td>
+</tr>
+<tr>
+<td><strong>块管理调参</strong></td>
+<td><code>--block-size</code> 试 {8, 16, 32, 64, 128}；prefix-caching / chunked-prefill <strong>可开</strong>（非 batch scheduler 参数）</td>
+<td>有效值受硬件/算法约束，不是任意；与 KV 量化分块粒度<strong>耦合</strong>，P1 末必须做耦合矩阵</td>
+</tr>
+<tr>
+<td><strong>Python 路径优化</strong></td>
+<td><code>compilation_config.use_cudagraph=True</code> + <code>enforce_eager=False</code>，decode ≥ 3 次 warmup</td>
+<td>HIP graph 录制有效；注意 warmup 不足会 capture 失败</td>
+</tr>
+<tr>
+<td><strong>调度</strong></td>
+<td><strong>不改</strong> vLLM batch scheduler 代码；可优化 Decode 阶段 attention/sampling 调度（赛题 P6.1 允许）</td>
+<td>赛题禁止 + 能力不足</td>
+</tr>
+<tr>
+<td><strong>vLLM 镜像</strong></td>
+<td>用 <code>vllm/vllm-rocm</code> Docker tag，不用 CUDA 镜像；官方 Dockerfile.rocm 用 <strong>ROCm 7.0</strong> 基线（旧分支支持 5.7-6.4）</td>
+<td>CUDA image 装 DCU 必失败；ROCm 版本要锁</td>
+</tr>
+<tr>
+<td><strong>不要漏的开关</strong></td>
+<td><code>--enable-prefix-caching</code>、<code>--enable-chunked-prefill</code>、<code>VLLM_USE_V1=1</code></td>
+<td>⚠️ <strong>没找到 <code>VLLM_ATTENTION_BACKEND</code> env var</strong>（v0.18.1 <code>envs.py</code> 全文 grep 0 次命中），后端选择走 platform priority list + <code>register_backend()</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="52-vllm-0181-attention-backend">5.2 vLLM 0.18.1 attention backend 真实机制（已源码验证）</h3>
+<ul>
+<li><strong>枚举</strong>：<code>AttentionBackendEnum</code> 在 <code>vllm/v1/attention/backends/registry.py</code>，<strong>共 24 个值</strong></li>
+<li><strong>关键值</strong>：<code>TRITON_ATTN</code> / <code>ROCM_ATTN</code> / <code>ROCM_AITER_FA</code> / <code>ROCM_AITER_UNIFIED_ATTN</code> / <code>FLASH_ATTN</code> / <code>FLASH_ATTN_DIFFKV</code> / <code>FLASHINFER</code> / <code>FLEX_ATTENTION</code> / <code>TORCH_SDPA</code> / <code>CPU_ATTN</code> / <code>TREE_ATTN</code> / <code>CUSTOM</code> (None)</li>
+<li><strong>平台选择</strong>：</li>
+<li><strong>模块级函数</strong> <code>_get_backend_priorities()</code> 在 <code>vllm/platforms/rocm.py:309-352</code></li>
+<li><code>RocmPlatform.get_attn_backend_cls()</code> 类方法在 <code>vllm/platforms/rocm.py:~432</code></li>
+<li><strong>平台 plugin</strong>：<code>PLATFORM_PLUGINS_GROUP = "vllm.platform_plugins"</code> (<code>vllm/plugins/__init__.py</code>)，通过 <code>importlib.metadata.entry_points()</code> 加载；平台用 <code>builtin_platform_plugins = {'tpu','cuda','rocm','xpu','cpu'}</code> + 外部 plugin</li>
+<li><strong>Pyproject entry-points</strong>：只有 <code>vllm.general_plugins</code>（LoRA resolver），<strong>没有</strong> <code>vllm.platform_plugins</code> 或 <code>vllm.attention_backends</code> 显式声明（意味着第三方可以声明，会被 <code>load_plugins_by_group</code> 自动发现）</li>
+<li><strong>ROCM 默认 backend</strong>：<code>_get_backend_priorities()</code> 默认返回 <code>[TRITON_ATTN]</code>；开启 <code>VLLM_ROCM_USE_AITER=1</code> 才注入 <code>ROCM_AITER_UNIFIED_ATTN</code> / <code>ROCM_AITER_FA</code></li>
+</ul>
+<h3 id="53-flashattention-rocm">5.3 FlashAttention ROCm 真相（已验证）</h3>
+<ul>
+<li>官方 fork：<a href="https://github.com/ROCm/flash-attention">ROCm/flash-attention</a></li>
+<li><strong>支持架构</strong>：MI200x / MI250x / MI300x / MI355x / RDNA 3/4（<strong>覆盖 CDNA2 gfx90a 和 CDNA3 gfx942</strong>）</li>
+<li><strong>安装</strong>：<code>pip install flash-attn --no-build-isolation</code>（需 ROCm 6.0+、PyTorch 2.2+）</li>
+<li><strong>两个 backend</strong>：Composable Kernel (CK) 默认 / Triton via <code>aiter</code> package</li>
+<li><strong>CK backend</strong>：<strong>仅 fp16/bf16</strong>（不支持 FP8）</li>
+<li><strong>Triton/aiter backend</strong>：<strong>支持 FP8</strong>（设 <code>FLASH_ATTENTION_TRITON_AMD_ENABLE=TRUE</code>）</li>
+<li>vLLM 的 <code>FLASH_ATTN</code> enum 值在 ROCm 上是这条 fork 的 wrapper</li>
+</ul>
+<h3 id="54-amd-rocm-fp8">5.4 AMD ROCm FP8 支持（已验证）</h3>
+<p>来源：<a href="https://rocm.docs.amd.com/en/latest/reference/precision-support.html">AMD ROCm precision-support docs</a></p>
+<table>
+<thead>
+<tr>
+<th>架构</th>
+<th>GPU</th>
+<th>FP8 支持</th>
+<th>格式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CDNA3 (gfx942)</td>
+<td>MI300A / MI300X / MI325X</td>
+<td>✅ 原生</td>
+<td><strong>FNUZ</strong> 变体（<code>__hip_fp8_e4m3_fnuz</code>）</td>
+</tr>
+<tr>
+<td>CDNA4</td>
+<td>MI350X / MI355X</td>
+<td>✅ 原生</td>
+<td>OCP 变体</td>
+</tr>
+<tr>
+<td><strong>CDNA2 (gfx90a)</strong></td>
+<td><strong>MI210 / MI250 / MI250X</strong></td>
+<td><strong>⚠️ 部分</strong>（emulation / 软件路径, 性能低）</td>
+<td>—</td>
+</tr>
+<tr>
+<td>CDNA1</td>
+<td>MI100</td>
+<td>❌</td>
+<td>—</td>
+</tr>
+<tr>
+<td>RDNA4</td>
+<td>RX 9070 / 9070XT</td>
+<td>✅ 原生</td>
+<td>OCP 变体</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>2026-06-21 平台实测</strong>: 赛方提供 Hygon DCU K100 (BW series, 1000W TDP, Samsung HBM2e), <strong>gfx90a</strong> 目标. ROCm driver 6.3.31 (= DTK 26.04 内核). FP8 在 gfx90a 上<strong>有 emulation 但吞吐量低于 CDNA3 2-3×</strong>, 不作 P3 必做路径. 主路定 <strong>INT8 per-head 动态量化</strong> (ADR 0009 CDNA2 fallback). 完整验证记录见 <a href="../../decisions/0001-dcu-sku/">ADR 0001</a>.</p>
+</blockquote>
+<p><strong>关键</strong>：FP8 FNUZ = <strong>F</strong>inite + <strong>N</strong>o inf + <strong>U</strong>nsigned zero（AMD 文档原文）。和 NVIDIA H100 的 OCP FP8 <strong>不兼容</strong>（无 inf、无 signed zero）。任何"FP8 KV cache" 方案在 DCU 上<strong>需要确认是 FNUZ 还是 OCP 变体</strong>，否则对不上。</p>
+<h3 id="55-triton-dcu-p0-case">5.5 Triton + DCU 真相（<strong>部分未验证</strong>，需 P0 跑最小 case）</h3>
+<ul>
+<li>Triton 3.x 在 ROCm/HIP 上有 first-class backend（target <code>gfx90a</code> / <code>gfx942</code> / <code>gfx950</code>）</li>
+<li>装 Triton 走 PyTorch 的 ROCm wheel 路径，<strong>不要</strong> <code>pip install triton[all]</code></li>
+<li><strong>未验证的已知坑</strong>（无 issue 链接 / 复现步骤，需 P0 跑最小 case 验证）：DCU 上 <code>tl.atomic_*</code> for FP8 和部分 <code>tl.dot</code> scale 组合的 bug</li>
+<li><strong>P0 验证动作</strong>：P0 期间在 DCU 跑 1 个 5 行 <code>triton.jit</code> matmul + FP8 store 最小 case，失败即降级 bf16 路线</li>
+</ul>
+<h3 id="3-3-stretch">优化方向砍到 <strong>3 必做 + 3 stretch</strong></h3>
+<p><strong>必做</strong>（P3 必须有进展；占 80% 提分空间）：
+1. <strong>KV cache 动态量化</strong>（FP8 优先，CDNA2 退化 INT8）
+2. <strong><code>torch.compile</code> (default) + <code>use_cudagraph=True</code> + 必杀开关全开</strong>
+3. <strong><code>--block-size</code> 调参 + prefix caching + chunked prefill</strong></p>
+<p><strong>Stretch</strong>（P3 末才能开；不及格则放弃）：
+4. <strong>Triton decode attention kernel 改造</strong>（vLLM backend 替换）
+5. <strong>手写 attention backend 注册为 vLLM backend</strong>（依赖 §2 第 4 项验证通过）
+6. <strong>FA2 之外的 attention 内核优化</strong>（高 ROI 但高难度）</p>
+<p><strong>理由</strong>：6 个方向对 4 个新人 + 5-10h/周（队长）太激进，必做 3 项已足够冲击 60-75 分。Stretch 项"做不出来也不丢分"。</p>
+<h2 id="6-skills-tools">6. 可用 Skills &amp; Tools</h2>
+<table>
+<thead>
+<tr>
+<th>工具 / skill</th>
+<th>用途</th>
+<th>何时用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mmx-cli</code>（本地已装）</td>
+<td>web search、查论文、生成架构图</td>
+<td>调研期</td>
+</tr>
+<tr>
+<td><code>context7</code> 插件</td>
+<td>实时查 vLLM / PyTorch / Triton / transformers API</td>
+<td>任何要查 API 时</td>
+</tr>
+<tr>
+<td><code>torch.profiler</code>（零安装）</td>
+<td>第一线 profile，任何性能问题</td>
+<td>任何性能异常</td>
+</tr>
+<tr>
+<td><code>rocprofv3</code> / <code>rocsys</code>（DCU 专用）</td>
+<td>kernel 级 + timeline profile，需 <code>apt install rocprofiler</code></td>
+<td>深度 profile</td>
+</tr>
+<tr>
+<td><code>superpowers:dispatching-parallel-agents</code></td>
+<td>并行启动 3+ 个调研 subagent</td>
+<td>一次性调研</td>
+</tr>
+<tr>
+<td><code>superpowers:writing-plans</code></td>
+<td>spec → 实施计划</td>
+<td>spec 审阅通过后</td>
+</tr>
+<tr>
+<td><code>superpowers:subagent-driven-development</code></td>
+<td>subagent 写脚手架 / 测试 / 文档</td>
+<td>编码期</td>
+</tr>
+<tr>
+<td><code>superpowers:test-driven-development</code></td>
+<td>kernel 单元测试先写</td>
+<td>任何 kernel 改造前</td>
+</tr>
+<tr>
+<td><code>superpowers:systematic-debugging</code></td>
+<td>性能变差 / SLA 熔断排查</td>
+<td>"为什么变慢了"问题</td>
+</tr>
+<tr>
+<td><code>superpowers:verification-before-completion</code></td>
+<td>任何"优化提速了"声称前必验证</td>
+<td>P3+ 提分时</td>
+</tr>
+<tr>
+<td><code>superpowers:using-git-worktrees</code></td>
+<td>3 条 owner 线用 worktree 隔离</td>
+<td>P1 起</td>
+</tr>
+</tbody>
+</table>
+<h2 id="7">7. 团队 &amp; 角色</h2>
+<table>
+<thead>
+<tr>
+<th>角色</th>
+<th>谁</th>
+<th>周投入</th>
+<th>主负责 stream</th>
+<th>备份 stream (主 R 临时有事时接手)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>队长 + 集成 owner</td>
+<td>recoletas</td>
+<td>7-10 h</td>
+<td><strong>块管理 + prefix + chunked prefill</strong></td>
+<td>集成 + 回归 (队员 C 临时有事时)</td>
+</tr>
+<tr>
+<td>Kernel owner</td>
+<td>队员 A</td>
+<td>7-10 h</td>
+<td><strong>KV cache 动态量化 (FP8/INT8)</strong></td>
+<td>torch.compile (队员 B 临时有事时)</td>
+</tr>
+<tr>
+<td>vLLM &amp; compile owner</td>
+<td>队员 B</td>
+<td>7-10 h</td>
+<td><strong>torch.compile + cudagraph</strong></td>
+<td>块管理 (队长临时有事时)</td>
+</tr>
+<tr>
+<td>集成 / 回归 / 数字 owner</td>
+<td>队员 C</td>
+<td>6-9 h</td>
+<td><strong>跨 stream 集成 + 回归 + 数字复核</strong></td>
+<td>KV 量化 (队员 A 临时有事时)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>3 必做 stream × 4 owner 矩阵 (R + R')</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>stream</th>
+<th>队长</th>
+<th>队员 A</th>
+<th>队员 B</th>
+<th>队员 C</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>块管理 / prefix / chunked prefill</td>
+<td><strong>R</strong></td>
+<td>C</td>
+<td><strong>R'</strong></td>
+<td>I</td>
+</tr>
+<tr>
+<td>KV cache 动态量化</td>
+<td>C</td>
+<td><strong>R</strong></td>
+<td>C</td>
+<td><strong>R'</strong></td>
+</tr>
+<tr>
+<td>torch.compile + cudagraph</td>
+<td>I</td>
+<td><strong>R'</strong></td>
+<td><strong>R</strong></td>
+<td>I</td>
+</tr>
+<tr>
+<td>跨 stream 集成 + 回归 + 数字</td>
+<td><strong>R'</strong></td>
+<td>I</td>
+<td>I</td>
+<td><strong>R</strong></td>
+</tr>
+</tbody>
+</table>
+<p>R = 主责任 / <strong>R'</strong> = 备份责任 (主 R 临时有事能直接顶, 不需要 24h 升级) / C = 协作 / I = 被通知 (跑回归或集成日配合)</p>
+<p><strong>4 人 + AI 辅助 ≈ 5-6 人等效生产力</strong>。</p>
+<h3 id="_1">决策机制</h3>
+<ul>
+<li><strong>技术分歧</strong>：3 owner 投票，多数决；平票 → 队长最终拍板</li>
+<li><strong>决策超时</strong>：单议题阻塞超过 24h → 升级到下次全组 sync</li>
+<li><strong>赛题边界</strong>（修改 scheduler / 投机解码 / 持久化量化等）→ 一票否决，<strong>任何 owner 可触发升级</strong></li>
+<li><strong>角色变更</strong>（人员退出 / 换 owner）→ 全组 sync 决议</li>
+</ul>
+<h3 id="_2">协作机制</h3>
+<ul>
+<li><strong>每周 1 次同步会</strong>（30 min）：上周交付、本周计划、阻塞</li>
+<li><strong>PR 全部进 GitHub</strong>：每个 owner 1 个 worktree</li>
+<li><strong>轻量进度交流</strong>：每周 standup 写入 <code>docs/weekly/progress.md</code>（4 人各 1 行）</li>
+<li><strong>共享调研笔记 / grep 技巧</strong>：写到 <code>docs/learning.md</code>（活文档，持续追加）</li>
+</ul>
+<h2 id="8">8. 文档架构</h2>
+<p><strong>单层 mkdocs-material 站，部署到 GitHub Pages</strong>。</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>docs/
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>├── index.md                 # 文档站首页
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>├── learning.md              # 找学习资料的方法 (vLLM / AMD / DCU 关键文件 + grep 技巧)
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>├── specs/                   # 设计 / 决策 / 计划
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>├── decisions/               # ADR —— P0+ 按需建
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>├── weekly/progress.md       # 轻量 standup 模板 —— P1+ 用
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>├── ai-prompts/              # 共享 prompt 库 —— P3+ 按需建
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>└── appendices/              # subagent 调研报告 —— 一次性建
+</span></code></pre></div>
+<blockquote>
+<p><strong>精简原则</strong>：不预建空 md。内容从 spec 长出，按需建子目录。</p>
+</blockquote>
+<h2 id="9-phase">9. 推进原则（<strong>软</strong> Phase，硬卡门）</h2>
+<h3 id="_3">核心原则</h3>
+<ol>
+<li><strong>基础优先</strong>：4 人必须都能讲清"Prefill/Decode/KV cache/PagedAttention"，过不了这关不进 P3</li>
+<li><strong>ROI 排序</strong>：每个优化点必须先有"为什么能提分"假设 + "怎么测"方案，没假设不开工</li>
+<li><strong>小步快跑</strong>：每改一处跑 1 次 bench，找不到 1.05× 提速立刻回退</li>
+<li><strong>AI 输出必审</strong>：subagent 写的代码 / 文档必须经过"读 + 跑 + 对比 baseline"三关</li>
+<li><strong>集成是瓶颈</strong>：P3 起每周 1 次集成日，所有 owner 合到一起跑 3 档</li>
+</ol>
+<h3 id="phase-9">Phase 划分（9 周预算）</h3>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>目标</th>
+<th>出口（CP）</th>
+<th>时长</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>P0</strong></td>
+<td>§2 4 项未知全部确认 + 建仓库 + 各自看 1 篇 vLLM 论文 + 各 owner 离线练手任务</td>
+<td><strong>CP0</strong>（硬卡）</td>
+<td>1.5 周（离线）</td>
+</tr>
+<tr>
+<td><strong>P1</strong>（基础统一）</td>
+<td>4 人能讲清 LLM 推理基础 + DCU/HIP 区别 + vLLM 0.18.1 架构 + Triton 5 行 FP8 matmul smoke test</td>
+<td><strong>CP1</strong>（硬卡）</td>
+<td>1.5 周</td>
+</tr>
+<tr>
+<td><strong>P2</strong>（baseline 锁定 + 调研）</td>
+<td>三档 baseline 数字锁定，误差 &lt; 5%</td>
+<td><strong>CP2</strong>（硬卡）</td>
+<td>1.5 周</td>
+</tr>
+<tr>
+<td><strong>P3</strong>（优化试错）</td>
+<td>必做 3 项至少有 1 项在 1 档上提分 ≥ 10%</td>
+<td><strong>CP3</strong></td>
+<td>3.5 周（<strong>锁死</strong>）</td>
+</tr>
+<tr>
+<td><strong>P4</strong>（集成 + 精度）</td>
+<td>3 档 + 4 类任务精度扣分 ≤ 3% + 1 次干净全量编译演练</td>
+<td><strong>CP4</strong></td>
+<td>0.5 周</td>
+</tr>
+<tr>
+<td><strong>P5</strong>（提交冲刺）</td>
+<td>提交材料齐全，演练成功</td>
+<td><strong>CP5</strong></td>
+<td>0.5 周</td>
+</tr>
+<tr>
+<td><strong>buffer</strong></td>
+<td>Phase 滑期用</td>
+<td>—</td>
+<td>0.5 周</td>
+</tr>
+<tr>
+<td><strong>总计</strong></td>
+<td>—</td>
+<td>—</td>
+<td><strong>9.5 周</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>对照用户预算 8-10 周</strong>：spec 落 9.5 周（取下沿），留 0.5-1.5 周 buffer 给突发（队员退 / DCU 不到位 / 编译撞墙）。</p>
+<h3 id="p0">P0 离线期间具体任务</h3>
+<blockquote>
+<p><strong>不强求完成下面所有项</strong>。每条是 <strong>建议路径</strong>, 时间紧的 owner 跳过非自己 stream 的部分即可。backup owner 责任从 P1 起自然过渡 (P0 阶段先读资料, P1 起跟主 owner 跑 1 周).</p>
+</blockquote>
+<ul>
+<li><strong>队长（7-10h/周 × 1.5 周 = 10-15h）</strong>：通读 <code>qwen_use.pdf</code> 1 遍 + 写完 AGENTS.md + 协调 §2 4 项验证; 顺手时查 1-2 篇 vLLM/prefix-cache 论文, 心得落 learning.md</li>
+<li><strong>队员 A / Kernel（7-10h/周 × 1.5 周 = 10-15h）</strong>：跑 Triton 官方 tutorial 的 vector_add / softmax / fused attention (按兴趣选, 不必跑完 3 个); 写过的 kernel 心得落 learning.md 或一个练习 PR</li>
+<li><strong>队员 B / vLLM（7-10h/周 × 1.5 周 = 10-15h）</strong>：浏览 vLLM 0.18.1 <code>v1/kv_cache_interface.py</code> + <code>attention/backends/</code>; 关键发现落 <code>docs/decisions/0006-vllm-readmap.md</code> 或 learning.md, 不必 "1 页" 严格</li>
+<li><strong>队员 C / 集成+回归（6-9h/周 × 1.5 周 = 9-14h）</strong>：本地 <code>vllm serve</code> + <code>vllm bench serve</code> 命令跑通 (GPU 或 CPU mock); 摸熟 vllm bench 输出格式; 起一个 regression checklist 草稿 (P2 用)</li>
+</ul>
+<p><strong>注</strong>: 周投入按 6-10h/周 配比, 4 人差距 ≤ 1.5h, 任何 owner 临时有事 backup 都能 1 天内接手 (P0 末已读完相关资料, P1 起跟主 owner 跑 1 周). 队员 C 数字复核 + regression 路线从 P0 起就有交付, 不再是 "5-8h 干等 P3".</p>
+<h3 id="phase">Phase 跳过规则（硬化）</h3>
+<ul>
+<li>CP0 不通过 → 不开 P1</li>
+<li>CP1 不通过 → P2 推迟（哪怕超周界）</li>
+<li>CP2 不通过 → P3 不开</li>
+<li>P3 任何 1 周内 0 bench 进展 → 立刻开 spec §10 应急"砍必做到 2 项"</li>
+</ul>
+<h2 id="10">10. 风险与对策</h2>
+<table>
+<thead>
+<tr>
+<th>风险</th>
+<th>信号</th>
+<th>对策</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>SLA 超基线（≤ Baseline × 1.5）</strong> — TTFT P99 / TPOT P99 任一超阈</td>
+<td>评测平台 P99 统计超阈</td>
+<td>立即回退当周优化点；不抢进度；TTL P99 按档独立判断，TPOT P99 全局统一（PDF P9.3.(6)）</td>
+</tr>
+<tr>
+<td><strong>DCU 是 CDNA2 (gfx90a)，无原生 FP8</strong></td>
+<td>§2 验证</td>
+<td>KV cache 改用 INT8 动态量化或保留 bf16；放弃 FP8 路线</td>
+</tr>
+<tr>
+<td><strong>DCU 不是 vLLM 0.18.1 支持的型号</strong></td>
+<td><code>vllm serve</code> 启动报错</td>
+<td>立即联系赛方，<strong>不绕</strong> —— 赛题第 7 条第 3 款</td>
+</tr>
+<tr>
+<td><strong>vLLM custom backend 接入路径不通</strong></td>
+<td>§2 验证</td>
+<td>砍掉 stretch 项 4-5；Kernel 路线降级为"torch.compile + 块管理"</td>
+</tr>
+<tr>
+<td><strong>官方 baseline 数字不公开</strong>（PDF P9.3.(7) 说"评测时严格锁定"暗示赛方有 baseline）</td>
+<td>询问赛方无回</td>
+<td>CP2 改为"自测 baseline ±5% 复现稳定"；<strong>60-75 估算改为按比例而非绝对分</strong></td>
+</tr>
+<tr>
+<td><strong>LongBench / RULER 测试集开发期不可下载</strong></td>
+<td>询问赛方无回</td>
+<td>bench script 改用"自造 100 样本本地验证 + 评测平台每周 1 次回归"</td>
+</tr>
+<tr>
+<td><strong>Triton kernel 编译/运行失败</strong></td>
+<td>DCU 上 <code>triton.jit</code> 异常</td>
+<td>fallback → vLLM <code>ROCM_ATTN</code> backend 或 <code>torch.compile</code>，<strong>不放弃 Triton 但退守默认 backend</strong></td>
+</tr>
+<tr>
+<td><strong>KV 量化精度塌方</strong></td>
+<td>OpenCompass Δ &gt; 3%</td>
+<td>退回 bf16，保留其他优化点</td>
+</tr>
+<tr>
+<td><strong>ROCm wheel / Docker image 不匹配</strong></td>
+<td><code>import torch</code> 找不到 HIP 后端</td>
+<td>用 <code>vllm/vllm-rocm</code> Docker tag；装 PyTorch 时用 <code>+rocmX.Y</code> index URL</td>
+</tr>
+<tr>
+<td><strong>队友时间进一步缩水</strong></td>
+<td>周会 2 周连续 0 出席</td>
+<td>合并 owner 角色，必做 3 项降级到 2 项</td>
+</tr>
+<tr>
+<td><strong>优化反而变慢</strong></td>
+<td>bench 数据反向</td>
+<td>48h 找不到原因 → 回退到上一稳定版</td>
+</tr>
+<tr>
+<td><strong>误改赛题锁定参数</strong></td>
+<td>评测平台拒绝</td>
+<td>PR 检查清单 + 跑通 <code>vllm serve --max-model-len 32768 --max-num-seqs 1</code> 锁定参数</td>
+</tr>
+<tr>
+<td><strong>编译失败撞 P5 截止</strong></td>
+<td>vLLM 全量编译 4-12h 实测</td>
+<td>演练放在 P4 末而非 P5；保留上次成功构建的 Docker 镜像</td>
+</tr>
+<tr>
+<td><strong>决赛多卡扩展</strong>（PDF P11 提决赛多卡分布式）</td>
+<td>初赛结束</td>
+<td>P3 末评估 1 个 stretch 项：tensor parallel 路径调研（不实现）</td>
+</tr>
+<tr>
+<td><strong>评测黑盒：请求顺序/时间戳不可见</strong></td>
+<td>PDF P11 第 3 款</td>
+<td>prefix-caching 调参策略要保守；不要假设请求可重放</td>
+</tr>
+<tr>
+<td><strong>任一 owner 临时有事 / 退出</strong></td>
+<td>任何 owner 连续 2 周 0 交付</td>
+<td>backup owner 1 天内接手 (P0 末已读完相关资料, P1 起跟主 owner 跑 1 周), 不开 24h sync, 不动 spec; 整组 ≥ 2 人 OOO 才升级</td>
+</tr>
+<tr>
+<td><strong>AI 代码未及时审阅合 main</strong></td>
+<td><code>git log</code> 找到无 reviewer 的 AI commit</td>
+<td>AGENTS.md 已有 3 关（读 / 跑 / 对比 baseline）；spec 加 24h 内未审 = revert</td>
+</tr>
+</tbody>
+</table>
+<h2 id="11-phase-5">11. 完工标准（Phase 5 结束）</h2>
+<p><strong>仓库里</strong>：
+- ✅ <code>AGENTS.md</code> 完整
+- ✅ <code>mkdocs.yml</code> + <code>docs/index.md</code> 文档站可本地预览
+- ✅ GitHub Pages 部署通过 Actions
+- ✅ <code>benchmarks/{baseline,optimized}/</code> 三档 JSON
+- ✅ <code>src/</code> 下 KV 量化模块 / torch.compile 配置 / block-size 调参脚本可一键加载
+- ✅ 1 次干净的全量编译 + 跑通演练（<strong>P4 末完成，P5 只重跑</strong>）</p>
+<h3 id="12-15">赛题第 12-15 条提交材料清单</h3>
+<table>
+<thead>
+<tr>
+<th>赛题条款</th>
+<th>提交材料</th>
+<th>Owner</th>
+<th>截止</th>
+<th>状态</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>§12 源码</td>
+<td>完整源代码 + 编译脚本 + 注释</td>
+<td>队长（合）+ 全员</td>
+<td>P5 末</td>
+<td>☐</td>
+</tr>
+<tr>
+<td>§13 环境变量</td>
+<td><code>reports/env-vars.md</code>：变量名/取值/作用</td>
+<td>队员 C</td>
+<td>P4 末</td>
+<td>☐</td>
+</tr>
+<tr>
+<td>§14 优化方案</td>
+<td><code>reports/optimization-plan.md</code>：方法/路线/贡献分析/优化点汇总表</td>
+<td>队长</td>
+<td>P4 末</td>
+<td>☐</td>
+</tr>
+<tr>
+<td>§15 第三方引用</td>
+<td><code>README.md</code> + <code>reports/submission-readme.md</code></td>
+<td>队长</td>
+<td>P5 末</td>
+<td>☐</td>
+</tr>
+<tr>
+<td>§15 源码 README</td>
+<td>源码 <code>README.md</code> 头部</td>
+<td>队长</td>
+<td>P5 末</td>
+<td>☐</td>
+</tr>
+</tbody>
+</table>
+<p><strong>预期分数</strong>：60-75 / 100（赛题第 9 条第 4 款公式估算；<strong>待 §2 第 2 项确认后修正</strong>）。</p>
+<p><strong>Baseline 数字公开 vs 不公开 → 评分场景表</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>信号</th>
+<th>分数区间</th>
+<th>策略</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>赛方下发官方 baseline</strong></td>
+<td>§2 验证通过</td>
+<td>60-75</td>
+<td>按 3 必做 + 1 stretch 推进</td>
+</tr>
+<tr>
+<td><strong>赛方部分公开（如仅给单档）</strong></td>
+<td>§2 部分通过</td>
+<td>45-65</td>
+<td>集中攻已公开档，其余按比例估算</td>
+</tr>
+<tr>
+<td><strong>完全自测 baseline</strong>（赛方不公开）</td>
+<td>§2 验证失败</td>
+<td>30-55（<strong>估算失锚</strong>）</td>
+<td>砍必做到 2 项；放弃 8k-16k 档（占 50% 权重）</td>
+</tr>
+</tbody>
+</table>
+<h2 id="12">12. 剩余硬卡门</h2>
+<ol>
+<li><strong>P0 验证</strong>：DCU 硬件到位后跑 §2 的 4 项（DCU SKU / 官方 baseline / LongBench+RULER 访问 / custom backend 路径）</li>
+<li><strong>验证回写</strong>：P0 结果落本 spec §2 表格 + §5 决策表（如选型有变）</li>
+<li><strong>P0 末调研</strong>：vLLM backend 接入点 / DCU 性能特征 / KV 量化方案对比 → <code>docs/appendices/</code></li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../../learning/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 学习资源与方法">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                学习资源与方法
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../../superpowers/plans/2026-06-09-qwen-dcu-inference-optimization/" class="md-footer__link md-footer__link--next" aria-label="Next: 实施计划">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                实施计划
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 Recoletas and Govinda contributors · MIT License
+    </div>
+  
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/Recoletas/Govinda" target="_blank" rel="noopener" title="GitHub 仓库" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.sections", "navigation.index", "navigation.top", "navigation.footer", "navigation.expand", "search.suggest", "search.highlight", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

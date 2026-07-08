@@ -1,0 +1,80 @@
+/* Right sidebar is redundant — left nav holds the same TOC. */
+.md-sidebar--secondary {
+    display: none !important;
+}
+
+/*
+ * Distinguish nav levels in the left sidebar.
+ *
+ * mkdocs-material renders every clickable entry with class .md-nav__link.
+ * To split them into H1 vs H2, we use the wrapper:
+ *   - H1: links outside .md-nav--secondary (page title links, plus leaf pages)
+ *   - H2: links inside .md-nav--secondary (the inline TOC under the active page)
+ * Section labels ("学习", "设计", "决策", …) are <label class="md-nav__title">,
+ * which is NOT .md-nav__link — they keep their default nav-label styling.
+ */
+.md-sidebar--primary {
+    --md-nav-spacing: 4px;
+}
+
+/* H1: page links. Bold, larger, separator from parent Section above. */
+.md-sidebar--primary .md-nav__link {
+    font-weight: 600;
+    font-size: 0.78rem;
+}
+
+/* Active H1: lift with top border + accent color. */
+.md-sidebar--primary .md-nav__link--active {
+    color: var(--md-accent-fg-color);
+    border-top: 1px solid var(--md-default-fg-color--lightest);
+    padding-top: 6px;
+    margin-top: 4px;
+}
+
+/* Hide the toggle-arrow on the active page's <label> — page-top link is enough. */
+.md-sidebar--primary .md-nav__link--active > .md-nav__icon {
+    display: none;
+}
+
+/*
+ * Auto-expand the active page's inline TOC. mkdocs-material hides
+ * `.md-nav__link[for=__toc] ~ .md-nav` by default; we override for
+ * `--active` items so H2 entries are immediately visible.
+ */
+.md-sidebar--primary .md-nav__item--active > .md-nav--secondary {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/*
+ * Hide the secondary nav's "Table of contents" header label — redundant
+ * with the H1 page title directly above it.
+ */
+.md-sidebar--primary .md-nav--secondary > .md-nav__title {
+    display: none;
+}
+
+/* H2: sections inside the active page (rendered inside .md-nav--secondary). */
+.md-sidebar--primary .md-nav--secondary .md-nav__link {
+    font-weight: 400;
+    font-size: 0.66rem;
+    color: var(--md-default-fg-color--light);
+    padding-left: 0.7rem;
+}
+
+/* H3: nested under an H2 (e.g. spec.md §5.1, §5.2). Even more subtle. */
+.md-sidebar--primary .md-nav--secondary .md-nav--secondary .md-nav__link {
+    font-size: 0.6rem;
+    padding-left: 1.4rem;
+    color: var(--md-default-fg-color--lighter);
+}
+
+/* Active H2 (sub-section we're scrolled to): keep accent but lighter. */
+.md-sidebar--primary .md-nav--secondary .md-nav__link--active {
+    color: var(--md-accent-fg-color);
+    border-top: none;
+    padding-top: 0;
+    margin-top: 0;
+    font-weight: 500;
+}
