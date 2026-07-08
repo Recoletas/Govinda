@@ -97,3 +97,7 @@ benchmarks/dryrun/logs/
 # SCNet SSH private keys — never commit
 *xdzs2026_c087*
 *zzeshell*
+
+# Local nested vLLM scoring checkout. It has its own git remote and may contain
+# competition credentials in `.git/config`; do not commit it into this repo.
+vllm_cscc_work/
