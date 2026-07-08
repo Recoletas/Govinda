@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# AI-generated, awaiting verification by recoletas on 2026-07-09.
+#
+# Run inside the SCNet container to switch the shared vLLM source tree to a
+# GitLab branch/commit. This helper deliberately does not start or stop vLLM.
+
+set -euo pipefail
+
+Q="${Q:-/public/home/xdzs2026_c087}"
+VLLM_DIR="${VLLM_DIR:-$Q/vllm_cscc}"
+REMOTE="${REMOTE:-origin}"
+REF="${1:-main}"
+
+if [[ ! -d "$VLLM_DIR/.git" ]]; then
+    echo "ERROR: $VLLM_DIR is not a git checkout" >&2
+    exit 1
+fi
+
+cd "$VLLM_DIR"
+
+echo "=== before ==="
+git status --short --branch
+git log --oneline -3
+
+echo "=== fetch $REMOTE $REF ==="
+git fetch "$REMOTE" "$REF"
+
+echo "=== switch tree ==="
+git checkout --detach FETCH_HEAD
+
+echo "=== after ==="
+git status --short --branch
+git log --oneline -5
+
+echo "=== active experiment env knobs ==="
+echo "VLLM_TRITON_PREFILL_TILE64_POLICY=${VLLM_TRITON_PREFILL_TILE64_POLICY:-broad}"
+echo "VLLM_GDN_CAUSAL_CONV1D_BLOCK_M=${VLLM_GDN_CAUSAL_CONV1D_BLOCK_M:-unset}"
