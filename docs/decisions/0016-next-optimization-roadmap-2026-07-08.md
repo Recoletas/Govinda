@@ -365,6 +365,15 @@ Stacked GDN experiment branch:
 Fast recovery smoke sequence after container access returns:
 
 ```bash
+# Preferred one-shot sequence. This restarts vLLM between cases because all
+# tested env knobs are server-import-time settings.
+RUN_PROFILE=quick bash /public/home/xdzs2026_c087/Govinda/tools/codex_run_p0_ab_sequence.sh
+
+# To focus only on GDN after the mid branch survives:
+RUN_PROFILE=gdn bash /public/home/xdzs2026_c087/Govinda/tools/codex_run_p0_ab_sequence.sh
+
+# Manual commands remain below for single-case debugging.
+
 # Inside container. These env vars are read when the vLLM server process imports
 # the modules, so set them before starting vLLM. Setting them only before
 # `vllm bench serve` does not change the already-running server.
