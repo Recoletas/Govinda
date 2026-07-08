@@ -23,6 +23,7 @@ echo "=== smoke $(date +%F_%T) ==="
 echo "range=$RANGE prompts=$NUM_PROMPTS"
 echo "tile64_policy=${VLLM_TRITON_PREFILL_TILE64_POLICY:-broad}"
 echo "gdn_conv_block_m=${VLLM_GDN_CAUSAL_CONV1D_BLOCK_M:-unset}"
+echo "fla_gdn_fix_bt=${FLA_GDN_FIX_BT:-0}"
 
 curl -fsS --noproxy 127.0.0.1 "http://127.0.0.1:${PORT}/health" >/dev/null
 

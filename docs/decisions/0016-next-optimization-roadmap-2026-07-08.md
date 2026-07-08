@@ -328,6 +328,9 @@ Unsubmitted experiment branch:
 - Change: makes GDN prefill `causal_conv1d` token block selectable via
   `VLLM_GDN_CAUSAL_CONV1D_BLOCK_M=8/16/32`, defaulting to `16`.
 - Do not promote this branch to `main` until at least a 4K-8K smoke completes.
+- Existing FLA env candidate: `FLA_GDN_FIX_BT=1` forces GDN `chunk_fwd_o` to use
+  `BT=64` instead of adapting to `min(64, max(16, next_power_of_2(T)))`.
+  This should be tested as an env-only A/B before adding new GDN code.
 
 Fast recovery smoke sequence after container access returns:
 
@@ -342,6 +345,10 @@ RANGE=4-8K NUM_PROMPTS=3 bash /public/home/xdzs2026_c087/Govinda/tools/codex_smo
 
 # Then test the experimental default:
 VLLM_GDN_CAUSAL_CONV1D_BLOCK_M=16 \
+RANGE=4-8K NUM_PROMPTS=3 bash /public/home/xdzs2026_c087/Govinda/tools/codex_smoke_p0_gdn.sh
+
+# Env-only GDN output-kernel BT test, no source change beyond current branch:
+FLA_GDN_FIX_BT=1 VLLM_GDN_CAUSAL_CONV1D_BLOCK_M=16 \
 RANGE=4-8K NUM_PROMPTS=3 bash /public/home/xdzs2026_c087/Govinda/tools/codex_smoke_p0_gdn.sh
 
 # Only if 4K-8K does not regress or crash:
