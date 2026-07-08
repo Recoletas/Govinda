@@ -50,6 +50,13 @@ case_lines_attn=(
   "mid_attn_tf32_8_16|experiment/mid-attn-launch-knobs-20260709|mid|16|64|0|ieee|0||tf32|8-16K|3"
 )
 
+case_lines_combo=(
+  "combo_base_4_8|experiment/mid-combo-knobs-20260709|mid|16|64|0|ieee|0|||4-8K|3"
+  "combo_attn_w2_8_16|experiment/mid-combo-knobs-20260709|mid|16|64|0|ieee|0|2||8-16K|3"
+  "combo_gdn_dot_tf32_4_8|experiment/mid-combo-knobs-20260709|mid|16|64|0|ieee|0|||4-8K|3"
+  "combo_llmm1silu_4_8|experiment/mid-combo-knobs-20260709|mid|16|64|0|ieee|1|||4-8K|3"
+)
+
 case_lines_full=(
   "mid_4_8|experiment/tile64-mid-default-20260709|mid|16|64|0|ieee|0|||4-8K|3"
   "mid_8_16|experiment/tile64-mid-default-20260709|mid|16|64|0|ieee|0|||8-16K|3"
@@ -63,6 +70,7 @@ case_lines_full=(
   "mid_gdn16_8_16|experiment/tile64-mid-gdn-conv-20260709|mid|16|64|0|ieee|0|||8-16K|3"
   "mid_llmm1silu_4_8|experiment/mid-llmm1silu-20260709|mid|16|64|0|ieee|1|||4-8K|3"
   "mid_attn_w2_8_16|experiment/mid-attn-launch-knobs-20260709|mid|16|64|0|ieee|0|2||8-16K|3"
+  "combo_base_4_8|experiment/mid-combo-knobs-20260709|mid|16|64|0|ieee|0|||4-8K|3"
 )
 
 case "$RUN_PROFILE" in
@@ -78,11 +86,14 @@ case "$RUN_PROFILE" in
   attn)
     selected_cases=("${case_lines_attn[@]}")
     ;;
+  combo)
+    selected_cases=("${case_lines_combo[@]}")
+    ;;
   full)
     selected_cases=("${case_lines_full[@]}")
     ;;
   *)
-    echo "ERROR: RUN_PROFILE must be quick, gdn, decode, attn, or full" >&2
+    echo "ERROR: RUN_PROFILE must be quick, gdn, decode, attn, combo, or full" >&2
     exit 1
     ;;
 esac
@@ -100,7 +111,7 @@ for line in "${selected_cases[@]}"; do
     echo
     echo "=== case $label ==="
     gdn_dot_precision=""
-    if [[ "$label" == *"gdn16_dot_tf32"* ]]; then
+    if [[ "$label" == *"gdn16_dot_tf32"* || "$label" == *"gdn_dot_tf32"* ]]; then
         gdn_dot_precision="tf32"
     fi
     echo "ref=$ref policy=$tile_policy gdn_block=$gdn_block gdn_chunk=$gdn_chunk fla_fix=$fla_fix tril_precision=$tril_precision gdn_dot=${gdn_dot_precision:-unset} llmm1silu=$llmm1silu prefill_warps=${prefill_warps:-unset} prefill_dot=${prefill_dot:-unset} range=$range prompts=$num_prompts"

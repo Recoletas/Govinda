@@ -432,6 +432,23 @@ GDN dot-precision experiment branch:
 - Risk: `tf32` may change numerics in the linear-attention recurrence. Treat as
   a smoke-only candidate until official-style accuracy confirms it.
 
+Combined knob experiment branch:
+
+- Branch: `experiment/mid-combo-knobs-20260709`
+- Commit: `ef8d787 Experiment gfx936 fused gate up silu`
+- Base: `3b0e230`, then stacked:
+  - GDN causal-conv block knob
+  - GDN chunk-size knob
+  - GDN dot-precision knob
+  - prefill attention launch knobs
+  - gfx936 `LLMM1Silu` decode fusion
+- Purpose: reduce branch switching and recompilation once the container is
+  available. Defaults remain conservative/off, so this branch can first be
+  smoked with no experimental env enabled, then individual knobs can be turned
+  on one at a time.
+- Do not promote this branch to `main` as a bundle. Only promote a specific
+  knob after same-container A/B and official-style smoke.
+
 Fast recovery smoke sequence after container access returns:
 
 ```bash
@@ -447,6 +464,9 @@ RUN_PROFILE=decode bash /public/home/xdzs2026_c087/Govinda/tools/codex_run_p0_ab
 
 # To test prefill attention launch knobs:
 RUN_PROFILE=attn bash /public/home/xdzs2026_c087/Govinda/tools/codex_run_p0_ab_sequence.sh
+
+# To reduce branch switching and test default-off knobs from one source tree:
+RUN_PROFILE=combo bash /public/home/xdzs2026_c087/Govinda/tools/codex_run_p0_ab_sequence.sh
 
 # Manual commands remain below for single-case debugging.
 
