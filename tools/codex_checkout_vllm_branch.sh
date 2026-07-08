@@ -45,3 +45,4 @@ git log --oneline -5
 echo "=== active experiment env knobs ==="
 echo "VLLM_TRITON_PREFILL_TILE64_POLICY=${VLLM_TRITON_PREFILL_TILE64_POLICY:-mid}"
 echo "VLLM_GDN_CAUSAL_CONV1D_BLOCK_M=${VLLM_GDN_CAUSAL_CONV1D_BLOCK_M:-unset}"
+echo "VLLM_GDN_CHUNK_SIZE=${VLLM_GDN_CHUNK_SIZE:-unset}"
