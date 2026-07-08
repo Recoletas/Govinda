@@ -6,6 +6,19 @@ Status: active working ledger.
 
 Latest known AC score:
 
+- Current submitted candidate (`1b7f156`, broad KV-length tile64):
+  - Score: 79.0567
+  - 4K-8K: 15.97 tok/s
+  - 8K-16K: 14.82 tok/s
+  - 16K-32K: 11.04 tok/s
+  - SLA penalty: 0.0
+  - Accuracy penalty: 0.5974
+
+This candidate is not better than the safe line because the accuracy penalty
+more than cancels the 8K-16K throughput gain.
+
+Latest zero-penalty safe score:
+
 - Score: 79.1109
 - 4K-8K: 15.97 tok/s
 - 8K-16K: 14.44 tok/s
@@ -63,15 +76,25 @@ P0 follow-up result, same container and same local bench conditions:
 Implementation shape:
 
 - `triton_unified_attention.py::_get_tile_size()` returns `64` only for prefill
-  when `max_seqlen_q > 8192`; shorter prefills stay at `32`.
+  when the long-context signal crosses the intended band; shorter prefills stay
+  at `32`.
 - `VLLM_TRITON_PREFILL_TILE_SIZE=32/64` remains available for A/B override.
 - `kernel_unified_attention_2d` launch uses `num_stages=1`; DCU LDS limits can
   make the `TILE_SIZE=64` variant fail compilation with higher/default stages.
 
-Decision: promote to candidate submit line after one scoring-style smoke. The
-absolute tok/s values above are lower than the historical safe score because the
-container/bench conditions changed; rely on same-container A/B direction, not
-cross-container absolute numbers.
+Important correction:
+
+- Under chunked prefill, `max_seqlen_q` is the chunk query length and can stay
+  below 2048 even for long prompts.
+- Use `max_seqlen_k` / `max(max_seqlen_q, max_seqlen_k)` to detect true prompt
+  context length.
+- Broad `max_len > 8192` coverage submitted as `1b7f156` improved official
+  8K-16K throughput (`14.44 -> 14.82`) but introduced `0.5974` accuracy penalty
+  and did not improve official 16K-32K (`11.04 -> 11.04`).
+
+Decision: narrow default `TILE_SIZE=64` to the official-benefit band
+`8192 < max(max_seqlen_q, max_seqlen_k) <= 16384`; keep 16K-32K on `32` unless
+a later smoke proves both throughput and zero accuracy penalty.
 
 ### CUDA Graph Capture Sizes
 

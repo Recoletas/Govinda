@@ -150,12 +150,19 @@ Current P0 candidate:
 
 - Keep `BLOCK_M=64`.
 - Add `VLLM_TRITON_PREFILL_TILE_SIZE=32/64` override.
-- Use `TILE_SIZE=64` only when `max_seqlen_q > 8192`; keep 4K-8K on `32`.
+- Use `TILE_SIZE=64` only when
+  `8192 < max(max_seqlen_q, max_seqlen_k) <= 16384`; keep 4K-8K and 16K-32K on
+  `32` by default.
 - Launch the 2D unified attention kernel with `num_stages=1` to avoid DCU LDS
   resource failures.
 - Same-container A/B showed `8K-16K` improving from `9.45` to `11.61` tok/s
   and `16K-32K` flat at about `9.05` tok/s. Cross-container absolute values are
   not comparable to the historical `79.1109` safe score.
+- Rationale for the narrowed band: the broad KV-length trigger submitted as
+  `1b7f156` improved official 8K-16K throughput but added `0.5974` accuracy
+  penalty and did not move official 16K-32K throughput. Do not expose the long
+  band to a different online-softmax tile partition unless it proves a real
+  score gain.
 
 ## Direction B: Decode Skinny GEMV and Fusion
 
