@@ -383,6 +383,22 @@ Env-only FLA solve-tril candidate:
   non-zero because it changes triangular-solve math precision, so do not make
   `tf32` default without official-style smoke and a no-penalty submission check.
 
+Decode fusion experiment branch:
+
+- Branch: `experiment/mid-llmm1silu-20260709`
+- Commit: `736c97a Experiment gfx936 fused gate up silu`
+- Base: `3b0e230` (`mid` tile64 default).
+- Change: adds a ROCm custom op `LLMM1Silu` and routes Qwen3.5 dense MLP
+  single-token decode through fused `gate_up + silu_and_mul` only when
+  `VLLM_GFX936_FUSED_GATE_UP_SILU=1`.
+- Guardrails:
+  - Default is off.
+  - Runtime path checks gfx936, no quant config, no expert gate, exact
+    Qwen3.5 dense MLP dimensions, exact weight shape `(34816, 5120)`, no bias,
+    and `x` is a single token.
+- Status: Python syntax check only. Needs HIP/C++ build, `tools/codex_llmm1_microbench.py`,
+  then 4K-8K smoke before it can be considered for submit.
+
 Fast recovery smoke sequence after container access returns:
 
 ```bash
@@ -392,6 +408,9 @@ RUN_PROFILE=quick bash /public/home/xdzs2026_c087/Govinda/tools/codex_run_p0_ab_
 
 # To focus only on GDN after the mid branch survives:
 RUN_PROFILE=gdn bash /public/home/xdzs2026_c087/Govinda/tools/codex_run_p0_ab_sequence.sh
+
+# To test the decode fusion branch after the mid branch survives:
+RUN_PROFILE=decode bash /public/home/xdzs2026_c087/Govinda/tools/codex_run_p0_ab_sequence.sh
 
 # Manual commands remain below for single-case debugging.
 
