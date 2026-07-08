@@ -321,6 +321,27 @@ Scoring `main` on GitLab:
   - `VLLM_TRITON_PREFILL_TILE64_POLICY=long`, use 64 only for >16K.
   - `VLLM_TRITON_PREFILL_TILE64_POLICY=off`, keep prefill tile 32.
 
+Latest official feedback on this line:
+
+- Score: `79.0567`
+- Throughput: `4K-8K=15.97`, `8K-16K=14.82`, `16K-32K=11.04`
+- Penalties: `SLA=0.0`, `accuracy=0.5974`
+- Working hypothesis: the broad `TILE_SIZE=64` policy changes the online
+  softmax reduction partition for long prefill. It improves the 8K-16K
+  throughput band, but the official 16K-32K throughput did not move, so exposing
+  the 16K-32K band to a different reduction order is not currently justified.
+
+Accuracy-risk reduction branch:
+
+- Branch: `experiment/tile64-mid-default-20260709`
+- Commit: `3b0e230 Default long prefill tile64 policy to mid`
+- Change: keep the same policy switch, but default to `mid` and fall back to
+  `mid` for invalid env values.
+- Intended behavior: `TILE_SIZE=64` only for `8192 < max(q_len, kv_len) <= 16384`;
+  4K-8K and 16K-32K use `32` by default.
+- Status: static syntax/import check only. Needs container smoke before promote
+  to GitLab `main`.
+
 Unsubmitted experiment branch:
 
 - `experiment/gdn-causal-conv-block-20260709`
@@ -331,6 +352,15 @@ Unsubmitted experiment branch:
 - Existing FLA env candidate: `FLA_GDN_FIX_BT=1` forces GDN `chunk_fwd_o` to use
   `BT=64` instead of adapting to `min(64, max(16, next_power_of_2(T)))`.
   This should be tested as an env-only A/B before adding new GDN code.
+
+Stacked GDN experiment branch:
+
+- Branch: `experiment/tile64-mid-gdn-conv-20260709`
+- Commit: `f05e2bb Experiment GDN causal conv token block`
+- Base: `3b0e230` (`mid` tile64 default), not the broad policy.
+- Change: makes GDN prefill causal-conv token block selectable via
+  `VLLM_GDN_CAUSAL_CONV1D_BLOCK_M=8/16/32`, defaulting to `16`.
+- Status: static syntax/import check only. Do not promote before smoke.
 
 Fast recovery smoke sequence after container access returns:
 
@@ -346,17 +376,26 @@ Fast recovery smoke sequence after container access returns:
 # Confirm the current GitLab main candidate first.
 RANGE=4-8K NUM_PROMPTS=3 bash /public/home/xdzs2026_c087/Govinda/tools/codex_smoke_p0_gdn.sh
 
+# Then test the accuracy-risk reduction branch:
+#   REF=experiment/tile64-mid-default-20260709
+#   server env: VLLM_TRITON_PREFILL_TILE64_POLICY=mid
+RANGE=4-8K NUM_PROMPTS=3 bash /public/home/xdzs2026_c087/Govinda/tools/codex_smoke_p0_gdn.sh
+
+# If startup and 4K-8K survive, test the official-benefit band:
+RANGE=8-16K NUM_PROMPTS=3 bash /public/home/xdzs2026_c087/Govinda/tools/codex_smoke_p0_gdn.sh
+
 # If testing the GDN experiment branch, restart vLLM with each server env below,
 # then run the same smoke command. First run baseline behavior on that branch:
-#   server env: VLLM_GDN_CAUSAL_CONV1D_BLOCK_M=8
+#   REF=experiment/tile64-mid-gdn-conv-20260709
+#   server env: VLLM_TRITON_PREFILL_TILE64_POLICY=mid VLLM_GDN_CAUSAL_CONV1D_BLOCK_M=8
 RANGE=4-8K NUM_PROMPTS=3 bash /public/home/xdzs2026_c087/Govinda/tools/codex_smoke_p0_gdn.sh
 
 # Then test the experimental default:
-#   server env: VLLM_GDN_CAUSAL_CONV1D_BLOCK_M=16
+#   server env: VLLM_TRITON_PREFILL_TILE64_POLICY=mid VLLM_GDN_CAUSAL_CONV1D_BLOCK_M=16
 RANGE=4-8K NUM_PROMPTS=3 bash /public/home/xdzs2026_c087/Govinda/tools/codex_smoke_p0_gdn.sh
 
 # Env-only GDN output-kernel BT test, no source change beyond current branch:
-#   server env: VLLM_GDN_CAUSAL_CONV1D_BLOCK_M=16 FLA_GDN_FIX_BT=1
+#   server env: VLLM_TRITON_PREFILL_TILE64_POLICY=mid VLLM_GDN_CAUSAL_CONV1D_BLOCK_M=16 FLA_GDN_FIX_BT=1
 RANGE=4-8K NUM_PROMPTS=3 bash /public/home/xdzs2026_c087/Govinda/tools/codex_smoke_p0_gdn.sh
 
 # Only if 4K-8K does not regress or crash:
