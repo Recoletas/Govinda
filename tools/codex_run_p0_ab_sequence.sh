@@ -156,3 +156,7 @@ done
 echo
 echo "=== summary ==="
 cat "$summary"
+
+echo
+echo "=== parsed results ==="
+python3 "$GOVINDA_DIR/tools/codex_summarize_ab_results.py" "$OUT_ROOT" || true

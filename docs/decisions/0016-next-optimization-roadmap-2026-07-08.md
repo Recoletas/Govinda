@@ -468,6 +468,10 @@ RUN_PROFILE=attn bash /public/home/xdzs2026_c087/Govinda/tools/codex_run_p0_ab_s
 # To reduce branch switching and test default-off knobs from one source tree:
 RUN_PROFILE=combo bash /public/home/xdzs2026_c087/Govinda/tools/codex_run_p0_ab_sequence.sh
 
+# After any sequence, the runner calls this automatically. It can also be run
+# manually on an existing output directory:
+python3 /public/home/xdzs2026_c087/Govinda/tools/codex_summarize_ab_results.py "$OUT_ROOT"
+
 # Manual commands remain below for single-case debugging.
 
 # Inside container. These env vars are read when the vLLM server process imports
